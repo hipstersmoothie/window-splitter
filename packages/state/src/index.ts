@@ -182,6 +182,17 @@ interface RebindPanelCallbacksEvent {
   data: Pick<PanelData, "id" | "onCollapseChange" | "onResize">;
 }
 
+interface UpdateConstraintsEvent {
+  /** Update the constraints of a panel */
+  type: "updateConstraints";
+  data:
+    | Pick<
+        PanelData,
+        "id" | "min" | "max" | "default" | "collapsedSize" | "isStaticAtRest"
+      >
+    | Pick<PanelHandleData, "id" | "size">;
+}
+
 interface RegisterDynamicPanelEvent extends Omit<RegisterPanelEvent, "type"> {
   /** Register a new panel with the state machine */
   type: "registerDynamicPanel";
@@ -336,7 +347,9 @@ export type GroupMachineEvent =
   | SetPanelPixelSizeEvent
   | ApplyDeltaEvent
   | SetActualItemsSizeEvent
-  | RebindPanelCallbacksEvent;
+  | RebindPanelCallbacksEvent
+  | UpdateConstraintsEvent;
+
 type EventForType<T extends GroupMachineEvent["type"]> = Extract<
   GroupMachineEvent,
   { type: T }
@@ -498,6 +511,64 @@ export function initializePanel(
     PanelData,
     "id"
   >;
+}
+
+function eq(a: ParsedUnit, b: ParsedUnit) {
+  return a.type === b.type && a.value.eq(b.value);
+}
+
+export function haveConstraintsChangedForPanel(
+  a: Omit<PanelData, "id" | "currentValue">,
+  b: Omit<PanelData, "id" | "currentValue">
+) {
+  if (!eq(a.min, b.min)) {
+    return true;
+  }
+
+  if (
+    (a.max === "1fr" && b.max !== "1fr") ||
+    (a.max !== "1fr" && b.max === "1fr") ||
+    (a.max !== "1fr" && b.max !== "1fr" && !eq(a.max, b.max))
+  ) {
+    return true;
+  }
+
+  if (
+    (a.default && !b.default) ||
+    (!a.default && b.default) ||
+    (a.default && b.default && !eq(a.default, b.default))
+  ) {
+    return true;
+  }
+
+  if (!eq(a.collapsedSize, b.collapsedSize)) {
+    return true;
+  }
+
+  if (a.isStaticAtRest !== b.isStaticAtRest) {
+    return true;
+  }
+
+  if (a.collapseAnimation !== b.collapseAnimation) {
+    return true;
+  }
+
+  if (a.collapsible !== b.collapsible) {
+    return true;
+  }
+
+  return false;
+}
+
+export function haveConstraintsChangedForPanelHandle(
+  a: Omit<PanelHandleData, "id">,
+  b: Omit<PanelHandleData, "id">
+) {
+  if (!eq(a.size, b.size)) {
+    return true;
+  }
+
+  return false;
 }
 
 export function initializePanelHandleData(item: InitializePanelHandleData) {
@@ -1652,7 +1723,19 @@ export const groupMachine = createMachine(
     on: {
       setActualItemsSize: { actions: ["recordActualItemSize", "onResize"] },
       registerPanel: { actions: ["assignPanelData"] },
-      rebindPanelCallbacks: { actions: ["rebindPanelCallbacks"] },
+      rebindPanelCallbacks: {
+        actions: ["rebindPanelCallbacks"],
+      },
+      updateConstraints: {
+        actions: [
+          "prepare",
+          "updateConstraints",
+          "onClearLastKnownSize",
+          "commit",
+          "onResize",
+          "onAutosave",
+        ],
+      },
       registerDynamicPanel: {
         actions: [
           "prepare",
@@ -1872,6 +1955,29 @@ export const groupMachine = createMachine(
             if (isPanelData(item) && item.id === event.data.id) {
               item.onCollapseChange = event.data.onCollapseChange;
               item.onResize = event.data.onResize;
+            }
+          }
+
+          return context.items;
+        },
+      }),
+      updateConstraints: assign({
+        items: ({ context, event }) => {
+          isEvent(event, ["updateConstraints"]);
+
+          for (const item of context.items) {
+            if (isPanelData(item) && item.id === event.data.id) {
+              const panel = event.data as PanelData;
+              item.min = panel.min;
+              item.max = panel.max;
+              item.default = panel.default;
+              item.collapsedSize = panel.collapsedSize;
+              item.isStaticAtRest = panel.isStaticAtRest;
+              item.collapseAnimation = panel.collapseAnimation;
+              item.collapsible = panel.collapsible;
+            } else if (isPanelHandle(item) && item.id === event.data.id) {
+              const handle = event.data as PanelHandleData;
+              item.size = handle.size;
             }
           }
 

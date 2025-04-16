@@ -41,7 +41,12 @@ import {
   getPanelPercentageSize,
   getCursor,
   OnResizeCallback,
+  haveConstraintsChangedForPanel,
+  PanelHandleData,
+  ParsedPixelUnit,
+  haveConstraintsChangedForPanelHandle,
 } from "@window-splitter/state";
+import { useEvent } from "./useEvent.js";
 
 // #region Components
 
@@ -185,6 +190,11 @@ function useGroupItem<T extends Item>(
   ) as T;
   const { send, ref: machineRef } = GroupMachineContext.useActorRef();
 
+  const onCollapseChangeRef = isPanelData(itemArg)
+    ? itemArg.onCollapseChange
+    : undefined;
+  const onResizeRef = isPanelData(itemArg) ? itemArg.onResize : undefined;
+
   React.useEffect(() => {
     const context = machineRef.getSnapshot().context;
     let contextItem: Item | undefined;
@@ -212,16 +222,13 @@ function useGroupItem<T extends Item>(
             },
           });
         }
-      } else if (
-        item.type === "panel" &&
-        (item.onCollapseChange || item.onResize)
-      ) {
+      } else if (onCollapseChangeRef || onResizeRef) {
         send({
           type: "rebindPanelCallbacks",
           data: {
-            id: item.id,
-            onCollapseChange: item.onCollapseChange,
-            onResize: item.onResize,
+            id: itemArg.id,
+            onCollapseChange: onCollapseChangeRef,
+            onResize: onResizeRef,
           },
         });
       }
@@ -246,7 +253,7 @@ function useGroupItem<T extends Item>(
         send({ type: "unregisterPanelHandle", id: unmountId });
       }
     };
-  }, [index, itemArg, machineRef, send]);
+  }, [index, itemArg, machineRef, send, onCollapseChangeRef, onResizeRef]);
 
   return currentItem || item;
   /* eslint-enable react-hooks/rules-of-hooks */
@@ -574,7 +581,14 @@ export const Panel = React.forwardRef<HTMLDivElement, PanelProps>(
       return null;
     }
 
-    return <PanelVisible ref={outerRef} {...props} panelId={panelId} />;
+    return (
+      <PanelVisible
+        ref={outerRef}
+        panelProp={panelDataRef}
+        {...props}
+        panelId={panelId}
+      />
+    );
   }
 );
 
@@ -591,9 +605,11 @@ const PanelVisible = React.forwardRef<
     | "onResize"
   > & {
     panelId: string;
+    /** The latest prop that was received by the `Panel` component */
+    panelProp: Omit<PanelData, "id">;
   }
 >(function PanelVisible(
-  { collapsible = false, collapsed, handle, panelId, ...props },
+  { collapsible = false, collapsed, handle, panelId, panelProp, ...props },
   outerRef
 ) {
   const innerRef = React.useRef<HTMLDivElement>(null);
@@ -609,6 +625,24 @@ const PanelVisible = React.forwardRef<
       return undefined;
     }
   });
+
+  const contraintChanged =
+    panel && haveConstraintsChangedForPanel(panelProp, panel);
+
+  const onConstraintChange = useEvent(() => {
+    if (contraintChanged) {
+      send({
+        type: "updateConstraints",
+        data: { ...panelProp, id: panel.id },
+      });
+    }
+  });
+
+  React.useEffect(() => {
+    if (contraintChanged) {
+      onConstraintChange();
+    }
+  }, [send, contraintChanged, onConstraintChange]);
 
   // For controlled collapse we track if the `collapse` prop changes
   // and update the state machine if it does.
@@ -706,7 +740,7 @@ export const PanelResizer = React.forwardRef<
   const data = React.useMemo(
     () => ({
       type: "handle" as const,
-      size: parseUnit(size),
+      size: parseUnit(size) as ParsedPixelUnit,
       id: props.id,
     }),
     [size, props.id]
@@ -718,14 +752,22 @@ export const PanelResizer = React.forwardRef<
     return null;
   }
 
-  return <PanelResizerVisible ref={ref} {...props} />;
+  return <PanelResizerVisible ref={ref} panelHandleProp={data} {...props} />;
 });
 
 const PanelResizerVisible = React.forwardRef<
   HTMLButtonElement,
-  PanelResizerProps
+  PanelResizerProps & { panelHandleProp: Omit<PanelHandleData, "id"> }
 >(function PanelResizerVisible(
-  { size = "0px", disabled, onDragStart, onDrag, onDragEnd, ...props },
+  {
+    size = "0px",
+    disabled,
+    onDragStart,
+    onDrag,
+    onDragEnd,
+    panelHandleProp,
+    ...props
+  },
   outerRef
 ) {
   const innerRef = React.useRef<HTMLButtonElement>(null);
@@ -736,6 +778,9 @@ const PanelResizerVisible = React.forwardRef<
   const { index } = useIndex()!;
   const handleId = GroupMachineContext.useSelector(
     ({ context }) => context.items[index]?.id || ""
+  );
+  const panelHandle = GroupMachineContext.useSelector(
+    ({ context }) => context.items[index] as PanelHandleData
   );
   const panelBeforeHandle = GroupMachineContext.useSelector(
     ({ context }) => context.items[index - 1]
@@ -773,6 +818,25 @@ const PanelResizerVisible = React.forwardRef<
       onDragEnd?.();
     },
   });
+
+  const contraintChanged =
+    panelHandle &&
+    haveConstraintsChangedForPanelHandle(panelHandleProp, panelHandle);
+
+  const onConstraintChange = useEvent(() => {
+    if (contraintChanged) {
+      send({
+        type: "updateConstraints",
+        data: { ...panelHandleProp, id: handleId },
+      });
+    }
+  });
+
+  React.useEffect(() => {
+    if (contraintChanged) {
+      onConstraintChange();
+    }
+  }, [send, contraintChanged, onConstraintChange]);
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.key === "Enter" && collapsiblePanel) {
