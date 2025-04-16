@@ -217,7 +217,7 @@ describe("Autosave", () => {
     expect(obj.context.items).toMatchSnapshot();
   });
 
-  test.only("callback", async () => {
+  test("callback", async () => {
     localStorage.clear();
 
     const handle = { current: null } as unknown as {
