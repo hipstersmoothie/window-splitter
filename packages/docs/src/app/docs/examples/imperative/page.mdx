@@ -1,0 +1,47 @@
+import {
+  ColorfulPanel,
+  ColorfulPanelGroup,
+  ColorfulPanelResizer,
+} from "../../../../Components/ColorfulPanels";
+import { CodeBlock } from "mdxts/components";
+import { ImperativeGroupExample } from "../../../../Components/ImperativeGroupExample";
+import { ImperativePanelExample } from "../../../../Components/ImperativePanelExample";
+
+# Imperative API
+
+All components also come with an imperative API.
+Each component has a `handle` prop that you can use to access the component's API.
+
+> NOTE: `ref` is used to get the element for the component, so the imperative API is not available on the `ref` prop.
+
+## PanelGroup
+
+The `PanelGroup` component has methods for getting the sizes of the panels and setting the sizes of the panels.
+
+[View the full API](/docs/api/panel-group#imperative-api)
+
+<ImperativeGroupExample />
+
+<div className="my-6">
+  <CodeBlock
+    source="../../../../examples/ImperativeGroupExample.tsx"
+    allowErrors={true}
+    showToolbar={false}
+  />
+</div>
+
+## Panel
+
+The `Panel` component has methods getting and setting it's size as well as collapsing and expanding the panel.
+
+[View the full API](/docs/api/panel#imperative-api)
+
+<ImperativePanelExample />
+
+<div className="my-6">
+  <CodeBlock
+    source="../../../../examples/ImperativePanelExample.tsx"
+    allowErrors={true}
+    showToolbar={false}
+  />
+</div>
