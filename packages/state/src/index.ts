@@ -176,6 +176,12 @@ interface RegisterPanelEvent {
   data: Omit<PanelData, "type" | "currentValue" | "defaultCollapsed">;
 }
 
+interface RebindPanelCallbacksEvent {
+  /** Rebind the panel callbacks */
+  type: "rebindPanelCallbacks";
+  data: Pick<PanelData, "id" | "onCollapseChange" | "onResize">;
+}
+
 interface RegisterDynamicPanelEvent extends Omit<RegisterPanelEvent, "type"> {
   /** Register a new panel with the state machine */
   type: "registerDynamicPanel";
@@ -329,8 +335,8 @@ export type GroupMachineEvent =
   | ExpandPanelEvent
   | SetPanelPixelSizeEvent
   | ApplyDeltaEvent
-  | SetActualItemsSizeEvent;
-
+  | SetActualItemsSizeEvent
+  | RebindPanelCallbacksEvent;
 type EventForType<T extends GroupMachineEvent["type"]> = Extract<
   GroupMachineEvent,
   { type: T }
@@ -1646,6 +1652,7 @@ export const groupMachine = createMachine(
     on: {
       setActualItemsSize: { actions: ["recordActualItemSize", "onResize"] },
       registerPanel: { actions: ["assignPanelData"] },
+      rebindPanelCallbacks: { actions: ["rebindPanelCallbacks"] },
       registerDynamicPanel: {
         actions: [
           "prepare",
@@ -1855,6 +1862,20 @@ export const groupMachine = createMachine(
             currentValue: makePixelUnit(-1),
             ...event.data,
           });
+        },
+      }),
+      rebindPanelCallbacks: assign({
+        items: ({ context, event }) => {
+          isEvent(event, ["rebindPanelCallbacks"]);
+
+          for (const item of context.items) {
+            if (isPanelData(item) && item.id === event.data.id) {
+              item.onCollapseChange = event.data.onCollapseChange;
+              item.onResize = event.data.onResize;
+            }
+          }
+
+          return context.items;
         },
       }),
       onRegisterDynamicPanel: assign({

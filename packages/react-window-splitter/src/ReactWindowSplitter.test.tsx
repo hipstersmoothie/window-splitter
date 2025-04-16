@@ -1,10 +1,11 @@
 import React from "react";
-import { test, expect, describe } from "vitest";
+import { test, expect, describe, vi } from "vitest";
 import { cleanup, fireEvent, render, waitFor } from "@testing-library/react";
 import Cookies from "universal-cookie";
 
 import {
   Autosave,
+  AutosaveCollapsible,
   Collapsible,
   ConditionalPanel,
   Simple,
@@ -214,6 +215,38 @@ describe("Autosave", () => {
     );
     const obj = JSON.parse(localStorage.getItem("autosave-example") || "{}");
     expect(obj.context.items).toMatchSnapshot();
+  });
+
+  test("callback", async () => {
+    localStorage.clear();
+
+    const handle = { current: null } as unknown as {
+      current: PanelGroupHandle;
+    };
+
+    const spy = vi.fn();
+
+    render(
+      <div style={{ width: 500 }}>
+        <AutosaveCollapsible handle={handle} onCollapseChange={spy} />
+      </div>
+    );
+
+    await dragHandle({ delta: -200 });
+    await expectTemplate(handle, "100px 10px 388px");
+    expect(spy).toHaveBeenCalledWith(true);
+
+    cleanup();
+
+    render(
+      <div style={{ width: 500 }}>
+        <AutosaveCollapsible handle={handle} onCollapseChange={spy} />
+      </div>
+    );
+
+    await expectTemplate(handle, "100px 10px 388px");
+    await dragHandle({ delta: 200 });
+    expect(spy).toHaveBeenCalledWith(false);
   });
 
   test("cookie", async () => {

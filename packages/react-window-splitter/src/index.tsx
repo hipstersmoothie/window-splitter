@@ -212,8 +212,18 @@ function useGroupItem<T extends Item>(
             },
           });
         }
-      } else {
-        // TODO
+      } else if (
+        item.type === "panel" &&
+        (item.onCollapseChange || item.onResize)
+      ) {
+        send({
+          type: "rebindPanelCallbacks",
+          data: {
+            id: item.id,
+            onCollapseChange: item.onCollapseChange,
+            onResize: item.onResize,
+          },
+        });
       }
     } else {
       contextItem = context.items[index];
