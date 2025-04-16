@@ -80,6 +80,30 @@ export function Autosave({ handle }: { handle?: React.Ref<PanelGroupHandle> }) {
   );
 }
 
+export function AutosaveCollapsible({
+  handle,
+  onCollapseChange = console.log,
+}: {
+  handle?: React.Ref<PanelGroupHandle>;
+  onCollapseChange?: (c: boolean) => void;
+}) {
+  return (
+    <StyledPanelGroup handle={handle} autosaveId="autosave-example-2">
+      <StyledPanel
+        id="1"
+        collapsible
+        collapsedSize="100px"
+        min="140px"
+        onCollapseChange={onCollapseChange}
+      >
+        Collapsible
+      </StyledPanel>
+      <StyledResizer id="resizer" />
+      <StyledPanel id="2">Panel 2</StyledPanel>
+    </StyledPanelGroup>
+  );
+}
+
 export function SimpleMin() {
   return (
     <StyledPanelGroup>
