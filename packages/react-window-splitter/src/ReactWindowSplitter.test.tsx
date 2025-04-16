@@ -10,6 +10,7 @@ import {
   ConditionalPanel,
   Simple,
   VerticalLayout,
+  DynamicConstraints,
 } from "./ReactWindowSplitter.stories.js";
 import {
   PanelGroupHandle,
@@ -188,6 +189,26 @@ test("Conditional Panels", async () => {
 
   getByText("Close").click();
   await expectTemplate(handle, "236.96875px 10px 251.03125px");
+});
+
+test("Dynamic constraints", async () => {
+  const handle = { current: null } as unknown as {
+    current: PanelGroupHandle;
+  };
+  const { getByText } = render(
+    <div style={{ width: 1000 }}>
+      <DynamicConstraints handle={handle} />
+    </div>
+  );
+
+  await waitForMeasurement(handle.current);
+  await expectTemplate(handle, "100px 10px 178px 10px 700px");
+
+  getByText("Toggle Custom").click();
+  await expectTemplate(handle, "500px 10px 178px 10px 300px");
+
+  getByText("Toggle Custom").click();
+  await expectTemplate(handle, "400px 10px 178px 10px 400px");
 });
 
 describe("Autosave", () => {

@@ -104,6 +104,41 @@ export function AutosaveCollapsible({
   );
 }
 
+export function DynamicConstraints({
+  handle,
+}: {
+  handle?: React.Ref<PanelGroupHandle>;
+}) {
+  const [customOn, setCustomOn] = React.useState(false);
+
+  return (
+    <>
+      <StyledPanelGroup handle={handle}>
+        <StyledPanel
+          default="100px"
+          {...(customOn ? { min: "200px" } : { min: "100px" })}
+        >
+          <div>Panel 1</div>
+        </StyledPanel>
+        <StyledResizer />
+        <StyledPanel min="100px">
+          <div>Panel 2</div>
+        </StyledPanel>
+        <StyledResizer />
+        <StyledPanel
+          {...(customOn ? { min: "100px" } : { min: "400px" })}
+          {...(customOn ? { max: "300px" } : { max: "700px" })}
+        >
+          <div>Panel 3</div>
+        </StyledPanel>
+      </StyledPanelGroup>
+      <button type="button" onClick={() => setCustomOn(!customOn)}>
+        Toggle Custom
+      </button>
+    </>
+  );
+}
+
 export function SimpleMin() {
   return (
     <StyledPanelGroup>
