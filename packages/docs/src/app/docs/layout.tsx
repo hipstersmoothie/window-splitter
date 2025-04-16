@@ -51,6 +51,9 @@ async function Sidebar() {
         <SidebarItem path="/docs/examples/static-at-rest">
           Static at rest
         </SidebarItem>
+        <SidebarItem path="/docs/examples/imperative">
+          Imperative API
+        </SidebarItem>
       </SidebarGroup>
       <SidebarGroup title="API Docs">
         <SidebarItem path="/docs/api/panel-group">PanelGroup</SidebarItem>
