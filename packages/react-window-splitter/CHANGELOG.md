@@ -1,3 +1,17 @@
+# v0.4.2 (Tue Apr 15 2025)
+
+#### 🐛 Bug Fix
+
+- rebind onResize and onCollapseChange to fix restoring from snapshot [#44](https://github.com/hipstersmoothie/react-window-splitter/pull/44) ([@hipstersmoothie](https://github.com/hipstersmoothie))
+- remove only ([@hipstersmoothie](https://github.com/hipstersmoothie))
+- rebind onResize and onCollapseChange to fix restoring from snapshot (closes #41) ([@hipstersmoothie](https://github.com/hipstersmoothie))
+
+#### Authors: 1
+
+- Andrew Lisowski ([@hipstersmoothie](https://github.com/hipstersmoothie))
+
+---
+
 # v0.4.1 (Sun Aug 25 2024)
 
 #### 🐛 Bug Fix

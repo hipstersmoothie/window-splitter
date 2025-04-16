@@ -1,3 +1,24 @@
+# v0.4.2 (Tue Apr 15 2025)
+
+#### 🐛 Bug Fix
+
+- `react-window-splitter`, `@window-splitter/state`
+  - rebind onResize and onCollapseChange to fix restoring from snapshot [#44](https://github.com/hipstersmoothie/react-window-splitter/pull/44) ([@hipstersmoothie](https://github.com/hipstersmoothie))
+
+#### ⚠️ Pushed to `main`
+
+- fix docs example ([@hipstersmoothie](https://github.com/hipstersmoothie))
+
+#### 📝 Documentation
+
+- add imperative api example [#43](https://github.com/hipstersmoothie/react-window-splitter/pull/43) ([@hipstersmoothie](https://github.com/hipstersmoothie))
+
+#### Authors: 1
+
+- Andrew Lisowski ([@hipstersmoothie](https://github.com/hipstersmoothie))
+
+---
+
 # v0.4.1 (Sun Aug 25 2024)
 
 #### 🐛 Bug Fix
