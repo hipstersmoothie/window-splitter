@@ -1,3 +1,16 @@
+# v0.4.3 (Tue Apr 15 2025)
+
+#### 🐛 Bug Fix
+
+- update panel settings when props update [#45](https://github.com/hipstersmoothie/react-window-splitter/pull/45) ([@hipstersmoothie](https://github.com/hipstersmoothie))
+- update panel settings when props update ([@hipstersmoothie](https://github.com/hipstersmoothie))
+
+#### Authors: 1
+
+- Andrew Lisowski ([@hipstersmoothie](https://github.com/hipstersmoothie))
+
+---
+
 # v0.4.2 (Tue Apr 15 2025)
 
 #### 🐛 Bug Fix
