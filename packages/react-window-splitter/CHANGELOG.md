@@ -1,3 +1,19 @@
+# v0.5.0 (Thu Apr 17 2025)
+
+#### 🚀 Enhancement
+
+- Add `data-state=inactive` for drag handles that aren't the active one [#46](https://github.com/hipstersmoothie/react-window-splitter/pull/46) ([@sfc-gh-alisowski](https://github.com/sfc-gh-alisowski))
+
+#### 🐛 Bug Fix
+
+- Add `data-state=inactive` for drag handles that aren't the active one ([@sfc-gh-alisowski](https://github.com/sfc-gh-alisowski))
+
+#### Authors: 1
+
+- Andrew Lisowski ([@sfc-gh-alisowski](https://github.com/sfc-gh-alisowski))
+
+---
+
 # v0.4.3 (Tue Apr 15 2025)
 
 #### 🐛 Bug Fix
