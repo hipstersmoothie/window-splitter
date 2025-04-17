@@ -773,7 +773,6 @@ const PanelResizerVisible = React.forwardRef<
   const innerRef = React.useRef<HTMLButtonElement>(null);
   const ref = useComposedRefs(outerRef, innerRef);
   const unit = parseUnit(size);
-  const [isDragging, setIsDragging] = React.useState(false);
   const { send } = GroupMachineContext.useActorRef();
   const { index } = useIndex()!;
   const handleId = GroupMachineContext.useSelector(
@@ -802,9 +801,12 @@ const PanelResizerVisible = React.forwardRef<
   const overshoot = GroupMachineContext.useSelector(
     (state) => state.context.dragOvershoot
   );
+  const activeDragHandleId = GroupMachineContext.useSelector(
+    (state) => state.context.activeDragHandleId
+  );
+  const isDragging = activeDragHandleId === handleId;
   const { moveProps } = useMove({
     onMoveStart: () => {
-      setIsDragging(true);
       send({ type: "dragHandleStart", handleId: handleId });
       onDragStart?.();
     },
@@ -813,7 +815,6 @@ const PanelResizerVisible = React.forwardRef<
       onDrag?.();
     },
     onMoveEnd: () => {
-      setIsDragging(false);
       send({ type: "dragHandleEnd", handleId: handleId });
       onDragEnd?.();
     },
@@ -882,7 +883,9 @@ const PanelResizerVisible = React.forwardRef<
       data-splitter-type="handle"
       data-splitter-id={handleId}
       data-handle-orientation={orientation}
-      data-state={isDragging ? "dragging" : "idle"}
+      data-state={
+        isDragging ? "dragging" : activeDragHandleId ? "inactive" : "idle"
+      }
       aria-label="Resize Handle"
       aria-disabled={disabled}
       aria-controls={panelBeforeHandle.id}
