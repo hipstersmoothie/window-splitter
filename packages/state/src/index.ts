@@ -319,6 +319,8 @@ export interface GroupMachineContextValue {
   orientation: Orientation;
   /** How much the drag has overshot the handle */
   dragOvershoot: Big.Big;
+  /** The id of the handle that is currently being dragged */
+  activeDragHandleId?: string;
   groupId: string;
   /**
    * How to save the persisted state
@@ -1658,7 +1660,10 @@ export const groupMachine = createMachine(
       idle: {
         entry: ["onAutosave"],
         on: {
-          dragHandleStart: { target: "dragging" },
+          dragHandleStart: {
+            target: "dragging",
+            actions: ["onDragHandleStart"],
+          },
           setPanelPixelSize: {
             actions: [
               "prepare",
@@ -1703,7 +1708,7 @@ export const groupMachine = createMachine(
             actions: "runCollapseToggle",
           },
         },
-        exit: ["commit"],
+        exit: ["commit", "clearDragHandle"],
       },
       togglingCollapse: {
         entry: ["prepare", "onClearLastKnownSize"],
@@ -1822,6 +1827,15 @@ export const groupMachine = createMachine(
       animation: animationActor,
     },
     actions: {
+      onDragHandleStart: assign({
+        activeDragHandleId: ({ event }) => {
+          isEvent(event, ["dragHandleStart"]);
+          return event.handleId;
+        },
+      }),
+      clearDragHandle: assign({
+        activeDragHandleId: undefined,
+      }),
       onAutosave: ({ context, self }) => {
         if (!context.autosaveStrategy || typeof window === "undefined") {
           return;
