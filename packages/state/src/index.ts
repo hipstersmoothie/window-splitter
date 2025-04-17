@@ -1843,6 +1843,7 @@ export const groupMachine = createMachine(
 
         const snapshot = self.getPersistedSnapshot() as GroupMachineSnapshot;
         snapshot.context.items = clearLastKnownSize(context.items);
+        snapshot.context.activeDragHandleId = context.activeDragHandleId;
         snapshot.value = "idle";
         const data = JSON.stringify(snapshot);
 
