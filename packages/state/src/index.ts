@@ -7,7 +7,7 @@ import {
   fromPromise,
   Snapshot,
 } from "xstate";
-import invariant from "invariant";
+import invariant from "tiny-invariant";
 import Big from "big.js";
 
 // #region Constants

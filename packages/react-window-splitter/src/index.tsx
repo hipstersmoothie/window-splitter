@@ -10,7 +10,7 @@ import React, {
   useMemo,
 } from "react";
 import { createActorContext } from "@xstate/react";
-import invariant from "invariant";
+import invariant from "tiny-invariant";
 import { useComposedRefs } from "@radix-ui/react-compose-refs";
 import { useIndex, useIndexedChildren } from "reforest";
 import {
