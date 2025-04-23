@@ -1,3 +1,16 @@
+# v0.5.2 (Wed Apr 23 2025)
+
+#### ⚠️ Pushed to `main`
+
+- `react-window-splitter`, `@window-splitter/state`
+  - switch to tiny-invariant (lisowski54@gmail.com)
+
+#### Authors: 1
+
+- Andrew Lisowski (lisowski54@gmail.com)
+
+---
+
 # v0.5.1 (Wed Apr 23 2025)
 
 #### ⚠️ Pushed to `main`

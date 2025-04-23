@@ -1,3 +1,15 @@
+# v0.5.2 (Wed Apr 23 2025)
+
+#### ⚠️ Pushed to `main`
+
+- switch to tiny-invariant (lisowski54@gmail.com)
+
+#### Authors: 1
+
+- Andrew Lisowski (lisowski54@gmail.com)
+
+---
+
 # v0.5.0 (Thu Apr 17 2025)
 
 #### 🚀 Enhancement
