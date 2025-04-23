@@ -30,6 +30,7 @@
   "devDependencies": {
     "@internal/eslint-config": "workspace:*",
     "@testing-library/react": "^16.0.0",
+    "@testing-library/jest-dom": "^6.4.8",
     "@types/invariant": "^2.2.37",
     "@types/node": "^20.14.10",
     "@types/react": "^18",
@@ -49,11 +50,12 @@
   },
   "dependencies": {
     "@radix-ui/react-compose-refs": "^1.1.0",
-    "@testing-library/jest-dom": "^6.4.8",
+    "@react-aria/button": "^3.13.0",
+    "@react-aria/interactions": "^3.25.0",
+    "@react-aria/utils": "^3.28.2",
     "@window-splitter/state": "workspace:*",
     "@xstate/react": "^4.1.1",
     "invariant": "^2.2.4",
-    "react-aria": "^3.34.1",
     "reforest": "^0.13.0",
     "xstate": "^5.17.4"
   },

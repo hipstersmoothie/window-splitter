@@ -9,7 +9,6 @@ import React, {
   useState,
   useMemo,
 } from "react";
-import { mergeProps, useButton, useId, useMove } from "react-aria";
 import { createActorContext } from "@xstate/react";
 import invariant from "invariant";
 import { useComposedRefs } from "@radix-ui/react-compose-refs";
@@ -47,6 +46,9 @@ import {
   haveConstraintsChangedForPanelHandle,
 } from "@window-splitter/state";
 import { useEvent } from "./useEvent.js";
+import { mergeProps, useId } from "@react-aria/utils";
+import { useButton } from "@react-aria/button";
+import { useMove } from "@react-aria/interactions";
 
 // #region Components
 
