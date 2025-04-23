@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/package.json",
   "name": "react-window-splitter",
   "sideEffects": false,
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "A WAI-ARIA compliant window splitter for React.",
   "homepage": "https://react-window-splitter-six.vercel.app",
   "repository": {
@@ -29,8 +29,8 @@
   },
   "devDependencies": {
     "@internal/eslint-config": "workspace:*",
-    "@testing-library/react": "^16.0.0",
     "@testing-library/jest-dom": "^6.4.8",
+    "@testing-library/react": "^16.0.0",
     "@types/invariant": "^2.2.37",
     "@types/node": "^20.14.10",
     "@types/react": "^18",
