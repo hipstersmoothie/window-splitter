@@ -2,7 +2,6 @@
 
 import React, {
   useEffect,
-  useLayoutEffect,
   useImperativeHandle,
   createContext,
   useRef,
@@ -11,7 +10,6 @@ import React, {
 } from "react";
 import { createActorContext } from "@xstate/react";
 import invariant from "tiny-invariant";
-import { useComposedRefs } from "@radix-ui/react-compose-refs";
 import { useIndex, useIndexedChildren } from "reforest";
 import {
   buildTemplate,
@@ -45,7 +43,13 @@ import {
   ParsedPixelUnit,
   haveConstraintsChangedForPanelHandle,
 } from "@window-splitter/state";
-import { mergeProps, useEffectEvent, useId } from "@react-aria/utils";
+import {
+  mergeProps,
+  useEffectEvent,
+  useId,
+  useLayoutEffect,
+  mergeRefs,
+} from "@react-aria/utils";
 import { useMove } from "@react-aria/interactions";
 
 // #region Components
@@ -69,9 +73,6 @@ const GroupMachineContext = createActorContext(groupMachine);
 //     )
 //   );
 // }
-
-const useIsomorphicLayoutEffect =
-  typeof document !== "undefined" ? useLayoutEffect : useEffect;
 
 function measureGroupChildren(
   groupId: string,
@@ -154,7 +155,7 @@ function PrerenderTree({
 }) {
   const [shouldPrerender, setShouldPrerender] = React.useState(true);
 
-  useIsomorphicLayoutEffect(() => {
+  useLayoutEffect(() => {
     setShouldPrerender(false);
     onPrerender();
   }, []);
@@ -359,7 +360,7 @@ const PanelGroupImplementation = React.forwardRef<
 ) {
   const { send, ref: machineRef } = GroupMachineContext.useActorRef();
   const innerRef = React.useRef<HTMLDivElement>(null);
-  const ref = useComposedRefs(outerRef, innerRef);
+  const ref = mergeRefs(outerRef, innerRef);
   const orientation = GroupMachineContext.useSelector(
     (state) => state.context.orientation
   );
@@ -376,7 +377,7 @@ const PanelGroupImplementation = React.forwardRef<
   }
 
   // Track the size of the group
-  useIsomorphicLayoutEffect(() => {
+  useLayoutEffect(() => {
     const { current: el } = innerRef;
 
     if (!el) {
@@ -403,7 +404,7 @@ const PanelGroupImplementation = React.forwardRef<
   const childIds = GroupMachineContext.useSelector((state) =>
     state.context.items.map((i) => i.id).join(",")
   );
-  useIsomorphicLayoutEffect(() => {
+  useLayoutEffect(() => {
     return measureGroupChildren(groupId, (childrenSizes) => {
       send({ type: "setActualItemsSize", childrenSizes });
     });
@@ -613,7 +614,7 @@ const PanelVisible = React.forwardRef<
   outerRef
 ) {
   const innerRef = React.useRef<HTMLDivElement>(null);
-  const ref = useComposedRefs(outerRef, innerRef);
+  const ref = mergeRefs(outerRef, innerRef);
   const { send, ref: machineRef } = GroupMachineContext.useActorRef();
   const groupId = GroupMachineContext.useSelector(
     (state) => state.context.groupId
@@ -771,7 +772,7 @@ const PanelResizerVisible = React.forwardRef<
   outerRef
 ) {
   const innerRef = React.useRef<HTMLButtonElement>(null);
-  const ref = useComposedRefs(outerRef, innerRef);
+  const ref = mergeRefs(outerRef, innerRef);
   const unit = parseUnit(size);
   const { send } = GroupMachineContext.useActorRef();
   const { index } = useIndex()!;
