@@ -1,3 +1,15 @@
+# v0.5.5 (Wed Apr 23 2025)
+
+#### ⚠️ Pushed to `main`
+
+- fix collapse animation breaking state machine ([@hipstersmoothie](https://github.com/hipstersmoothie))
+
+#### Authors: 1
+
+- Andrew Lisowski ([@hipstersmoothie](https://github.com/hipstersmoothie))
+
+---
+
 # v0.5.3 (Wed Apr 23 2025)
 
 #### ⚠️ Pushed to `main`

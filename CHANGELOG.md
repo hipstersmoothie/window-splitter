@@ -1,3 +1,16 @@
+# v0.5.5 (Wed Apr 23 2025)
+
+#### ⚠️ Pushed to `main`
+
+- `@window-splitter/state`
+  - fix collapse animation breaking state machine ([@hipstersmoothie](https://github.com/hipstersmoothie))
+
+#### Authors: 1
+
+- Andrew Lisowski ([@hipstersmoothie](https://github.com/hipstersmoothie))
+
+---
+
 # v0.5.4 (Wed Apr 23 2025)
 
 #### ⚠️ Pushed to `main`
