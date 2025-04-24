@@ -40,12 +40,15 @@ async function dragHandle(options: {
   const x = rect.x + rect.width / 2;
   const y = rect.y + rect.height / 2;
   const step = options.delta > 0 ? 1 : -1;
+  const pointerId = 1;
 
   handle.dispatchEvent(
     new PointerEvent("pointerdown", {
       bubbles: true,
       clientX: x,
       clientY: y,
+      pointerId,
+      button: 0,
     })
   );
 
@@ -53,6 +56,7 @@ async function dragHandle(options: {
     handle.dispatchEvent(
       new PointerEvent("pointermove", {
         bubbles: true,
+        pointerId,
         clientX: orientation === "horizontal" ? x + i * step : x,
         clientY: orientation === "vertical" ? y + i * step : y,
       })
@@ -63,6 +67,7 @@ async function dragHandle(options: {
   handle.dispatchEvent(
     new PointerEvent("pointerup", {
       bubbles: true,
+      pointerId,
       clientX: orientation === "horizontal" ? x + options.delta : x,
       clientY: orientation === "vertical" ? y + options.delta : y,
     })
