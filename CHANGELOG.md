@@ -1,3 +1,16 @@
+# v0.5.7 (Wed Apr 23 2025)
+
+#### ⚠️ Pushed to `main`
+
+- `react-window-splitter`
+  - move back to utils package and use more hooks from it (lisowski54@gmail.com)
+
+#### Authors: 1
+
+- Andrew Lisowski (lisowski54@gmail.com)
+
+---
+
 # v0.5.6 (Wed Apr 23 2025)
 
 #### ⚠️ Pushed to `main`
