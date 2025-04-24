@@ -1,4 +1,4 @@
-import Cookies from "universal-cookie";
+import * as Cookies from "tiny-cookie";
 import { raf } from "@react-spring/rafz";
 import {
   createMachine,
@@ -1850,11 +1850,10 @@ export const groupMachine = createMachine(
         if (context.autosaveStrategy === "localStorage") {
           localStorage.setItem(context.groupId, data);
         } else {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const ActualClass = (Cookies as any).default || Cookies;
-          const cookies = new ActualClass(null, { path: "/" });
-
-          cookies.set(context.groupId, data, { path: "/", maxAge: 31536000 });
+          Cookies.set(context.groupId, data, {
+            path: "/",
+            "max-age": 31536000,
+          });
         }
       },
       notifyCollapseToggle: ({ context, event }) => {

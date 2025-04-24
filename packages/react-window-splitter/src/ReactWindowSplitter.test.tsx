@@ -1,7 +1,7 @@
 import React from "react";
 import { test, expect, describe, vi } from "vitest";
 import { cleanup, fireEvent, render, waitFor } from "@testing-library/react";
-import Cookies from "universal-cookie";
+import * as Cookies from "tiny-cookie";
 
 import {
   Autosave,
@@ -315,9 +315,7 @@ describe("Autosave", () => {
 
     expect(document.cookie).toMatchSnapshot();
 
-    const ActualClass = (Cookies as any).default || Cookies;
-    const cookies = new ActualClass(null, { path: "/" });
-    const snapshot = cookies.get("autosave-cookie-example");
+    const snapshot = Cookies.get("autosave-cookie-example");
 
     cleanup();
 
@@ -329,7 +327,7 @@ describe("Autosave", () => {
           autosaveId="autosave-cookie-example"
           autosaveStrategy="cookie"
           style={{ height: 200 }}
-          snapshot={snapshot}
+          snapshot={snapshot ? JSON.parse(snapshot) : undefined}
         >
           <Panel id="panel1">1</Panel>
           <PanelResizer

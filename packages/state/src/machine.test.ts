@@ -20,7 +20,7 @@ import {
 import { Actor, createActor } from "xstate";
 import { spring } from "framer-motion";
 import Big from "big.js";
-import Cookies from "universal-cookie";
+import * as Cookies from "tiny-cookie";
 
 function getTemplate(actor: Actor<typeof groupMachine>) {
   return buildTemplate(actor.getSnapshot().context);
@@ -2040,9 +2040,7 @@ describe("autosave", () => {
 
     await waitForIdle(actor);
 
-    const ActualClass = (Cookies as any).default || Cookies;
-    const cookies = new ActualClass(null, { path: "/" });
-    const snapshot = prepareSnapshot(cookies.get("group-2")!);
+    const snapshot = prepareSnapshot(JSON.parse(Cookies.get("group-2")!));
     const actor2 = createActor(groupMachine, {
       // @ts-expect-error For tests
       input: {},
