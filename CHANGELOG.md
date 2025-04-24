@@ -1,3 +1,18 @@
+# v0.5.3 (Wed Apr 23 2025)
+
+#### ⚠️ Pushed to `main`
+
+- `react-window-splitter`, `@window-splitter/state`
+  - tiny cookie (lisowski54@gmail.com)
+- `react-window-splitter`
+  - fix tests (lisowski54@gmail.com)
+
+#### Authors: 1
+
+- Andrew Lisowski (lisowski54@gmail.com)
+
+---
+
 # v0.5.2 (Wed Apr 23 2025)
 
 #### ⚠️ Pushed to `main`

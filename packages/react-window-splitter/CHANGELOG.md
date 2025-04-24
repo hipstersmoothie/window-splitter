@@ -1,3 +1,16 @@
+# v0.5.3 (Wed Apr 23 2025)
+
+#### ⚠️ Pushed to `main`
+
+- tiny cookie (lisowski54@gmail.com)
+- fix tests (lisowski54@gmail.com)
+
+#### Authors: 1
+
+- Andrew Lisowski (lisowski54@gmail.com)
+
+---
+
 # v0.5.2 (Wed Apr 23 2025)
 
 #### ⚠️ Pushed to `main`
