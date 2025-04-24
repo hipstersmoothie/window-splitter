@@ -1,3 +1,15 @@
+# v0.5.4 (Wed Apr 23 2025)
+
+#### ⚠️ Pushed to `main`
+
+- unused (lisowski54@gmail.com)
+
+#### Authors: 1
+
+- Andrew Lisowski (lisowski54@gmail.com)
+
+---
+
 # v0.5.3 (Wed Apr 23 2025)
 
 #### ⚠️ Pushed to `main`
