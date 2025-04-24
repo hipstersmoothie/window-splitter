@@ -48,8 +48,8 @@
   },
   "dependencies": {
     "@radix-ui/react-compose-refs": "^1.1.0",
+    "@radix-ui/react-id": "^1.1.1",
     "@react-aria/interactions": "^3.25.0",
-    "@react-aria/utils": "^3.28.2",
     "@window-splitter/state": "workspace:*",
     "@xstate/react": "^4.1.1",
     "reforest": "^0.13.0",

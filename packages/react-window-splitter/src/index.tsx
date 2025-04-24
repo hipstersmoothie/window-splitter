@@ -46,8 +46,8 @@ import {
   haveConstraintsChangedForPanelHandle,
 } from "@window-splitter/state";
 import { useEvent } from "./useEvent.js";
-import { mergeProps, useId } from "@react-aria/utils";
 import { useMove } from "@react-aria/interactions";
+import { useId } from "@radix-ui/react-id";
 
 // #region Components
 
@@ -141,6 +141,36 @@ export interface PanelGroupProps
   snapshot?: GroupMachineSnapshot;
   /** An id to use for autosaving the layout */
   autosaveId?: string;
+}
+
+function mergeProps<T extends Record<string, unknown>>(...props: T[]): T {
+  return props.reduce((acc, curr) => {
+    for (const key in curr) {
+      const a = acc[key];
+      const b = curr[key];
+
+      if (
+        a &&
+        b &&
+        typeof a === "function" &&
+        typeof b === "function" &&
+        // This is a lot faster than a regex.
+        key[0] === "o" &&
+        key[1] === "n" &&
+        key.charCodeAt(2) >= /* 'A' */ 65 &&
+        key.charCodeAt(2) <= /* 'Z' */ 90
+      ) {
+        acc[key] = ((...args: any[]) => {
+          a(...args);
+          b(...args);
+        }) as unknown as T[Extract<keyof T, string>];
+      } else {
+        acc[key] = b !== undefined ? b : a;
+      }
+    }
+
+    return acc;
+  }, {} as T);
 }
 
 const InitialMapContext = createContext<Item[]>([]);
@@ -355,7 +385,7 @@ const PanelGroupImplementation = React.forwardRef<
   HTMLDivElement,
   PanelGroupProps
 >(function PanelGroupImplementation(
-  { handle, orientation: orientationProp, ...props },
+  { handle, orientation: orientationProp, style, ...props },
   outerRef
 ) {
   const { send, ref: machineRef } = GroupMachineContext.useActorRef();
@@ -451,16 +481,15 @@ const PanelGroupImplementation = React.forwardRef<
       ref={ref}
       data-group-id={groupId}
       data-group-orientation={orientation}
-      {...mergeProps(props, {
-        style: {
-          display: "grid",
-          gridTemplateColumns:
-            orientation === "horizontal" ? template : undefined,
-          gridTemplateRows: orientation === "vertical" ? template : undefined,
-          height: "100%",
-          ...props.style,
-        },
-      })}
+      {...props}
+      style={{
+        display: "grid",
+        gridTemplateColumns:
+          orientation === "horizontal" ? template : undefined,
+        gridTemplateRows: orientation === "vertical" ? template : undefined,
+        height: "100%",
+        ...style,
+      }}
     />
   );
 });
@@ -717,7 +746,7 @@ const PanelVisible = React.forwardRef<
 
 export interface PanelResizerProps
   extends Omit<
-    React.HTMLAttributes<HTMLButtonElement>,
+    React.HTMLAttributes<HTMLDivElement>,
     "onDragStart" | "onDrag" | "onDragEnd"
   > {
   /** If the handle is disabled */
@@ -732,32 +761,31 @@ export interface PanelResizerProps
 }
 
 /** A resize handle to place between panels. */
-export const PanelResizer = React.forwardRef<
-  HTMLButtonElement,
-  PanelResizerProps
->(function PanelResizer(props, ref) {
-  const { size = "0px" } = props;
-  const isPrerender = React.useContext(PreRenderContext);
-  const data = React.useMemo(
-    () => ({
-      type: "handle" as const,
-      size: parseUnit(size) as ParsedPixelUnit,
-      id: props.id,
-    }),
-    [size, props.id]
-  );
+export const PanelResizer = React.forwardRef<HTMLDivElement, PanelResizerProps>(
+  function PanelResizer(props, ref) {
+    const { size = "0px" } = props;
+    const isPrerender = React.useContext(PreRenderContext);
+    const data = React.useMemo(
+      () => ({
+        type: "handle" as const,
+        size: parseUnit(size) as ParsedPixelUnit,
+        id: props.id,
+      }),
+      [size, props.id]
+    );
 
-  useGroupItem(data);
+    useGroupItem(data);
 
-  if (isPrerender) {
-    return null;
+    if (isPrerender) {
+      return null;
+    }
+
+    return <PanelResizerVisible ref={ref} panelHandleProp={data} {...props} />;
   }
-
-  return <PanelResizerVisible ref={ref} panelHandleProp={data} {...props} />;
-});
+);
 
 const PanelResizerVisible = React.forwardRef<
-  HTMLButtonElement,
+  HTMLDivElement,
   PanelResizerProps & { panelHandleProp: Omit<PanelHandleData, "id"> }
 >(function PanelResizerVisible(
   {
@@ -771,7 +799,7 @@ const PanelResizerVisible = React.forwardRef<
   },
   outerRef
 ) {
-  const innerRef = React.useRef<HTMLButtonElement>(null);
+  const innerRef = React.useRef<HTMLDivElement>(null);
   const ref = useComposedRefs(outerRef, innerRef);
   const unit = parseUnit(size);
   const { send } = GroupMachineContext.useActorRef();
