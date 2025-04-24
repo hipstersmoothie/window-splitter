@@ -551,7 +551,17 @@ export function haveConstraintsChangedForPanel(
     return true;
   }
 
-  if (a.collapseAnimation !== b.collapseAnimation) {
+  if (
+    (a.collapseAnimation && !b.collapseAnimation) ||
+    (!a.collapseAnimation && b.collapseAnimation) ||
+    (typeof a.collapseAnimation === "string" &&
+      typeof b.collapseAnimation === "string" &&
+      a.collapseAnimation !== b.collapseAnimation) ||
+    (typeof a.collapseAnimation === "object" &&
+      typeof b.collapseAnimation === "object" &&
+      (a.collapseAnimation.duration !== b.collapseAnimation.duration ||
+        a.collapseAnimation.easing !== b.collapseAnimation.easing))
+  ) {
     return true;
   }
 
