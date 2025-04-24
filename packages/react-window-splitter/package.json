@@ -48,7 +48,6 @@
   },
   "dependencies": {
     "@radix-ui/react-compose-refs": "^1.1.0",
-    "@react-aria/button": "^3.13.0",
     "@react-aria/interactions": "^3.25.0",
     "@react-aria/utils": "^3.28.2",
     "@window-splitter/state": "workspace:*",

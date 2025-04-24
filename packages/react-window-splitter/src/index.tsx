@@ -47,7 +47,6 @@ import {
 } from "@window-splitter/state";
 import { useEvent } from "./useEvent.js";
 import { mergeProps, useId } from "@react-aria/utils";
-import { useButton } from "@react-aria/button";
 import { useMove } from "@react-aria/interactions";
 
 // #region Components
@@ -793,7 +792,6 @@ const PanelResizerVisible = React.forwardRef<
       return undefined;
     }
   });
-  const { buttonProps } = useButton({}, innerRef);
   const orientation = GroupMachineContext.useSelector(
     (state) => state.context.orientation
   );
@@ -901,12 +899,7 @@ const PanelResizerVisible = React.forwardRef<
         groupsSize,
         panelBeforeHandle.currentValue
       )}
-      {...mergeProps(
-        props,
-        disabled ? {} : buttonProps,
-        disabled ? {} : moveProps,
-        { onKeyDown }
-      )}
+      {...mergeProps(props, disabled ? {} : moveProps, { onKeyDown })}
       tabIndex={0}
       style={{
         cursor,
