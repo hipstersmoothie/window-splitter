@@ -321,6 +321,14 @@ export interface GroupMachineContextValue {
   autosaveStrategy?: "localStorage" | "cookie";
 }
 
+interface LockGroupEvent {
+  type: "lockGroup";
+}
+
+interface UnlockGroupEvent {
+  type: "unlockGroup";
+}
+
 export type GroupMachineEvent =
   | RegisterPanelEvent
   | RegisterDynamicPanelEvent
@@ -338,7 +346,9 @@ export type GroupMachineEvent =
   | ApplyDeltaEvent
   | SetActualItemsSizeEvent
   | RebindPanelCallbacksEvent
-  | UpdateConstraintsEvent;
+  | UpdateConstraintsEvent
+  | LockGroupEvent
+  | UnlockGroupEvent;
 
 type EventForType<T extends GroupMachineEvent["type"]> = Extract<
   GroupMachineEvent,
@@ -1659,6 +1669,7 @@ export function groupMachine(
   const state = {
     current: "idle" as State,
   };
+  let locked = false;
 
   const context: GroupMachineContextValue = {
     size: { width: 0, height: 0 },
@@ -1852,6 +1863,19 @@ export function groupMachine(
   }
 
   function send(event: GroupMachineEvent) {
+    switch (event.type) {
+      case "lockGroup":
+        locked = true;
+        break;
+      case "unlockGroup":
+        locked = false;
+        break;
+    }
+
+    if (locked) {
+      return;
+    }
+
     switch (event.type) {
       case "registerPanel":
         context.items = addDeDuplicatedItems(context.items, {

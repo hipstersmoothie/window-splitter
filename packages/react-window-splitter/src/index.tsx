@@ -111,6 +111,17 @@ const GroupMachine = {
     const currentContextRef = useRef(intiialValue);
     const [currentValue, setCurrentValue] = useState(intiialValue);
 
+    useEffect(() => {
+      send({ type: "unlockGroup" });
+
+      return () => {
+        // When we were on xstate we could fire off event during unmount and if the parent group
+        // unmounted too the events would never apply. With out own state machine code it doesn't
+        // do that so we have to lock the group as it unmounts so it's children don't de-register.
+        send({ type: "lockGroup" });
+      };
+    }, [send]);
+
     return (
       <GroupMachineState.Provider value={state}>
         <GroupMachineStateContextRef.Provider value={currentContextRef}>
