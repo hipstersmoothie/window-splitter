@@ -39,12 +39,9 @@ import {
   initializePanel,
   initializePanelHandleData,
 } from "@window-splitter/state";
-import { createActor } from "xstate";
 
 // Setup the state machine
-const actor = createActor(groupMachine, {
-  input: { groupId: "group" },
-}).start();
+const actor = groupMachine({ groupId: "group" });
 
 // Register the panels with the state machine
 actor.send({

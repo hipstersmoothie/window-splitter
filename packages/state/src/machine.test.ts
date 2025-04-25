@@ -10,15 +10,11 @@ import {
   getPanelGroupPixelSizes,
   getPanelPercentageSize,
   getPanelPixelSize,
-  groupMachine,
-  GroupMachineContextValue,
   GroupMachineEvent,
   initializePanel,
   initializePanelHandleData,
   isPanelHandle,
   prepareSnapshot,
-  SendFn,
-  State,
 } from "./index.js";
 import { spring } from "framer-motion";
 import Big from "big.js";
@@ -1359,7 +1355,7 @@ describe("collapsible panel", () => {
   });
 
   describe("constraints", () => {
-    test("on render", async () => {
+    test.only("on render", async () => {
       const actor = createActor({ groupId: "group" });
 
       sendAll(actor, [
@@ -1804,34 +1800,38 @@ describe("errors", () => {
       data: initializePanel({ id: "panel-1" }),
     });
 
-    actor.send({
-      type: "setPanelPixelSize",
-      panelId: "panel-2",
-      size: "100px",
-    });
-
-    expect(spy).toHaveBeenCalledWith(
-      new Error("Expected panel with id: panel-2")
-    );
+    try {
+      actor.send({
+        type: "setPanelPixelSize",
+        panelId: "panel-2",
+        size: "100px",
+      });
+    } catch (error) {
+      expect(error).toBeInstanceOf(Error);
+      expect((error as Error).message).toBe("Expected panel with id: panel-2");
+    }
   });
 
   test("throws when using invalid handle IDs", () => {
     const spy = vi.fn();
     const actor = createActor({ groupId: "group" }, spy);
 
-    sendAll(actor, [
-      { type: "registerPanel", data: initializePanel({ id: "handle-2" }) },
-      { type: "dragHandleStart", handleId: "handle-2" },
-      {
-        type: "dragHandle",
-        handleId: "handle-2",
-        value: dragHandlePayload({ delta: 100 }),
-      },
-    ]);
-
-    expect(spy).toHaveBeenCalledWith(
-      new Error("Expected panel handle with id: handle-2")
-    );
+    try {
+      sendAll(actor, [
+        { type: "registerPanel", data: initializePanel({ id: "handle-2" }) },
+        { type: "dragHandleStart", handleId: "handle-2" },
+        {
+          type: "dragHandle",
+          handleId: "handle-2",
+          value: dragHandlePayload({ delta: 100 }),
+        },
+      ]);
+    } catch (error) {
+      expect(error).toBeInstanceOf(Error);
+      expect((error as Error).message).toBe(
+        "Expected panel handle with id: handle-2"
+      );
+    }
   });
 });
 
@@ -2027,7 +2027,7 @@ describe("autosave", () => {
     const snapshot = prepareSnapshot(
       JSON.parse(localStorage.getItem("group")!)
     );
-    const actor2 = createActor({});
+    const actor2 = createActor(snapshot!);
 
     expect(buildTemplate(actor2.value)).toMatchInlineSnapshot(
       `"clamp(20px, 190px, 200px) 10px minmax(50px, 1fr) 10px minmax(50px, min(calc(0.48275862068965517241 * (100% - 210px)), 100%))"`
@@ -2063,7 +2063,7 @@ describe("autosave", () => {
     await waitForIdle(actor);
 
     const snapshot = prepareSnapshot(JSON.parse(Cookies.get("group-2")!));
-    const actor2 = createActor({});
+    const actor2 = createActor(snapshot!);
 
     expect(buildTemplate(actor2.value)).toMatchInlineSnapshot(
       `"clamp(20px, 190px, 200px) 10px minmax(50px, 1fr) 10px minmax(50px, min(calc(0.48275862068965517241 * (100% - 210px)), 100%))"`

@@ -1,6 +1,5 @@
 import * as Cookies from "tiny-cookie";
 import { raf } from "@react-spring/rafz";
-import { fromPromise } from "xstate";
 import invariant from "tiny-invariant";
 import Big from "big.js";
 
@@ -373,7 +372,11 @@ export function getCursor(
 }
 
 export function prepareSnapshot(snapshot: GroupMachineContextValue) {
-  snapshot.dragOvershoot = new Big(snapshot.dragOvershoot);
+  if (!("items" in snapshot)) {
+    return;
+  }
+
+  snapshot.dragOvershoot = new Big(snapshot.dragOvershoot || 0);
 
   for (const item of snapshot.items) {
     if (isPanelData(item)) {
@@ -389,7 +392,6 @@ export function prepareSnapshot(snapshot: GroupMachineContextValue) {
     }
   }
 
-  console.log("snapshotContext", buildTemplate(snapshot));
   return snapshot;
 }
 
@@ -1573,239 +1575,69 @@ function getDeltaForEvent(
   return panel.currentValue.value.minus(collapsedSize);
 }
 
-const animationActor = fromPromise<
-  AnimationActorOutput | undefined,
-  AnimationActorInput
->(
-  ({ input: { send, context, event } }) =>
-    new Promise<AnimationActorOutput | undefined>((resolve) => {
-      const panel = getPanelWithId(context, event.panelId);
-      const handle = getHandleForPanelId(context, event.panelId);
+async function animationActor(
+  context: GroupMachineContextValue,
+  event: CollapsePanelEvent | ExpandPanelEvent,
+  send: (event: GroupMachineEvent) => void,
+  abortController: AbortController
+) {
+  return new Promise<AnimationActorOutput | undefined>((resolve, reject) => {
+    abortController.signal.addEventListener("abort", () => {
+      reject(new Error("Operation was canceled"));
+    });
 
-      let direction = new Big(handle.direction);
-      const fullDelta = getDeltaForEvent(context, event);
+    const panel = getPanelWithId(context, event.panelId);
+    const handle = getHandleForPanelId(context, event.panelId);
 
-      if (event.type === "collapsePanel") {
-        panel.sizeBeforeCollapse = panel.currentValue.value.toNumber();
-        direction = direction.mul(new Big(-1));
-      }
+    let direction = new Big(handle.direction);
+    const fullDelta = getDeltaForEvent(context, event);
 
-      const fps = 60;
-      const { duration, ease } = getCollapseAnimation(panel);
-      const totalFrames = Math.ceil(
-        panel.collapseAnimation ? duration / (1000 / fps) : 1
+    if (event.type === "collapsePanel") {
+      panel.sizeBeforeCollapse = panel.currentValue.value.toNumber();
+      direction = direction.mul(new Big(-1));
+    }
+
+    const fps = 60;
+    const { duration, ease } = getCollapseAnimation(panel);
+    const totalFrames = Math.ceil(
+      panel.collapseAnimation ? duration / (1000 / fps) : 1
+    );
+    let frame = 0;
+    let appliedDelta = new Big(0);
+
+    function renderFrame() {
+      const progress = ++frame / totalFrames;
+      const e = new Big(panel.collapseAnimation ? ease(progress) : 1);
+      const delta = e.mul(fullDelta).sub(appliedDelta).mul(direction);
+
+      send({
+        type: "applyDelta",
+        handleId: handle.item.id,
+        delta: delta.toNumber(),
+      });
+
+      appliedDelta = appliedDelta.add(
+        delta
+          .abs()
+          .mul(
+            (delta.gt(0) && direction.lt(0)) || (delta.lt(0) && direction.gt(0))
+              ? -1
+              : 1
+          )
       );
-      let frame = 0;
-      let appliedDelta = new Big(0);
 
-      function renderFrame() {
-        const progress = ++frame / totalFrames;
-        const e = new Big(panel.collapseAnimation ? ease(progress) : 1);
-        const delta = e.mul(fullDelta).sub(appliedDelta).mul(direction);
-
-        send({
-          type: "applyDelta",
-          handleId: handle.item.id,
-          delta: delta.toNumber(),
-        });
-
-        appliedDelta = appliedDelta.add(
-          delta
-            .abs()
-            .mul(
-              (delta.gt(0) && direction.lt(0)) ||
-                (delta.lt(0) && direction.gt(0))
-                ? -1
-                : 1
-            )
-        );
-
-        if (e.eq(1)) {
-          const action = event.type === "expandPanel" ? "expand" : "collapse";
-          resolve({ panelId: panel.id, action });
-          return false;
-        }
-
-        return true;
+      if (e.eq(1)) {
+        const action = event.type === "expandPanel" ? "expand" : "collapse";
+        resolve({ panelId: panel.id, action });
+        return false;
       }
 
-      raf(renderFrame);
-    })
-);
+      return true;
+    }
 
-// export const groupMachine = createMachine(
-//   {
-//     initial: "idle",
-//     types: {
-//       context: {} as GroupMachineContextValue,
-//       events: {} as GroupMachineEvent,
-//       input: {} as {
-//         orientation?: Orientation;
-//         groupId: string;
-//         initialItems?: Item[];
-//         autosaveStrategy?: "localStorage" | "cookie";
-//       },
-//     },
-//     context: ({ input }) => ({
-//       size: { width: 0, height: 0 },
-//       items: input.initialItems || [],
-//       orientation: input.orientation || "horizontal",
-//       dragOvershoot: new Big(0),
-//       groupId: input.groupId,
-//       autosaveStrategy: input.autosaveStrategy,
-//     }),
-//     states: {
-//       idle: {
-//         on: {
-//           collapsePanel: [
-//             {
-//               actions: "notifyCollapseToggle",
-//               guard: "shouldNotifyCollapseToggle",
-//             },
-//             { target: "togglingCollapse" },
-//           ],
-//           expandPanel: [
-//             // This will match if we can't expand and the expansion won't happen
-//             { guard: "cannotExpandPanel" },
-//             {
-//               actions: "notifyCollapseToggle",
-//               guard: "shouldNotifyCollapseToggle",
-//             },
-//             { target: "togglingCollapse" },
-//           ],
-//         },
-//       },
-//       dragging: {
-//         on: {
-//           collapsePanel: {
-//             guard: "shouldCollapseToggle",
-//             actions: "runCollapseToggle",
-//           },
-//           expandPanel: {
-//             guard: "shouldCollapseToggle",
-//             actions: "runCollapseToggle",
-//           },
-//         },
-//       },
-//       togglingCollapse: {
-//         entry: ["prepare", "onClearLastKnownSize"],
-//         invoke: {
-//           src: "animation",
-//           input: (i) => ({ ...i, send: i.self.send }),
-//           onDone: {
-//             target: "idle",
-//             actions: ["onToggleCollapseComplete", "commit"],
-//           },
-//         },
-//         on: {
-//           applyDelta: { actions: ["onApplyDelta", "onResize"] },
-//         },
-//       },
-//     },
-//   },
-//   {
-//     guards: {
-//       shouldNotifyCollapseToggle: ({ context, event }) => {
-//         isEvent(event, ["collapsePanel", "expandPanel"]);
-//         const panel = getPanelWithId(context, event.panelId);
-//         return !event.controlled && panel.collapseIsControlled === true;
-//       },
-//       shouldCollapseToggle: ({ context, event }) => {
-//         isEvent(event, ["collapsePanel", "expandPanel"]);
-//         const panel = getPanelWithId(context, event.panelId);
-//         return panel.collapseIsControlled === true;
-//       },
-//       cannotExpandPanel: ({ context, event }) => {
-//         isEvent(event, ["expandPanel"]);
-//         const delta = getDeltaForEvent(context, event);
-//         const handle = getHandleForPanelId(context, event.panelId);
-//         const pixelItems = prepareItems(context);
-
-//         let interimContext = { ...context, items: pixelItems };
-//         interimContext = {
-//           ...interimContext,
-//           ...iterativelyUpdateLayout({
-//             context: interimContext,
-//             handleId: handle.item.id,
-//             controlled: event.controlled,
-//             delta: delta,
-//             direction: handle.direction,
-//           }),
-//         };
-//         const updatedPanel = interimContext.items.find(
-//           (i) => i.id === event.panelId
-//         );
-//         const totalSize = interimContext.items.reduce(
-//           (acc, i) =>
-//             acc.add(isPanelData(i) ? i.currentValue.value : i.size.value),
-//           new Big(0)
-//         );
-//         const didExpand =
-//           updatedPanel &&
-//           isPanelData(updatedPanel) &&
-//           !updatedPanel.currentValue.value.eq(updatedPanel.collapsedSize.value);
-
-//         return totalSize.gt(getGroupSize(context)) || !didExpand;
-//       },
-//     },
-//     actors: {
-//       animation: animationActor,
-//     },
-//     actions: {
-//       notifyCollapseToggle: ({ context, event }) => {
-//         isEvent(event, ["collapsePanel", "expandPanel"]);
-//         const panel = getPanelWithId(context, event.panelId);
-//         panel.onCollapseChange?.current?.(!panel.collapsed);
-//       },
-//       runCollapseToggle: enqueueActions(({ context, event, enqueue }) => {
-//         isEvent(event, ["collapsePanel", "expandPanel"]);
-
-//         const handle = getHandleForPanelId(context, event.panelId);
-//         // When collapsing a panel it will be in the opposite direction
-//         // that handle assumes
-//         const delta =
-//           event.type === "collapsePanel"
-//             ? handle.direction * -1
-//             : handle.direction;
-//         const newContext = updateLayout(context, {
-//           handleId: handle.item.id,
-//           type: "dragHandle",
-//           controlled: event.controlled,
-//           value: dragHandlePayload({ delta, orientation: context.orientation }),
-//         });
-
-//         enqueue.assign(newContext);
-//       }),
-//       onToggleCollapseComplete: assign({
-//         items: ({ context, event: e }) => {
-//           const { output } = e as unknown as { output: AnimationActorOutput };
-//           invariant(output, "Expected output from animation actor");
-
-//           const panel = getPanelWithId(context, output.panelId);
-//           panel.collapsed = output.action === "collapse";
-
-//           if (panel.collapsed) {
-//             panel.currentValue = panel.collapsedSize;
-//           }
-
-//           return context.items;
-//         },
-//       }),
-//       onApplyDelta: assign(({ context, event }) => {
-//         isEvent(event, ["applyDelta"]);
-//         return updateLayout(context, {
-//           handleId: event.handleId,
-//           type: "collapsePanel",
-//           disregardCollapseBuffer: true,
-//           value: dragHandlePayload({
-//             delta: event.delta,
-//             orientation: context.orientation,
-//           }),
-//         });
-//       }),
-//     },
-//   }
-// );
+    raf(renderFrame);
+  });
+}
 
 function assign<T>(target: T, source: Partial<T>) {
   for (const key in source) {
@@ -1829,6 +1661,7 @@ export function groupMachine(
   input: Partial<GroupMachineContextValue>,
   onUpdate?: (context: GroupMachineContextValue) => void
 ) {
+  const abortController = new AbortController();
   const state = {
     current: "idle" as State,
   };
@@ -1901,7 +1734,7 @@ export function groupMachine(
       const item = context.items[itemIndex];
 
       if (!item) {
-        return context.items;
+        return;
       }
 
       const newItems = context.items.filter((i) => i.id !== id);
@@ -1911,12 +1744,92 @@ export function groupMachine(
 
       applyDeltaInBothDirections(context, newItems, itemIndex, removedSize);
 
-      return newItems;
+      context.items = newItems;
+    },
+    notifyCollapseToggle: (event: GroupMachineEvent) => {
+      isEvent(event, ["collapsePanel", "expandPanel"]);
+      const panel = getPanelWithId(context, event.panelId);
+      panel.onCollapseChange?.current?.(!panel.collapsed);
+    },
+    runCollapseToggle: (event: GroupMachineEvent) => {
+      isEvent(event, ["collapsePanel", "expandPanel"]);
+
+      const handle = getHandleForPanelId(context, event.panelId);
+      // When collapsing a panel it will be in the opposite direction
+      // that handle assumes
+      const delta =
+        event.type === "collapsePanel"
+          ? handle.direction * -1
+          : handle.direction;
+      const newContext = updateLayout(context, {
+        handleId: handle.item.id,
+        type: "dragHandle",
+        controlled: event.controlled,
+        value: dragHandlePayload({ delta, orientation: context.orientation }),
+      });
+
+      assign(context, newContext);
+    },
+    onAnimationEnd: (output: AnimationActorOutput | undefined) => {
+      invariant(output, "Expected output from animation actor");
+
+      const panel = getPanelWithId(context, output.panelId);
+      panel.collapsed = output.action === "collapse";
+
+      if (panel.collapsed) {
+        panel.currentValue = panel.collapsedSize;
+      }
+
+      actions.commit();
+    },
+  };
+
+  const guards = {
+    shouldNotifyCollapseToggle: (event: GroupMachineEvent) => {
+      isEvent(event, ["collapsePanel", "expandPanel"]);
+      const panel = getPanelWithId(context, event.panelId);
+      return !event.controlled && panel.collapseIsControlled === true;
+    },
+    shouldCollapseToggle: (event: GroupMachineEvent) => {
+      isEvent(event, ["collapsePanel", "expandPanel"]);
+      const panel = getPanelWithId(context, event.panelId);
+      return panel.collapseIsControlled === true;
+    },
+    cannotExpandPanel: (event: GroupMachineEvent) => {
+      isEvent(event, ["expandPanel"]);
+      const delta = getDeltaForEvent(context, event);
+      const handle = getHandleForPanelId(context, event.panelId);
+      const pixelItems = prepareItems(context);
+
+      let interimContext = { ...context, items: pixelItems };
+      interimContext = {
+        ...interimContext,
+        ...iterativelyUpdateLayout({
+          context: interimContext,
+          handleId: handle.item.id,
+          controlled: event.controlled,
+          delta: delta,
+          direction: handle.direction,
+        }),
+      };
+      const updatedPanel = interimContext.items.find(
+        (i) => i.id === event.panelId
+      );
+      const totalSize = interimContext.items.reduce(
+        (acc, i) =>
+          acc.add(isPanelData(i) ? i.currentValue.value : i.size.value),
+        new Big(0)
+      );
+      const didExpand =
+        updatedPanel &&
+        isPanelData(updatedPanel) &&
+        !updatedPanel.currentValue.value.eq(updatedPanel.collapsedSize.value);
+
+      return totalSize.gt(getGroupSize(context)) || !didExpand;
     },
   };
 
   function transition(to: State) {
-    console.log("transition", { from: state.current, to });
     // exit
     switch (state.current) {
       case "dragging":
@@ -1933,13 +1846,16 @@ export function groupMachine(
       case "dragging":
         actions.prepare();
         break;
+      case "togglingCollapse":
+        actions.prepare();
+        actions.clearLastKnownSize();
+        break;
     }
 
     state.current = to;
   }
 
   function send(event: GroupMachineEvent) {
-    console.log("send", { state }, event);
     switch (event.type) {
       case "registerPanel":
         context.items = addDeDuplicatedItems(context.items, {
@@ -2069,6 +1985,7 @@ export function groupMachine(
         });
 
         let totalSize = 0;
+        let useLastKnownSize = false;
 
         for (const item of withLastKnownSize) {
           if (isPanelData(item)) {
@@ -2079,7 +1996,9 @@ export function groupMachine(
 
             // If any size is 0 don't handle overflow
             if (!size) {
-              return withLastKnownSize;
+              context.items = withLastKnownSize;
+              useLastKnownSize = true;
+              break;
             }
 
             totalSize += size;
@@ -2088,19 +2007,23 @@ export function groupMachine(
           }
         }
 
-        if (totalSize > getGroupSize(context)) {
-          return handleOverflow({
+        if (useLastKnownSize) {
+          context.items = withLastKnownSize;
+        } else if (totalSize > getGroupSize(context)) {
+          context.items = handleOverflow({
             ...context,
             items: prepareItems({ ...context, items: withLastKnownSize }),
           }).items;
+        } else {
+          context.items = withLastKnownSize;
         }
 
-        context.items = withLastKnownSize;
         actions.onResize();
         break;
       case "setSize":
         context.size = event.size;
         actions.onResize();
+        console.log("setSize", context.items);
         break;
       case "setOrientation":
         context.orientation = event.orientation;
@@ -2148,6 +2071,34 @@ export function groupMachine(
           actions.onResize();
           actions.onAutosave();
           break;
+        case "collapsePanel":
+          if (guards.shouldNotifyCollapseToggle(event)) {
+            actions.notifyCollapseToggle(event);
+          } else {
+            transition("togglingCollapse");
+            abortController.abort();
+            animationActor(context, event, send, abortController).then(
+              (output) => {
+                actions.onAnimationEnd(output);
+                transition("idle");
+              }
+            );
+          }
+          break;
+        case "expandPanel":
+          if (guards.shouldNotifyCollapseToggle(event)) {
+            actions.notifyCollapseToggle(event);
+          } else {
+            transition("togglingCollapse");
+            abortController.abort();
+            animationActor(context, event, send, abortController).then(
+              (output) => {
+                actions.onAnimationEnd(output);
+                transition("idle");
+              }
+            );
+          }
+          break;
         default:
           break;
       }
@@ -2156,11 +2107,34 @@ export function groupMachine(
         case "dragHandle":
           actions.clearLastKnownSize();
           assign(context, updateLayout(context, event));
-          console.log(context.items);
           actions.onResize();
           break;
         case "dragHandleEnd":
           transition("idle");
+          break;
+        case "expandPanel":
+        case "collapsePanel":
+          if (guards.shouldCollapseToggle(event)) {
+            actions.runCollapseToggle(event);
+          }
+          break;
+      }
+    } else if (state.current === "togglingCollapse") {
+      switch (event.type) {
+        case "applyDelta":
+          assign(
+            context,
+            updateLayout(context, {
+              handleId: event.handleId,
+              type: "collapsePanel",
+              disregardCollapseBuffer: true,
+              value: dragHandlePayload({
+                delta: event.delta,
+                orientation: context.orientation,
+              }),
+            })
+          );
+          actions.onResize();
           break;
       }
     }

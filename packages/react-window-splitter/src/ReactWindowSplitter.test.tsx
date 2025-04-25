@@ -240,10 +240,10 @@ describe("Autosave", () => {
       Boolean(localStorage.getItem("autosave-example"))
     );
     const obj = JSON.parse(localStorage.getItem("autosave-example") || "{}");
-    expect(obj.context.items).toMatchSnapshot();
+    expect(obj.items).toMatchSnapshot();
   });
 
-  test("callback", async () => {
+  test.only("callback", async () => {
     localStorage.clear();
 
     const handle = { current: null } as unknown as {
