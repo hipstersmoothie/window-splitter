@@ -1705,7 +1705,6 @@ export function groupMachine(
       }
     },
     onAutosave: () => {
-      console.log("onAutosave!!!", context.groupId);
       if (!context.autosaveStrategy || typeof window === "undefined") {
         return;
       }
@@ -1716,7 +1715,6 @@ export function groupMachine(
       const data = JSON.stringify(snapshot);
 
       if (context.autosaveStrategy === "localStorage") {
-        console.log("autosave", data);
         localStorage.setItem(context.groupId, data);
       } else {
         Cookies.set(context.groupId, data, {
@@ -1836,15 +1834,9 @@ export function groupMachine(
         break;
     }
 
-    console.log("transition", {
-      from: state.current,
-      to,
-    });
-
     // enter
     switch (to) {
       case "idle":
-        console.log("IDLE!!!", context.groupId);
         actions.onAutosave();
         break;
       case "dragging":
@@ -1860,7 +1852,6 @@ export function groupMachine(
   }
 
   function send(event: GroupMachineEvent) {
-    console.log("send", event.type);
     switch (event.type) {
       case "registerPanel":
         context.items = addDeDuplicatedItems(context.items, {
@@ -2031,7 +2022,6 @@ export function groupMachine(
       case "setSize": {
         context.size = event.size;
         actions.onResize();
-        console.log("setSize", context.items);
         break;
       }
       case "setOrientation":

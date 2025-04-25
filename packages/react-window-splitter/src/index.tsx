@@ -267,7 +267,6 @@ function useGroupItem<T extends Item>(
   const onResizeRef = isPanelData(itemArg) ? itemArg.onResize : undefined;
 
   React.useEffect(() => {
-    console.log("item useEffect");
     const context = machineRef.current;
 
     if (!context) {
@@ -280,7 +279,6 @@ function useGroupItem<T extends Item>(
       contextItem = context.items.find((i) => i.id === itemArg.id);
 
       if (!contextItem) {
-        debugger;
         invariant(
           itemArg.id,
           "When using dynamic panels you must provide an id on the items. This applies to React strict mode as well."
@@ -291,7 +289,6 @@ function useGroupItem<T extends Item>(
             type: "registerDynamicPanel",
             data: { ...itemArg, order: index },
           });
-          console.log("registerDynamicPanel", itemArg, context.items);
         } else {
           send({
             type: "registerPanelHandle",
@@ -401,7 +398,6 @@ const PanelGroupImpl = React.forwardRef<
   ) {
     const localSnapshot = localStorage.getItem(autosaveId);
 
-    console.log("localSnapshot", localSnapshot);
     if (localSnapshot) {
       setSnapshot(JSON.parse(localSnapshot));
     } else {
@@ -409,23 +405,9 @@ const PanelGroupImpl = React.forwardRef<
     }
   }
 
-  console.log("before", {
-    snapshot,
-    snapshotProp,
-  });
   const snapshotMemo = useMemo(() => {
     return typeof snapshot === "object" ? prepareSnapshot(snapshot) : undefined;
   }, [snapshot]);
-
-  console.log("snapshotMemo", {
-    orientation: props.orientation,
-    snapshot,
-    snapshotMemo,
-    groupId,
-    items: initialItems.current,
-    autosaveStrategy,
-    ...(typeof snapshotMemo === "object" ? snapshotMemo : undefined),
-  });
 
   return (
     <GroupMachine.Provider
@@ -481,7 +463,6 @@ const PanelGroupImplementation = React.forwardRef<
         return;
       }
 
-      console.log({ type: "setSize", size: entry.contentRect });
       send({ type: "setSize", size: entry.contentRect });
     });
 
