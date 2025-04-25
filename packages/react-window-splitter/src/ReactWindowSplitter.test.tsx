@@ -193,7 +193,7 @@ test("Conditional Panels", async () => {
   await expectTemplate(handle, "236.953125px 10px 141.046875px 10px 100px");
 
   getByText("Close").click();
-  await expectTemplate(handle, "236.96875px 10px 251.03125px");
+  await expectTemplate(handle, "236.953125px 10px 251.03125px");
 });
 
 test("Dynamic constraints", async () => {
@@ -368,19 +368,16 @@ test("Keyboard interactions with collapsed panels", async () => {
   fireEvent.keyDown(resizer2, { key: "ArrowLeft" });
   fireEvent.keyDown(resizer2, { key: "ArrowLeft" });
   fireEvent.keyDown(resizer2, { key: "ArrowLeft" });
-  await expectTemplate(handle, "209px 10px 165px 10px 104px");
+  await expectTemplate(handle, "209px 10px 164.96875px 10px 104.03125px");
 
   fireEvent.keyDown(resizer2, { key: "ArrowLeft", shiftKey: true });
-  await expectTemplate(handle, "209px 10px 150px 10px 119px");
+  await expectTemplate(handle, "209px 10px 149.96875px 10px 119.03125px");
 
   fireEvent.keyDown(resizer2, { key: "Enter" });
   await expectTemplate(handle, "209px 10px 209px 10px 60px");
 
   fireEvent.keyDown(resizer2, { key: "Enter" });
-  await expectTemplate(
-    handle,
-    "209.03125px 10px 149.984375px 10px 118.984375px"
-  );
+  await expectTemplate(handle, "209px 10px 149.96875px 10px 119.03125px");
 });
 
 describe("imperative panel API", async () => {

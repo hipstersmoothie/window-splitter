@@ -1548,12 +1548,6 @@ function clearLastKnownSize(items: Item[]) {
 
 // #region Machine
 
-interface AnimationActorInput {
-  context: GroupMachineContextValue;
-  event: CollapsePanelEvent | ExpandPanelEvent;
-  send: (event: GroupMachineEvent) => void;
-}
-
 interface AnimationActorOutput {
   panelId: string;
   action: "expand" | "collapse";
@@ -1578,7 +1572,7 @@ function getDeltaForEvent(
 async function animationActor(
   context: GroupMachineContextValue,
   event: CollapsePanelEvent | ExpandPanelEvent,
-  send: (event: GroupMachineEvent) => void,
+  send: (e: GroupMachineEvent) => void,
   abortController: AbortController
 ) {
   return new Promise<AnimationActorOutput | undefined>((resolve, reject) => {
@@ -1711,6 +1705,7 @@ export function groupMachine(
       }
     },
     onAutosave: () => {
+      console.log("onAutosave!!!", context.groupId);
       if (!context.autosaveStrategy || typeof window === "undefined") {
         return;
       }
@@ -1721,6 +1716,7 @@ export function groupMachine(
       const data = JSON.stringify(snapshot);
 
       if (context.autosaveStrategy === "localStorage") {
+        console.log("autosave", data);
         localStorage.setItem(context.groupId, data);
       } else {
         Cookies.set(context.groupId, data, {
@@ -1784,6 +1780,8 @@ export function groupMachine(
     },
   };
 
+  actions.onAutosave();
+
   const guards = {
     shouldNotifyCollapseToggle: (event: GroupMachineEvent) => {
       isEvent(event, ["collapsePanel", "expandPanel"]);
@@ -1838,9 +1836,15 @@ export function groupMachine(
         break;
     }
 
+    console.log("transition", {
+      from: state.current,
+      to,
+    });
+
     // enter
     switch (to) {
       case "idle":
+        console.log("IDLE!!!", context.groupId);
         actions.onAutosave();
         break;
       case "dragging":
@@ -1856,6 +1860,7 @@ export function groupMachine(
   }
 
   function send(event: GroupMachineEvent) {
+    console.log("send", event.type);
     switch (event.type) {
       case "registerPanel":
         context.items = addDeDuplicatedItems(context.items, {
@@ -1872,7 +1877,7 @@ export function groupMachine(
         actions.onResize();
         actions.onAutosave();
         break;
-      case "registerPanelHandle":
+      case "registerPanelHandle": {
         const unit =
           typeof event.data.size === "string"
             ? parseUnit(event.data.size)
@@ -1887,6 +1892,7 @@ export function groupMachine(
           },
         });
         break;
+      }
       case "unregisterPanelHandle":
         actions.prepare();
         actions.removeItem(event.id);
@@ -1895,7 +1901,7 @@ export function groupMachine(
         actions.onResize();
         actions.onAutosave();
         break;
-      case "registerDynamicPanel":
+      case "registerDynamicPanel": {
         actions.prepare();
 
         let currentValue: ParsedUnit = makePixelUnit(0);
@@ -1945,6 +1951,7 @@ export function groupMachine(
         actions.onResize();
         actions.onAutosave();
         break;
+      }
       case "rebindPanelCallbacks":
         for (const item of context.items) {
           if (isPanelData(item) && item.id === event.data.id) {
@@ -1977,7 +1984,7 @@ export function groupMachine(
         actions.onResize();
         actions.onAutosave();
         break;
-      case "setActualItemsSize":
+      case "setActualItemsSize": {
         const withLastKnownSize = context.items.map((i) => {
           if (!isPanelData(i)) return i;
           const lastKnownSize = event.childrenSizes[i.id] || i.lastKnownSize;
@@ -2020,11 +2027,13 @@ export function groupMachine(
 
         actions.onResize();
         break;
-      case "setSize":
+      }
+      case "setSize": {
         context.size = event.size;
         actions.onResize();
         console.log("setSize", context.items);
         break;
+      }
       case "setOrientation":
         context.orientation = event.orientation;
         actions.clearLastKnownSize();
@@ -2040,7 +2049,7 @@ export function groupMachine(
           transition("dragging");
           context.activeDragHandleId = event.handleId;
           break;
-        case "setPanelPixelSize":
+        case "setPanelPixelSize": {
           actions.prepare();
           actions.clearLastKnownSize();
 
@@ -2071,6 +2080,7 @@ export function groupMachine(
           actions.onResize();
           actions.onAutosave();
           break;
+        }
         case "collapsePanel":
           if (guards.shouldNotifyCollapseToggle(event)) {
             actions.notifyCollapseToggle(event);
