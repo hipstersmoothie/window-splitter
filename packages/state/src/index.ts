@@ -1,12 +1,6 @@
 import * as Cookies from "tiny-cookie";
 import { raf } from "@react-spring/rafz";
-import {
-  createMachine,
-  assign,
-  enqueueActions,
-  fromPromise,
-  Snapshot,
-} from "xstate";
+import { fromPromise } from "xstate";
 import invariant from "tiny-invariant";
 import Big from "big.js";
 
@@ -328,11 +322,6 @@ export interface GroupMachineContextValue {
   autosaveStrategy?: "localStorage" | "cookie";
 }
 
-export type GroupMachineSnapshot = Snapshot<unknown> & {
-  context: GroupMachineContextValue;
-  value: string;
-};
-
 export type GroupMachineEvent =
   | RegisterPanelEvent
   | RegisterDynamicPanelEvent
@@ -383,12 +372,10 @@ export function getCursor(
   }
 }
 
-export function prepareSnapshot(snapshot: GroupMachineSnapshot) {
-  const snapshotContext = snapshot.context;
+export function prepareSnapshot(snapshot: GroupMachineContextValue) {
+  snapshot.dragOvershoot = new Big(snapshot.dragOvershoot);
 
-  snapshotContext.dragOvershoot = new Big(snapshotContext.dragOvershoot);
-
-  for (const item of snapshotContext.items) {
+  for (const item of snapshot.items) {
     if (isPanelData(item)) {
       item.currentValue.value = new Big(item.currentValue.value);
       item.collapsedSize.value = new Big(item.collapsedSize.value);
@@ -402,6 +389,7 @@ export function prepareSnapshot(snapshot: GroupMachineSnapshot) {
     }
   }
 
+  console.log("snapshotContext", buildTemplate(snapshot));
   return snapshot;
 }
 
@@ -1645,533 +1633,544 @@ const animationActor = fromPromise<
     })
 );
 
-export const groupMachine = createMachine(
-  {
-    initial: "idle",
-    types: {
-      context: {} as GroupMachineContextValue,
-      events: {} as GroupMachineEvent,
-      input: {} as {
-        orientation?: Orientation;
-        groupId: string;
-        initialItems?: Item[];
-        autosaveStrategy?: "localStorage" | "cookie";
-      },
-    },
-    context: ({ input }) => ({
-      size: { width: 0, height: 0 },
-      items: input.initialItems || [],
-      orientation: input.orientation || "horizontal",
-      dragOvershoot: new Big(0),
-      groupId: input.groupId,
-      autosaveStrategy: input.autosaveStrategy,
-    }),
-    states: {
-      idle: {
-        entry: ["onAutosave"],
-        on: {
-          dragHandleStart: {
-            target: "dragging",
-            actions: ["onDragHandleStart"],
-          },
-          setPanelPixelSize: {
-            actions: [
-              "prepare",
-              "onClearLastKnownSize",
-              "onSetPanelSize",
-              "commit",
-              "onResize",
-              "onAutosave",
-            ],
-          },
-          collapsePanel: [
-            {
-              actions: "notifyCollapseToggle",
-              guard: "shouldNotifyCollapseToggle",
-            },
-            { target: "togglingCollapse" },
-          ],
-          expandPanel: [
-            // This will match if we can't expand and the expansion won't happen
-            { guard: "cannotExpandPanel" },
-            {
-              actions: "notifyCollapseToggle",
-              guard: "shouldNotifyCollapseToggle",
-            },
-            { target: "togglingCollapse" },
-          ],
-        },
-      },
-      dragging: {
-        entry: ["prepare"],
-        on: {
-          dragHandle: {
-            actions: ["onClearLastKnownSize", "onDragHandle", "onResize"],
-          },
-          dragHandleEnd: { target: "idle" },
-          collapsePanel: {
-            guard: "shouldCollapseToggle",
-            actions: "runCollapseToggle",
-          },
-          expandPanel: {
-            guard: "shouldCollapseToggle",
-            actions: "runCollapseToggle",
-          },
-        },
-        exit: ["commit", "clearDragHandle"],
-      },
-      togglingCollapse: {
-        entry: ["prepare", "onClearLastKnownSize"],
-        invoke: {
-          src: "animation",
-          input: (i) => ({ ...i, send: i.self.send }),
-          onDone: {
-            target: "idle",
-            actions: ["onToggleCollapseComplete", "commit"],
-          },
-        },
-        on: {
-          applyDelta: { actions: ["onApplyDelta", "onResize"] },
-        },
-      },
-    },
-    on: {
-      setActualItemsSize: { actions: ["recordActualItemSize", "onResize"] },
-      registerPanel: { actions: ["assignPanelData"] },
-      rebindPanelCallbacks: {
-        actions: ["rebindPanelCallbacks"],
-      },
-      updateConstraints: {
-        actions: [
-          "prepare",
-          "updateConstraints",
-          "onClearLastKnownSize",
-          "commit",
-          "onResize",
-          "onAutosave",
-        ],
-      },
-      registerDynamicPanel: {
-        actions: [
-          "prepare",
-          "onRegisterDynamicPanel",
-          "onClearLastKnownSize",
-          "commit",
-          "onResize",
-          "onAutosave",
-        ],
-      },
-      unregisterPanel: {
-        actions: [
-          "prepare",
-          "removeItem",
-          "onClearLastKnownSize",
-          "commit",
-          "onResize",
-          "onAutosave",
-        ],
-      },
-      registerPanelHandle: { actions: ["assignPanelHandleData"] },
-      unregisterPanelHandle: {
-        actions: [
-          "prepare",
-          "removeItem",
-          "onClearLastKnownSize",
-          "commit",
-          "onResize",
-          "onAutosave",
-        ],
-      },
-      setSize: { actions: ["updateSize", "onResize"] },
-      setOrientation: {
-        actions: ["updateOrientation", "onClearLastKnownSize", "onResize"],
-      },
-    },
-  },
-  {
-    guards: {
-      shouldNotifyCollapseToggle: ({ context, event }) => {
-        isEvent(event, ["collapsePanel", "expandPanel"]);
-        const panel = getPanelWithId(context, event.panelId);
-        return !event.controlled && panel.collapseIsControlled === true;
-      },
-      shouldCollapseToggle: ({ context, event }) => {
-        isEvent(event, ["collapsePanel", "expandPanel"]);
-        const panel = getPanelWithId(context, event.panelId);
-        return panel.collapseIsControlled === true;
-      },
-      cannotExpandPanel: ({ context, event }) => {
-        isEvent(event, ["expandPanel"]);
-        const delta = getDeltaForEvent(context, event);
-        const handle = getHandleForPanelId(context, event.panelId);
-        const pixelItems = prepareItems(context);
+// export const groupMachine = createMachine(
+//   {
+//     initial: "idle",
+//     types: {
+//       context: {} as GroupMachineContextValue,
+//       events: {} as GroupMachineEvent,
+//       input: {} as {
+//         orientation?: Orientation;
+//         groupId: string;
+//         initialItems?: Item[];
+//         autosaveStrategy?: "localStorage" | "cookie";
+//       },
+//     },
+//     context: ({ input }) => ({
+//       size: { width: 0, height: 0 },
+//       items: input.initialItems || [],
+//       orientation: input.orientation || "horizontal",
+//       dragOvershoot: new Big(0),
+//       groupId: input.groupId,
+//       autosaveStrategy: input.autosaveStrategy,
+//     }),
+//     states: {
+//       idle: {
+//         on: {
+//           collapsePanel: [
+//             {
+//               actions: "notifyCollapseToggle",
+//               guard: "shouldNotifyCollapseToggle",
+//             },
+//             { target: "togglingCollapse" },
+//           ],
+//           expandPanel: [
+//             // This will match if we can't expand and the expansion won't happen
+//             { guard: "cannotExpandPanel" },
+//             {
+//               actions: "notifyCollapseToggle",
+//               guard: "shouldNotifyCollapseToggle",
+//             },
+//             { target: "togglingCollapse" },
+//           ],
+//         },
+//       },
+//       dragging: {
+//         on: {
+//           collapsePanel: {
+//             guard: "shouldCollapseToggle",
+//             actions: "runCollapseToggle",
+//           },
+//           expandPanel: {
+//             guard: "shouldCollapseToggle",
+//             actions: "runCollapseToggle",
+//           },
+//         },
+//       },
+//       togglingCollapse: {
+//         entry: ["prepare", "onClearLastKnownSize"],
+//         invoke: {
+//           src: "animation",
+//           input: (i) => ({ ...i, send: i.self.send }),
+//           onDone: {
+//             target: "idle",
+//             actions: ["onToggleCollapseComplete", "commit"],
+//           },
+//         },
+//         on: {
+//           applyDelta: { actions: ["onApplyDelta", "onResize"] },
+//         },
+//       },
+//     },
+//   },
+//   {
+//     guards: {
+//       shouldNotifyCollapseToggle: ({ context, event }) => {
+//         isEvent(event, ["collapsePanel", "expandPanel"]);
+//         const panel = getPanelWithId(context, event.panelId);
+//         return !event.controlled && panel.collapseIsControlled === true;
+//       },
+//       shouldCollapseToggle: ({ context, event }) => {
+//         isEvent(event, ["collapsePanel", "expandPanel"]);
+//         const panel = getPanelWithId(context, event.panelId);
+//         return panel.collapseIsControlled === true;
+//       },
+//       cannotExpandPanel: ({ context, event }) => {
+//         isEvent(event, ["expandPanel"]);
+//         const delta = getDeltaForEvent(context, event);
+//         const handle = getHandleForPanelId(context, event.panelId);
+//         const pixelItems = prepareItems(context);
 
-        let interimContext = { ...context, items: pixelItems };
-        interimContext = {
-          ...interimContext,
-          ...iterativelyUpdateLayout({
-            context: interimContext,
-            handleId: handle.item.id,
-            controlled: event.controlled,
-            delta: delta,
-            direction: handle.direction,
-          }),
-        };
-        const updatedPanel = interimContext.items.find(
-          (i) => i.id === event.panelId
-        );
-        const totalSize = interimContext.items.reduce(
-          (acc, i) =>
-            acc.add(isPanelData(i) ? i.currentValue.value : i.size.value),
-          new Big(0)
-        );
-        const didExpand =
-          updatedPanel &&
-          isPanelData(updatedPanel) &&
-          !updatedPanel.currentValue.value.eq(updatedPanel.collapsedSize.value);
+//         let interimContext = { ...context, items: pixelItems };
+//         interimContext = {
+//           ...interimContext,
+//           ...iterativelyUpdateLayout({
+//             context: interimContext,
+//             handleId: handle.item.id,
+//             controlled: event.controlled,
+//             delta: delta,
+//             direction: handle.direction,
+//           }),
+//         };
+//         const updatedPanel = interimContext.items.find(
+//           (i) => i.id === event.panelId
+//         );
+//         const totalSize = interimContext.items.reduce(
+//           (acc, i) =>
+//             acc.add(isPanelData(i) ? i.currentValue.value : i.size.value),
+//           new Big(0)
+//         );
+//         const didExpand =
+//           updatedPanel &&
+//           isPanelData(updatedPanel) &&
+//           !updatedPanel.currentValue.value.eq(updatedPanel.collapsedSize.value);
 
-        return totalSize.gt(getGroupSize(context)) || !didExpand;
-      },
-    },
-    actors: {
-      animation: animationActor,
-    },
-    actions: {
-      onDragHandleStart: assign({
-        activeDragHandleId: ({ event }) => {
-          isEvent(event, ["dragHandleStart"]);
-          return event.handleId;
-        },
-      }),
-      clearDragHandle: assign({
-        activeDragHandleId: undefined,
-      }),
-      onAutosave: ({ context, self }) => {
-        if (!context.autosaveStrategy || typeof window === "undefined") {
-          return;
-        }
+//         return totalSize.gt(getGroupSize(context)) || !didExpand;
+//       },
+//     },
+//     actors: {
+//       animation: animationActor,
+//     },
+//     actions: {
+//       notifyCollapseToggle: ({ context, event }) => {
+//         isEvent(event, ["collapsePanel", "expandPanel"]);
+//         const panel = getPanelWithId(context, event.panelId);
+//         panel.onCollapseChange?.current?.(!panel.collapsed);
+//       },
+//       runCollapseToggle: enqueueActions(({ context, event, enqueue }) => {
+//         isEvent(event, ["collapsePanel", "expandPanel"]);
 
-        const snapshot = self.getPersistedSnapshot() as GroupMachineSnapshot;
-        snapshot.context.items = clearLastKnownSize(context.items);
-        snapshot.context.activeDragHandleId = context.activeDragHandleId;
-        snapshot.value = "idle";
-        const data = JSON.stringify(snapshot);
+//         const handle = getHandleForPanelId(context, event.panelId);
+//         // When collapsing a panel it will be in the opposite direction
+//         // that handle assumes
+//         const delta =
+//           event.type === "collapsePanel"
+//             ? handle.direction * -1
+//             : handle.direction;
+//         const newContext = updateLayout(context, {
+//           handleId: handle.item.id,
+//           type: "dragHandle",
+//           controlled: event.controlled,
+//           value: dragHandlePayload({ delta, orientation: context.orientation }),
+//         });
 
-        if (context.autosaveStrategy === "localStorage") {
-          localStorage.setItem(context.groupId, data);
-        } else {
-          Cookies.set(context.groupId, data, {
-            path: "/",
-            "max-age": 31536000,
-          });
-        }
-      },
-      notifyCollapseToggle: ({ context, event }) => {
-        isEvent(event, ["collapsePanel", "expandPanel"]);
-        const panel = getPanelWithId(context, event.panelId);
-        panel.onCollapseChange?.current?.(!panel.collapsed);
-      },
-      runCollapseToggle: enqueueActions(({ context, event, enqueue }) => {
-        isEvent(event, ["collapsePanel", "expandPanel"]);
+//         enqueue.assign(newContext);
+//       }),
+//       onToggleCollapseComplete: assign({
+//         items: ({ context, event: e }) => {
+//           const { output } = e as unknown as { output: AnimationActorOutput };
+//           invariant(output, "Expected output from animation actor");
 
-        const handle = getHandleForPanelId(context, event.panelId);
-        // When collapsing a panel it will be in the opposite direction
-        // that handle assumes
-        const delta =
-          event.type === "collapsePanel"
-            ? handle.direction * -1
-            : handle.direction;
-        const newContext = updateLayout(context, {
-          handleId: handle.item.id,
-          type: "dragHandle",
-          controlled: event.controlled,
-          value: dragHandlePayload({ delta, orientation: context.orientation }),
-        });
+//           const panel = getPanelWithId(context, output.panelId);
+//           panel.collapsed = output.action === "collapse";
 
-        enqueue.assign(newContext);
-      }),
-      onToggleCollapseComplete: assign({
-        items: ({ context, event: e }) => {
-          const { output } = e as unknown as { output: AnimationActorOutput };
-          invariant(output, "Expected output from animation actor");
+//           if (panel.collapsed) {
+//             panel.currentValue = panel.collapsedSize;
+//           }
 
-          const panel = getPanelWithId(context, output.panelId);
-          panel.collapsed = output.action === "collapse";
+//           return context.items;
+//         },
+//       }),
+//       onApplyDelta: assign(({ context, event }) => {
+//         isEvent(event, ["applyDelta"]);
+//         return updateLayout(context, {
+//           handleId: event.handleId,
+//           type: "collapsePanel",
+//           disregardCollapseBuffer: true,
+//           value: dragHandlePayload({
+//             delta: event.delta,
+//             orientation: context.orientation,
+//           }),
+//         });
+//       }),
+//     },
+//   }
+// );
 
-          if (panel.collapsed) {
-            panel.currentValue = panel.collapsedSize;
-          }
-
-          return context.items;
-        },
-      }),
-      updateSize: assign({
-        size: ({ event }) => {
-          isEvent(event, ["setSize"]);
-          return event.size;
-        },
-      }),
-      recordActualItemSize: assign({
-        items: ({ context, event }) => {
-          isEvent(event, ["setActualItemsSize"]);
-
-          const withLastKnownSize = context.items.map((i) => {
-            if (!isPanelData(i)) return i;
-            const lastKnownSize = event.childrenSizes[i.id] || i.lastKnownSize;
-            return { ...i, lastKnownSize };
-          });
-
-          let totalSize = 0;
-
-          for (const item of withLastKnownSize) {
-            if (isPanelData(item)) {
-              const size =
-                item.lastKnownSize?.[
-                  context.orientation === "horizontal" ? "width" : "height"
-                ];
-
-              // If any size is 0 don't handle overflow
-              if (!size) {
-                return withLastKnownSize;
-              }
-
-              totalSize += size;
-            } else {
-              totalSize += item.size.value.toNumber();
-            }
-          }
-
-          if (totalSize > getGroupSize(context)) {
-            return handleOverflow({
-              ...context,
-              items: prepareItems({ ...context, items: withLastKnownSize }),
-            }).items;
-          }
-
-          return withLastKnownSize;
-        },
-      }),
-      updateOrientation: assign({
-        orientation: ({ event }) => {
-          isEvent(event, ["setOrientation"]);
-          return event.orientation;
-        },
-      }),
-      onClearLastKnownSize: assign({
-        items: ({ context }) => clearLastKnownSize(context.items),
-      }),
-      assignPanelData: assign({
-        items: ({ context, event }) => {
-          isEvent(event, ["registerPanel"]);
-
-          return addDeDuplicatedItems(context.items, {
-            type: "panel",
-            currentValue: makePixelUnit(-1),
-            ...event.data,
-          });
-        },
-      }),
-      rebindPanelCallbacks: assign({
-        items: ({ context, event }) => {
-          isEvent(event, ["rebindPanelCallbacks"]);
-
-          for (const item of context.items) {
-            if (isPanelData(item) && item.id === event.data.id) {
-              item.onCollapseChange = event.data.onCollapseChange;
-              item.onResize = event.data.onResize;
-            }
-          }
-
-          return context.items;
-        },
-      }),
-      updateConstraints: assign({
-        items: ({ context, event }) => {
-          isEvent(event, ["updateConstraints"]);
-
-          for (const item of context.items) {
-            if (isPanelData(item) && item.id === event.data.id) {
-              const panel = event.data as PanelData;
-              item.min = panel.min;
-              item.max = panel.max;
-              item.default = panel.default;
-              item.collapsedSize = panel.collapsedSize;
-              item.isStaticAtRest = panel.isStaticAtRest;
-              item.collapseAnimation = panel.collapseAnimation;
-              item.collapsible = panel.collapsible;
-            } else if (isPanelHandle(item) && item.id === event.data.id) {
-              const handle = event.data as PanelHandleData;
-              item.size = handle.size;
-            }
-          }
-
-          return context.items;
-        },
-      }),
-      onRegisterDynamicPanel: assign({
-        items: ({ context, event }) => {
-          isEvent(event, ["registerDynamicPanel"]);
-
-          let currentValue: ParsedUnit = makePixelUnit(0);
-
-          if (
-            event.data.collapsible &&
-            event.data.collapsed &&
-            event.data.collapsedSize
-          ) {
-            currentValue = event.data.collapsedSize;
-          } else if (event.data.default) {
-            currentValue = event.data.default;
-          } else {
-            currentValue = event.data.min;
-          }
-
-          const newItems = addDeDuplicatedItems(context.items, {
-            type: "panel",
-            ...event.data,
-            currentValue,
-          });
-          const itemIndex = newItems.findIndex(
-            (item) => item.id === event.data.id
-          );
-          const newContext = { ...context, items: newItems };
-          const overflowDueToHandles = context.items
-            .reduce((acc, i) => {
-              if (isPanelHandle(i)) {
-                return acc.add(getUnitPixelValue(context, i.size));
-              }
-
-              return acc.add(i.currentValue.value);
-            }, new Big(0))
-            .minus(getGroupSize(context));
-
-          applyDeltaInBothDirections(
-            newContext,
-            newItems,
-            itemIndex,
-            currentValue.value.add(overflowDueToHandles).neg()
-          );
-
-          return newItems;
-        },
-      }),
-      assignPanelHandleData: assign({
-        items: ({ context, event }) => {
-          isEvent(event, ["registerPanelHandle"]);
-
-          const unit =
-            typeof event.data.size === "string"
-              ? parseUnit(event.data.size)
-              : event.data.size;
-
-          return addDeDuplicatedItems(context.items, {
-            type: "handle",
-            ...event.data,
-            size: {
-              type: "pixel",
-              value: new Big(unit.value),
-            },
-          });
-        },
-      }),
-      removeItem: assign({
-        items: ({ context, event }) => {
-          isEvent(event, ["unregisterPanel", "unregisterPanelHandle"]);
-          const itemIndex = context.items.findIndex(
-            (item) => item.id === event.id
-          );
-          const item = context.items[itemIndex];
-
-          if (!item) {
-            return context.items;
-          }
-
-          const newItems = context.items.filter((i) => i.id !== event.id);
-          const removedSize = isPanelData(item)
-            ? item.currentValue.value
-            : item.size.value;
-
-          applyDeltaInBothDirections(context, newItems, itemIndex, removedSize);
-
-          return newItems;
-        },
-      }),
-      prepare: assign({
-        items: ({ context }) => prepareItems(context),
-      }),
-      onDragHandle: enqueueActions(({ context, event, enqueue }) => {
-        isEvent(event, ["dragHandle"]);
-        enqueue.assign(updateLayout(context, event));
-      }),
-      commit: assign({
-        dragOvershoot: new Big(0),
-        items: ({ context }) => commitLayout(context),
-      }),
-      onApplyDelta: assign(({ context, event }) => {
-        isEvent(event, ["applyDelta"]);
-        return updateLayout(context, {
-          handleId: event.handleId,
-          type: "collapsePanel",
-          disregardCollapseBuffer: true,
-          value: dragHandlePayload({
-            delta: event.delta,
-            orientation: context.orientation,
-          }),
-        });
-      }),
-      onSetPanelSize: enqueueActions(({ context, event, enqueue }) => {
-        isEvent(event, ["setPanelPixelSize"]);
-
-        const panel = getPanelWithId(context, event.panelId);
-        const handle = getHandleForPanelId(context, event.panelId);
-        const current = panel.currentValue.value;
-        const newSize = clampUnit(
-          context,
-          panel,
-          getUnitPixelValue(context, parseUnit(event.size))
-        );
-        const isBigger = newSize > current;
-        const delta = isBigger
-          ? newSize.minus(current)
-          : current.minus(newSize);
-
-        enqueue.assign(
-          iterativelyUpdateLayout({
-            context,
-            direction: (handle.direction * (isBigger ? 1 : -1)) as -1 | 1,
-            handleId: handle.item.id,
-            delta,
-          })
-        );
-      }),
-      onResize: ({ context }) => {
-        for (const item of context.items) {
-          if (isPanelData(item)) {
-            const pixel = item.lastKnownSize
-              ? new Big(
-                  context.orientation === "horizontal"
-                    ? item.lastKnownSize.width
-                    : item.lastKnownSize.height
-                )
-              : clampUnit(
-                  context,
-                  item,
-                  getUnitPixelValue(context, item.currentValue)
-                );
-            const groupSize = getGroupSize(context);
-
-            item.onResize?.current?.({
-              pixel: pixel.toNumber(),
-              percentage:
-                groupSize > 0
-                  ? pixel.div(getGroupSize(context)).toNumber()
-                  : -1,
-            });
-          }
-        }
-      },
-    },
+function assign<T>(target: T, source: Partial<T>) {
+  for (const key in source) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (target as any)[key] = source[key];
   }
-);
+}
+
+export interface GroupMachineInput {
+  orientation?: Orientation;
+  groupId: string;
+  items?: Item[];
+  autosaveStrategy?: "localStorage" | "cookie";
+}
+
+export type State = "idle" | "dragging" | "togglingCollapse";
+
+let groupId = 0;
+
+export function groupMachine(
+  input: Partial<GroupMachineContextValue>,
+  onUpdate?: (context: GroupMachineContextValue) => void
+) {
+  const state = {
+    current: "idle" as State,
+  };
+
+  const context: GroupMachineContextValue = {
+    size: { width: 0, height: 0 },
+    items: input.items || [],
+    orientation: input.orientation || "horizontal",
+    dragOvershoot: new Big(0),
+    groupId: input.groupId || `group-${groupId++}`,
+    autosaveStrategy: input.autosaveStrategy,
+  };
+
+  const actions = {
+    prepare: () => {
+      context.items = prepareItems(context);
+    },
+    clearLastKnownSize: () => {
+      context.items = clearLastKnownSize(context.items);
+    },
+    commit: () => {
+      context.dragOvershoot = new Big(0);
+      context.items = commitLayout(context);
+    },
+    onResize: () => {
+      for (const item of context.items) {
+        if (isPanelData(item)) {
+          const pixel = item.lastKnownSize
+            ? new Big(
+                context.orientation === "horizontal"
+                  ? item.lastKnownSize.width
+                  : item.lastKnownSize.height
+              )
+            : clampUnit(
+                context,
+                item,
+                getUnitPixelValue(context, item.currentValue)
+              );
+          const groupSize = getGroupSize(context);
+
+          item.onResize?.current?.({
+            pixel: pixel.toNumber(),
+            percentage:
+              groupSize > 0 ? pixel.div(getGroupSize(context)).toNumber() : -1,
+          });
+        }
+      }
+    },
+    onAutosave: () => {
+      if (!context.autosaveStrategy || typeof window === "undefined") {
+        return;
+      }
+
+      const snapshot = { ...context };
+      snapshot.items = clearLastKnownSize(context.items);
+      snapshot.activeDragHandleId = context.activeDragHandleId;
+      const data = JSON.stringify(snapshot);
+
+      if (context.autosaveStrategy === "localStorage") {
+        localStorage.setItem(context.groupId, data);
+      } else {
+        Cookies.set(context.groupId, data, {
+          path: "/",
+          "max-age": 31536000,
+        });
+      }
+    },
+    removeItem: (id: string) => {
+      const itemIndex = context.items.findIndex((item) => item.id === id);
+      const item = context.items[itemIndex];
+
+      if (!item) {
+        return context.items;
+      }
+
+      const newItems = context.items.filter((i) => i.id !== id);
+      const removedSize = isPanelData(item)
+        ? item.currentValue.value
+        : item.size.value;
+
+      applyDeltaInBothDirections(context, newItems, itemIndex, removedSize);
+
+      return newItems;
+    },
+  };
+
+  function transition(to: State) {
+    console.log("transition", { from: state.current, to });
+    // exit
+    switch (state.current) {
+      case "dragging":
+        actions.commit();
+        context.activeDragHandleId = undefined;
+        break;
+    }
+
+    // enter
+    switch (to) {
+      case "idle":
+        actions.onAutosave();
+        break;
+      case "dragging":
+        actions.prepare();
+        break;
+    }
+
+    state.current = to;
+  }
+
+  function send(event: GroupMachineEvent) {
+    console.log("send", { state }, event);
+    switch (event.type) {
+      case "registerPanel":
+        context.items = addDeDuplicatedItems(context.items, {
+          type: "panel",
+          currentValue: makePixelUnit(-1),
+          ...event.data,
+        });
+        break;
+      case "unregisterPanel":
+        actions.prepare();
+        actions.removeItem(event.id);
+        actions.clearLastKnownSize();
+        actions.commit();
+        actions.onResize();
+        actions.onAutosave();
+        break;
+      case "registerPanelHandle":
+        const unit =
+          typeof event.data.size === "string"
+            ? parseUnit(event.data.size)
+            : event.data.size;
+
+        context.items = addDeDuplicatedItems(context.items, {
+          type: "handle",
+          ...event.data,
+          size: {
+            type: "pixel",
+            value: new Big(unit.value),
+          },
+        });
+        break;
+      case "unregisterPanelHandle":
+        actions.prepare();
+        actions.removeItem(event.id);
+        actions.clearLastKnownSize();
+        actions.commit();
+        actions.onResize();
+        actions.onAutosave();
+        break;
+      case "registerDynamicPanel":
+        actions.prepare();
+
+        let currentValue: ParsedUnit = makePixelUnit(0);
+
+        if (
+          event.data.collapsible &&
+          event.data.collapsed &&
+          event.data.collapsedSize
+        ) {
+          currentValue = event.data.collapsedSize;
+        } else if (event.data.default) {
+          currentValue = event.data.default;
+        } else {
+          currentValue = event.data.min;
+        }
+
+        const newItems = addDeDuplicatedItems(context.items, {
+          type: "panel",
+          ...event.data,
+          currentValue,
+        });
+        const itemIndex = newItems.findIndex(
+          (item) => item.id === event.data.id
+        );
+        const newContext = { ...context, items: newItems };
+        const overflowDueToHandles = context.items
+          .reduce((acc, i) => {
+            if (isPanelHandle(i)) {
+              return acc.add(getUnitPixelValue(context, i.size));
+            }
+
+            return acc.add(i.currentValue.value);
+          }, new Big(0))
+          .minus(getGroupSize(context));
+
+        applyDeltaInBothDirections(
+          newContext,
+          newItems,
+          itemIndex,
+          currentValue.value.add(overflowDueToHandles).neg()
+        );
+
+        context.items = newItems;
+
+        actions.clearLastKnownSize();
+        actions.commit();
+        actions.onResize();
+        actions.onAutosave();
+        break;
+      case "rebindPanelCallbacks":
+        for (const item of context.items) {
+          if (isPanelData(item) && item.id === event.data.id) {
+            item.onCollapseChange = event.data.onCollapseChange;
+            item.onResize = event.data.onResize;
+          }
+        }
+        break;
+      case "updateConstraints":
+        actions.prepare();
+
+        for (const item of context.items) {
+          if (isPanelData(item) && item.id === event.data.id) {
+            const panel = event.data as PanelData;
+            item.min = panel.min;
+            item.max = panel.max;
+            item.default = panel.default;
+            item.collapsedSize = panel.collapsedSize;
+            item.isStaticAtRest = panel.isStaticAtRest;
+            item.collapseAnimation = panel.collapseAnimation;
+            item.collapsible = panel.collapsible;
+          } else if (isPanelHandle(item) && item.id === event.data.id) {
+            const handle = event.data as PanelHandleData;
+            item.size = handle.size;
+          }
+        }
+
+        actions.clearLastKnownSize();
+        actions.commit();
+        actions.onResize();
+        actions.onAutosave();
+        break;
+      case "setActualItemsSize":
+        const withLastKnownSize = context.items.map((i) => {
+          if (!isPanelData(i)) return i;
+          const lastKnownSize = event.childrenSizes[i.id] || i.lastKnownSize;
+          return { ...i, lastKnownSize };
+        });
+
+        let totalSize = 0;
+
+        for (const item of withLastKnownSize) {
+          if (isPanelData(item)) {
+            const size =
+              item.lastKnownSize?.[
+                context.orientation === "horizontal" ? "width" : "height"
+              ];
+
+            // If any size is 0 don't handle overflow
+            if (!size) {
+              return withLastKnownSize;
+            }
+
+            totalSize += size;
+          } else {
+            totalSize += item.size.value.toNumber();
+          }
+        }
+
+        if (totalSize > getGroupSize(context)) {
+          return handleOverflow({
+            ...context,
+            items: prepareItems({ ...context, items: withLastKnownSize }),
+          }).items;
+        }
+
+        context.items = withLastKnownSize;
+        actions.onResize();
+        break;
+      case "setSize":
+        context.size = event.size;
+        actions.onResize();
+        break;
+      case "setOrientation":
+        context.orientation = event.orientation;
+        actions.clearLastKnownSize();
+        actions.onResize();
+        break;
+      default:
+        break;
+    }
+
+    if (state.current === "idle") {
+      switch (event.type) {
+        case "dragHandleStart":
+          transition("dragging");
+          context.activeDragHandleId = event.handleId;
+          break;
+        case "setPanelPixelSize":
+          actions.prepare();
+          actions.clearLastKnownSize();
+
+          const panel = getPanelWithId(context, event.panelId);
+          const handle = getHandleForPanelId(context, event.panelId);
+          const current = panel.currentValue.value;
+          const newSize = clampUnit(
+            context,
+            panel,
+            getUnitPixelValue(context, parseUnit(event.size))
+          );
+          const isBigger = newSize > current;
+          const delta = isBigger
+            ? newSize.minus(current)
+            : current.minus(newSize);
+
+          Object.assign(
+            context,
+            iterativelyUpdateLayout({
+              context,
+              direction: (handle.direction * (isBigger ? 1 : -1)) as -1 | 1,
+              handleId: handle.item.id,
+              delta,
+            })
+          );
+
+          actions.commit();
+          actions.onResize();
+          actions.onAutosave();
+          break;
+        default:
+          break;
+      }
+    } else if (state.current === "dragging") {
+      switch (event.type) {
+        case "dragHandle":
+          actions.clearLastKnownSize();
+          assign(context, updateLayout(context, event));
+          console.log(context.items);
+          actions.onResize();
+          break;
+        case "dragHandleEnd":
+          transition("idle");
+          break;
+      }
+    }
+
+    onUpdate?.(context);
+  }
+
+  return [context, send, state] as const;
+}
+
+export type SendFn = ReturnType<typeof groupMachine>[1];
 
 // #endregion

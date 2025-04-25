@@ -8,7 +8,6 @@ import {
   getCursor,
   initializePanelHandleData,
 } from "./index.js";
-import { createActor } from "xstate";
 import Big from "big.js";
 
 describe("getUnitPercentageValue", () => {
