@@ -106,6 +106,8 @@ const GroupMachine = {
           currentContextRef.current = value;
           setCurrentValue({ ...value });
         }),
+      // We only want this to run once, we dont care about changes to the input
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       []
     );
     const currentContextRef = useRef(intiialValue);

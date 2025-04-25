@@ -127,17 +127,6 @@ function initializeSizes(
   });
 }
 
-function waitForCondition(condition: () => boolean) {
-  return new Promise<void>((resolve) => {
-    const interval = setInterval(() => {
-      if (condition()) {
-        clearInterval(interval);
-        resolve();
-      }
-    }, 100);
-  });
-}
-
 describe("constraints", () => {
   test("works with 2 simple panels - horizontal", () => {
     const actor = createActor({ groupId: "group" });
@@ -1355,7 +1344,7 @@ describe("collapsible panel", () => {
   });
 
   describe("constraints", () => {
-    test.only("on render", async () => {
+    test("on render", async () => {
       const actor = createActor({ groupId: "group" });
 
       sendAll(actor, [
