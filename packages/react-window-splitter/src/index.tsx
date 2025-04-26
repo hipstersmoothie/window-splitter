@@ -241,6 +241,8 @@ function PrerenderTree({
   useLayoutEffect(() => {
     setShouldPrerender(false);
     onPrerender();
+    // We only want this to run once
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return shouldPrerender ? (
@@ -279,7 +281,7 @@ function useGroupItem<T extends Item>(
     ? itemArg.onCollapseChange
     : undefined;
   const onResizeRef = isPanelData(itemArg) ? itemArg.onResize : undefined;
-  const unmountIdRef = useRef<string | undefined>(undefined);
+  const onUnmountRef = useRef<(() => void) | undefined>(undefined);
 
   // We register panels before layout so it looks good
   useLayoutEffect(() => {
@@ -329,14 +331,9 @@ function useGroupItem<T extends Item>(
       contextItem = context.items[index];
     }
 
-    unmountIdRef.current = contextItem?.id || itemArg.id;
-  }, [index, itemArg, machineRef, send, onCollapseChangeRef, onResizeRef]);
+    const unmountId = contextItem?.id || itemArg.id;
 
-  // And unregister after layout so we can tell if the element was actually removed.
-  React.useEffect(() => {
-    return () => {
-      const unmountId = unmountIdRef.current;
-
+    onUnmountRef.current = () => {
       if (!unmountId) return;
 
       const el = document.querySelector(
@@ -352,6 +349,14 @@ function useGroupItem<T extends Item>(
       } else {
         send({ type: "unregisterPanelHandle", id: unmountId });
       }
+    };
+  }, [index, itemArg, machineRef, send, onCollapseChangeRef, onResizeRef]);
+
+  // And unregister after layout so we can tell if the element was actually removed.
+  React.useEffect(() => {
+    return () => {
+      onUnmountRef.current?.();
+      onUnmountRef.current = undefined;
     };
   }, []);
 
