@@ -1,3 +1,16 @@
+# v0.6.5 (Sat Apr 26 2025)
+
+#### 🐛 Bug Fix
+
+- `react-window-splitter`
+  - Fix conditional panel flicker [#52](https://github.com/hipstersmoothie/react-window-splitter/pull/52) ([@hipstersmoothie](https://github.com/hipstersmoothie))
+
+#### Authors: 1
+
+- Andrew Lisowski ([@hipstersmoothie](https://github.com/hipstersmoothie))
+
+---
+
 # v0.6.4 (Sat Apr 26 2025)
 
 #### ⚠️ Pushed to `main`
