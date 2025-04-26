@@ -2,7 +2,7 @@
 export default {
   source: {
     entry: {
-      index: "./src/bundle.test.ts",
+      index: "./src/bundle.size.ts",
     },
   },
   performance: {

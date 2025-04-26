@@ -1,4 +1,3 @@
-import * as Cookies from "tiny-cookie";
 import { raf } from "@react-spring/rafz";
 import invariant from "tiny-invariant";
 import Big from "big.js";
@@ -1559,6 +1558,10 @@ function clearLastKnownSize(items: Item[]) {
   return items.map((i) => ({ ...i, lastKnownSize: undefined }));
 }
 
+function setCookie(name: string, jsonData: unknown) {
+  document.cookie = `${name}=${encodeURIComponent(`${jsonData}`)};path=/;max-age=31536000`;
+}
+
 // #endregion
 
 // #region Machine
@@ -1733,10 +1736,7 @@ export function groupMachine(
       if (context.autosaveStrategy === "localStorage") {
         localStorage.setItem(context.groupId, data);
       } else {
-        Cookies.set(context.groupId, data, {
-          path: "/",
-          "max-age": 31536000,
-        });
+        setCookie(context.groupId, data);
       }
     },
     removeItem: (id: string) => {
