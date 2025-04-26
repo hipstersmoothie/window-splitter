@@ -9,7 +9,6 @@ import React, {
   useMemo,
   useContext,
 } from "react";
-import invariant from "tiny-invariant";
 import { useIndex, useIndexedChildren } from "reforest";
 import {
   buildTemplate,
@@ -75,10 +74,11 @@ const GroupMachine = {
     selector: (data: { context: GroupMachineContextValue }) => R
   ): R {
     const context = useContext(GroupMachineContext);
-    invariant(
-      context,
-      "GroupMachineContext must be used within a GroupMachineProvider"
-    );
+    if (!context) {
+      throw new Error(
+        "GroupMachineContext must be used within a GroupMachineProvider"
+      );
+    }
     return selector({ context });
   },
   useActorRef: () => {
@@ -87,10 +87,11 @@ const GroupMachine = {
   },
   useContextRef: () => {
     const ref = useContext(GroupMachineStateContextRef);
-    invariant(
-      ref,
-      "GroupMachineContext must be used within a GroupMachineProvider"
-    );
+    if (!ref) {
+      throw new Error(
+        "GroupMachineContext must be used within a GroupMachineProvider"
+      );
+    }
     return ref;
   },
   Provider: ({
@@ -292,10 +293,11 @@ function useGroupItem<T extends Item>(
       contextItem = context.items.find((i) => i.id === itemArg.id);
 
       if (!contextItem) {
-        invariant(
-          itemArg.id,
-          "When using dynamic panels you must provide an id on the items. This applies to React strict mode as well."
-        );
+        if (!itemArg.id) {
+          throw new Error(
+            "When using dynamic panels you must provide an id on the items. This applies to React strict mode as well."
+          );
+        }
 
         if (isPanelData(itemArg)) {
           send({
