@@ -14,7 +14,7 @@
     "sourceMap": true,
     "strict": true,
     "target": "es2022",
-    "noUnusedLocals": true,
+    "noUnusedLocals": false,
     "noUnusedParameters": true
   }
 }

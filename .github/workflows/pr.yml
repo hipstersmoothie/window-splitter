@@ -35,10 +35,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Install Playwright Browsers
-        working-directory: packages/react-window-splitter
-        run: pnpm exec playwright install --with-deps chromium
-
       - name: Lint
         run: pnpm lint
 
@@ -56,6 +52,20 @@ jobs:
           webpackStatsFile: packages/react-window-splitter/dist/stats.json
           key: ${{ secrets.RELATIVE_CI_KEY }}
           token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
+
+      - name: Install Playwright Browsers
+        working-directory: packages/react-window-splitter
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: pnpm exec playwright install --with-deps chromium
 
       - name: Test
         run: pnpm test -- -- --coverage

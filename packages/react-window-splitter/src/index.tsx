@@ -7,14 +7,13 @@ import React, {
   useRef,
   useState,
   useMemo,
+  useContext,
 } from "react";
-import { createActorContext } from "@xstate/react";
 import invariant from "tiny-invariant";
 import { useIndex, useIndexedChildren } from "reforest";
 import {
   buildTemplate,
   Constraints,
-  GroupMachineSnapshot,
   getCollapsiblePanelForHandleId,
   getGroupSize,
   getPanelWithId,
@@ -42,6 +41,9 @@ import {
   PanelHandleData,
   ParsedPixelUnit,
   haveConstraintsChangedForPanelHandle,
+  GroupMachineInput,
+  GroupMachineEvent,
+  State,
 } from "@window-splitter/state";
 import {
   mergeProps,
@@ -54,7 +56,87 @@ import { useMove } from "@react-aria/interactions";
 
 // #region Components
 
-const GroupMachineContext = createActorContext(groupMachine);
+const GroupMachineState = createContext<{ current: State | undefined }>({
+  current: undefined,
+});
+const GroupMachineContext = createContext<GroupMachineContextValue | undefined>(
+  undefined
+);
+const GroupMachineStateContextRef = createContext<
+  React.MutableRefObject<GroupMachineContextValue>
+>({
+  current: undefined,
+} as unknown as React.MutableRefObject<GroupMachineContextValue>);
+const GroupMachineActor = createContext<(e: GroupMachineEvent) => void>(
+  () => {}
+);
+const GroupMachine = {
+  useSelector<R>(
+    selector: (data: { context: GroupMachineContextValue }) => R
+  ): R {
+    const context = useContext(GroupMachineContext);
+    invariant(
+      context,
+      "GroupMachineContext must be used within a GroupMachineProvider"
+    );
+    return selector({ context });
+  },
+  useActorRef: () => {
+    const send = useContext(GroupMachineActor);
+    return { send };
+  },
+  useContextRef: () => {
+    const ref = useContext(GroupMachineStateContextRef);
+    invariant(
+      ref,
+      "GroupMachineContext must be used within a GroupMachineProvider"
+    );
+    return ref;
+  },
+  Provider: ({
+    input,
+    children,
+  }: {
+    input: GroupMachineInput;
+    children: React.ReactNode;
+  }) => {
+    const [intiialValue, send, state] = useMemo(
+      () =>
+        groupMachine(input, (value) => {
+          currentContextRef.current = value;
+          setCurrentValue({ ...value });
+        }),
+      // We only want this to run once, we dont care about changes to the input
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      []
+    );
+    const currentContextRef = useRef(intiialValue);
+    const [currentValue, setCurrentValue] = useState(intiialValue);
+
+    useEffect(() => {
+      send({ type: "unlockGroup" });
+
+      return () => {
+        // When we were on xstate we could fire off event during unmount and if the parent group
+        // unmounted too the events would never apply. With out own state machine code it doesn't
+        // do that so we have to lock the group as it unmounts so it's children don't de-register.
+        send({ type: "lockGroup" });
+      };
+    }, [send]);
+
+    return (
+      <GroupMachineState.Provider value={state}>
+        <GroupMachineStateContextRef.Provider value={currentContextRef}>
+          <GroupMachineContext.Provider value={currentValue}>
+            <GroupMachineActor.Provider value={send}>
+              {children}
+            </GroupMachineActor.Provider>
+          </GroupMachineContext.Provider>
+        </GroupMachineStateContextRef.Provider>
+      </GroupMachineState.Provider>
+    );
+  },
+};
 
 // function useDebugGroupMachineContext({ id }: { id: string }) {
 //   const value = GroupMachineContext.useSelector((state) => state.value);
@@ -138,7 +220,7 @@ export interface PanelGroupProps
   /** Imperative handle to control the group */
   handle?: React.Ref<PanelGroupHandle>;
   /** Persisted state to initialized the machine with */
-  snapshot?: GroupMachineSnapshot;
+  snapshot?: GroupMachineContextValue;
   /** An id to use for autosaving the layout */
   autosaveId?: string;
 }
@@ -186,10 +268,11 @@ function useGroupItem<T extends Item>(
 
   // The way this hooks is called is never conditional so the usage here is fine
   /* eslint-disable react-hooks/rules-of-hooks */
-  const currentItem = GroupMachineContext.useSelector(
+  const currentItem = GroupMachine.useSelector(
     ({ context }) => context.items[index]
   ) as T;
-  const { send, ref: machineRef } = GroupMachineContext.useActorRef();
+  const { send } = GroupMachine.useActorRef();
+  const machineRef = GroupMachine.useContextRef();
 
   const onCollapseChangeRef = isPanelData(itemArg)
     ? itemArg.onCollapseChange
@@ -197,7 +280,12 @@ function useGroupItem<T extends Item>(
   const onResizeRef = isPanelData(itemArg) ? itemArg.onResize : undefined;
 
   React.useEffect(() => {
-    const context = machineRef.getSnapshot().context;
+    const context = machineRef.current;
+
+    if (!context) {
+      return;
+    }
+
     let contextItem: Item | undefined;
 
     if (itemArg.id) {
@@ -312,7 +400,7 @@ const PanelGroupImpl = React.forwardRef<
   const defaultGroupId = `panel-group-${useId()}`;
   const groupId = autosaveId || props.id || defaultGroupId;
   const [snapshot, setSnapshot] = React.useState<
-    GroupMachineSnapshot | true | undefined
+    GroupMachineContextValue | true | undefined
   >(snapshotProp);
 
   if (
@@ -335,19 +423,17 @@ const PanelGroupImpl = React.forwardRef<
   }, [snapshot]);
 
   return (
-    <GroupMachineContext.Provider
-      options={{
-        input: {
-          orientation: props.orientation,
-          groupId,
-          initialItems: initialItems.current,
-          autosaveStrategy,
-        },
-        snapshot: typeof snapshotMemo === "object" ? snapshotMemo : undefined,
+    <GroupMachine.Provider
+      input={{
+        orientation: props.orientation,
+        groupId,
+        items: initialItems.current,
+        autosaveStrategy,
+        ...(typeof snapshotMemo === "object" ? snapshotMemo : undefined),
       }}
     >
       <PanelGroupImplementation ref={ref} {...props} />
-    </GroupMachineContext.Provider>
+    </GroupMachine.Provider>
   );
 });
 
@@ -358,16 +444,15 @@ const PanelGroupImplementation = React.forwardRef<
   { handle, orientation: orientationProp, ...props },
   outerRef
 ) {
-  const { send, ref: machineRef } = GroupMachineContext.useActorRef();
+  const { send } = GroupMachine.useActorRef();
+  const machineRef = GroupMachine.useContextRef();
   const innerRef = React.useRef<HTMLDivElement>(null);
   const ref = mergeRefs(outerRef, innerRef);
-  const orientation = GroupMachineContext.useSelector(
+  const orientation = GroupMachine.useSelector(
     (state) => state.context.orientation
   );
-  const groupId = GroupMachineContext.useSelector(
-    (state) => state.context.groupId
-  );
-  const template = GroupMachineContext.useSelector((state) =>
+  const groupId = GroupMachine.useSelector((state) => state.context.groupId);
+  const template = GroupMachine.useSelector((state) =>
     buildTemplate(state.context)
   );
 
@@ -396,12 +481,14 @@ const PanelGroupImplementation = React.forwardRef<
 
     observer.observe(el);
 
+    send({ type: "setSize", size: el.getBoundingClientRect() });
+
     return () => {
       observer.disconnect();
     };
   }, [send, innerRef, groupId]);
 
-  const childIds = GroupMachineContext.useSelector((state) =>
+  const childIds = GroupMachine.useSelector((state) =>
     state.context.items.map((i) => i.id).join(",")
   );
   useLayoutEffect(() => {
@@ -413,16 +500,16 @@ const PanelGroupImplementation = React.forwardRef<
   // useDebugGroupMachineContext({ id: groupId });
 
   const fallbackHandleRef = React.useRef<PanelGroupHandle>(null);
+  const state = useContext(GroupMachineState);
 
   useImperativeHandle(handle || fallbackHandleRef, () => {
     return {
       getId: () => groupId,
-      getPixelSizes: () =>
-        getPanelGroupPixelSizes(machineRef.getSnapshot().context),
+      getPixelSizes: () => getPanelGroupPixelSizes(machineRef.current),
       getPercentageSizes: () =>
-        getPanelGroupPercentageSizes(machineRef.getSnapshot().context),
+        getPanelGroupPercentageSizes(machineRef.current),
       setSizes: (updates) => {
-        const context = machineRef.getSnapshot().context;
+        const context = machineRef.current;
 
         for (let index = 0; index < updates.length; index++) {
           const item = context.items[index];
@@ -438,11 +525,10 @@ const PanelGroupImplementation = React.forwardRef<
         }
       },
       getTemplate: () => {
-        const context = machineRef.getSnapshot().context;
+        const context = machineRef.current;
         return buildTemplate({ ...context, items: prepareItems(context) });
       },
-      getState: () =>
-        machineRef.getSnapshot().value === "idle" ? "idle" : "dragging",
+      getState: () => (state.current === "idle" ? "idle" : "dragging"),
     };
   });
 
@@ -615,11 +701,10 @@ const PanelVisible = React.forwardRef<
 ) {
   const innerRef = React.useRef<HTMLDivElement>(null);
   const ref = mergeRefs(outerRef, innerRef);
-  const { send, ref: machineRef } = GroupMachineContext.useActorRef();
-  const groupId = GroupMachineContext.useSelector(
-    (state) => state.context.groupId
-  );
-  const panel = GroupMachineContext.useSelector(({ context }) => {
+  const { send } = GroupMachine.useActorRef();
+  const machineRef = GroupMachine.useContextRef();
+  const groupId = GroupMachine.useSelector((state) => state.context.groupId);
+  const panel = GroupMachine.useSelector(({ context }) => {
     try {
       return getPanelWithId(context, panelId);
     } catch {
@@ -649,7 +734,7 @@ const PanelVisible = React.forwardRef<
   // and update the state machine if it does.
   React.useEffect(() => {
     if (typeof collapsed !== "undefined") {
-      const context = machineRef.getSnapshot().context;
+      const context = machineRef.current;
 
       if (context.items.length === 0) {
         return;
@@ -684,14 +769,14 @@ const PanelVisible = React.forwardRef<
       },
       isExpanded: () => Boolean(collapsible && !panel?.collapsed),
       getPixelSize: () => {
-        const context = machineRef.getSnapshot().context;
+        const context = machineRef.current;
         return getPanelPixelSize(context, panelId);
       },
       setSize: (size) => {
         send({ type: "setPanelPixelSize", panelId, size });
       },
       getPercentageSize: () => {
-        const context = machineRef.getSnapshot().context;
+        const context = machineRef.current;
         return getPanelPercentageSize(context, panelId);
       },
     };
@@ -774,34 +859,34 @@ const PanelResizerVisible = React.forwardRef<
   const innerRef = React.useRef<HTMLButtonElement>(null);
   const ref = mergeRefs(outerRef, innerRef);
   const unit = parseUnit(size);
-  const { send } = GroupMachineContext.useActorRef();
+  const { send } = GroupMachine.useActorRef();
   const { index } = useIndex()!;
-  const handleId = GroupMachineContext.useSelector(
+  const handleId = GroupMachine.useSelector(
     ({ context }) => context.items[index]?.id || ""
   );
-  const panelHandle = GroupMachineContext.useSelector(
+  const panelHandle = GroupMachine.useSelector(
     ({ context }) => context.items[index] as PanelHandleData
   );
-  const panelBeforeHandle = GroupMachineContext.useSelector(
+  const panelBeforeHandle = GroupMachine.useSelector(
     ({ context }) => context.items[index - 1]
   );
-  const collapsiblePanel = GroupMachineContext.useSelector(({ context }) => {
+  const collapsiblePanel = GroupMachine.useSelector(({ context }) => {
     try {
       return getCollapsiblePanelForHandleId(context, handleId);
     } catch {
       return undefined;
     }
   });
-  const orientation = GroupMachineContext.useSelector(
+  const orientation = GroupMachine.useSelector(
     (state) => state.context.orientation
   );
-  const groupsSize = GroupMachineContext.useSelector((state) =>
+  const groupsSize = GroupMachine.useSelector((state) =>
     getGroupSize(state.context)
   );
-  const overshoot = GroupMachineContext.useSelector(
+  const overshoot = GroupMachine.useSelector(
     (state) => state.context.dragOvershoot
   );
-  const activeDragHandleId = GroupMachineContext.useSelector(
+  const activeDragHandleId = GroupMachine.useSelector(
     (state) => state.context.activeDragHandleId
   );
   const isDragging = activeDragHandleId === handleId;

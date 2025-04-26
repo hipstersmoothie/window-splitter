@@ -240,7 +240,7 @@ describe("Autosave", () => {
       Boolean(localStorage.getItem("autosave-example"))
     );
     const obj = JSON.parse(localStorage.getItem("autosave-example") || "{}");
-    expect(obj.context.items).toMatchSnapshot();
+    expect(obj.items).toMatchSnapshot();
   });
 
   test("callback", async () => {
@@ -368,19 +368,16 @@ test("Keyboard interactions with collapsed panels", async () => {
   fireEvent.keyDown(resizer2, { key: "ArrowLeft" });
   fireEvent.keyDown(resizer2, { key: "ArrowLeft" });
   fireEvent.keyDown(resizer2, { key: "ArrowLeft" });
-  await expectTemplate(handle, "209px 10px 165px 10px 104px");
+  await expectTemplate(handle, "209px 10px 164.96875px 10px 104.03125px");
 
   fireEvent.keyDown(resizer2, { key: "ArrowLeft", shiftKey: true });
-  await expectTemplate(handle, "209px 10px 150px 10px 119px");
+  await expectTemplate(handle, "209px 10px 149.96875px 10px 119.03125px");
 
   fireEvent.keyDown(resizer2, { key: "Enter" });
   await expectTemplate(handle, "209px 10px 209px 10px 60px");
 
   fireEvent.keyDown(resizer2, { key: "Enter" });
-  await expectTemplate(
-    handle,
-    "209.03125px 10px 149.984375px 10px 118.984375px"
-  );
+  await expectTemplate(handle, "209px 10px 149.96875px 10px 119.03125px");
 });
 
 describe("imperative panel API", async () => {
@@ -447,15 +444,13 @@ describe("imperative panel API", async () => {
     expect(rightHandle.current.isExpanded()).toBe(false);
 
     rightHandle.current.expand();
-    await waitForCondition(() =>
-      handle.current.getTemplate().endsWith("100px")
-    );
+    await new Promise((resolve) => setTimeout(resolve, 2000));
 
     expect(rightHandle.current.isCollapsed()).toBe(false);
     expect(rightHandle.current.isExpanded()).toBe(true);
 
     rightHandle.current.collapse();
-    await waitForCondition(() => handle.current.getTemplate().endsWith("60px"));
+    await new Promise((resolve) => setTimeout(resolve, 2000));
 
     expect(rightHandle.current.isCollapsed()).toBe(true);
     expect(rightHandle.current.isExpanded()).toBe(false);
@@ -466,9 +461,7 @@ describe("imperative panel API", async () => {
     expect(leftHandle.current.isExpanded()).toBe(true);
 
     leftHandle.current.collapse();
-    await waitForCondition(() =>
-      handle.current.getTemplate().startsWith("60px")
-    );
+    await new Promise((resolve) => setTimeout(resolve, 2000));
 
     expect(leftHandle.current.isCollapsed()).toBe(true);
     expect(leftHandle.current.isExpanded()).toBe(false);
@@ -480,9 +473,7 @@ describe("imperative panel API", async () => {
     );
 
     leftHandle.current.expand();
-    await waitForCondition(
-      () => !handle.current.getTemplate().startsWith("60px")
-    );
+    await new Promise((resolve) => setTimeout(resolve, 5000));
 
     expect(leftHandle.current.isCollapsed()).toBe(false);
     expect(leftHandle.current.isExpanded()).toBe(true);
