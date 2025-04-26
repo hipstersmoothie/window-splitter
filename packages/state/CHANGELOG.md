@@ -1,3 +1,15 @@
+# v0.6.4 (Sat Apr 26 2025)
+
+#### ⚠️ Pushed to `main`
+
+- slim down raf ([@hipstersmoothie](https://github.com/hipstersmoothie))
+
+#### Authors: 1
+
+- Andrew Lisowski ([@hipstersmoothie](https://github.com/hipstersmoothie))
+
+---
+
 # v0.6.2 (Sat Apr 26 2025)
 
 #### 🐛 Bug Fix
