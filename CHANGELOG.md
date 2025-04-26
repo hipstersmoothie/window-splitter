@@ -1,3 +1,33 @@
+# v0.6.0 (Fri Apr 25 2025)
+
+### Release Notes
+
+#### No xstate ([#47](https://github.com/hipstersmoothie/react-window-splitter/pull/47))
+
+This release is a dramatic reduction to the bundle size. This was done by pruning some unnecessary deps and some that were to large to justify in the headless component.
+
+The biggest change is to `@window-splitter/state` where we refactored the state machine into a function that followed the logic of the state machine, taking careful aim to not give up any of the guarantees we had there. As a result the apis for `snapshot` changed since those were exposing `xstate`'s snapshots. The format is now just the context value, which is also a smaller amount of text than we were storing for snapshots. 
+
+That change is breaking. The version has only received a minor bump because we are still <0, where bumping the minor can include breaking changes.
+
+---
+
+#### 🚀 Enhancement
+
+- `react-window-splitter`, `@window-splitter/state`
+  - No xstate [#47](https://github.com/hipstersmoothie/react-window-splitter/pull/47) ([@hipstersmoothie](https://github.com/hipstersmoothie))
+
+#### 🐛 Bug Fix
+
+- `react-window-splitter`
+  - bundle size [#48](https://github.com/hipstersmoothie/react-window-splitter/pull/48) ([@hipstersmoothie](https://github.com/hipstersmoothie))
+
+#### Authors: 1
+
+- Andrew Lisowski ([@hipstersmoothie](https://github.com/hipstersmoothie))
+
+---
+
 # v0.5.8 (Wed Apr 23 2025)
 
 #### ⚠️ Pushed to `main`
