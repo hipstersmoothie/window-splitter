@@ -1,5 +1,4 @@
 import { raf } from "@react-spring/rafz";
-import invariant from "tiny-invariant";
 import Big from "big.js";
 
 // #region Constants
@@ -407,6 +406,12 @@ export function prepareSnapshot(snapshot: GroupMachineContextValue) {
   }
 
   return snapshot;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function invariant(condition: any, message: string): asserts condition {
+  if (condition) return;
+  throw new Error(message);
 }
 
 /** Assert that the provided event is one of the accepted types */

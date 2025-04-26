@@ -54,8 +54,7 @@
     "@react-aria/interactions": "^3.25.0",
     "@react-aria/utils": "^3.28.2",
     "@window-splitter/state": "workspace:*",
-    "reforest": "^0.13.0",
-    "tiny-invariant": "^1.3.3"
+    "reforest": "^0.13.0"
   },
   "tshy": {
     "exclude": [
