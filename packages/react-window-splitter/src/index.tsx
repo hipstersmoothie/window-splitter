@@ -279,8 +279,10 @@ function useGroupItem<T extends Item>(
     ? itemArg.onCollapseChange
     : undefined;
   const onResizeRef = isPanelData(itemArg) ? itemArg.onResize : undefined;
+  const unmountIdRef = useRef<string | undefined>(undefined);
 
-  React.useEffect(() => {
+  // We register panels before layout so it looks good
+  useLayoutEffect(() => {
     const context = machineRef.current;
 
     if (!context) {
@@ -327,9 +329,16 @@ function useGroupItem<T extends Item>(
       contextItem = context.items[index];
     }
 
-    const unmountId = contextItem?.id || itemArg.id;
+    unmountIdRef.current = contextItem?.id || itemArg.id;
+  }, [index, itemArg, machineRef, send, onCollapseChangeRef, onResizeRef]);
 
+  // And unregister after layout so we can tell if the element was actually removed.
+  React.useEffect(() => {
     return () => {
+      const unmountId = unmountIdRef.current;
+
+      if (!unmountId) return;
+
       const el = document.querySelector(
         `[data-splitter-id="${unmountId}"]`
       ) as HTMLElement;
@@ -344,7 +353,7 @@ function useGroupItem<T extends Item>(
         send({ type: "unregisterPanelHandle", id: unmountId });
       }
     };
-  }, [index, itemArg, machineRef, send, onCollapseChangeRef, onResizeRef]);
+  }, []);
 
   return currentItem || item;
   /* eslint-enable react-hooks/rules-of-hooks */
