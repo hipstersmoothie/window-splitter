@@ -43,7 +43,6 @@
     "vitest": "^3.1.2"
   },
   "dependencies": {
-    "@react-spring/rafz": "^9.7.4",
     "big.js": "^6.2.1"
   },
   "tshy": {
