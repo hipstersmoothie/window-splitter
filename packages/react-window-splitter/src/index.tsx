@@ -9,7 +9,6 @@ import React, {
   useMemo,
   useContext,
 } from "react";
-import { useIndex, useIndexedChildren } from "reforest";
 import {
   buildTemplate,
   Constraints,
@@ -52,6 +51,7 @@ import {
   mergeRefs,
 } from "@react-aria/utils";
 import { useMove } from "@react-aria/interactions";
+import { useIndex, useIndexedChildren } from "./useIndexedChildren.js";
 
 // #region Components
 
@@ -257,7 +257,7 @@ function useGroupItem<T extends Item>(
   const initialMap = React.useContext(InitialMapContext);
   const generatedId = useId();
   const id = itemArg.id || generatedId;
-  const { index } = useIndex()!;
+  const { index } = useIndex();
   const item = { ...itemArg, id } as T;
 
   if (isPrerender) {
@@ -350,23 +350,12 @@ function useGroupItem<T extends Item>(
   /* eslint-enable react-hooks/rules-of-hooks */
 }
 
-function flattenChildren(children: React.ReactNode[]): React.ReactNode[] {
-  return children.flatMap((child) =>
-    React.isValidElement(child) && child.type === React.Fragment
-      ? flattenChildren(child.props.children)
-      : child
-  );
-}
-
 /** A group of panels that has constraints and a user can resize */
 export const PanelGroup = React.forwardRef<HTMLDivElement, PanelGroupProps>(
   function PanelGroup({ children, ...props }, ref) {
     const [hasPreRendered, setHasPreRendered] = useState(false);
     const initialMap = useRef<Item[]>([]);
-    const indexedChildren = useIndexedChildren(
-      // eslint-disable-next-line @eslint-react/no-children-to-array
-      flattenChildren(React.Children.toArray(children))
-    );
+    const indexedChildren = useIndexedChildren(children);
 
     return (
       <InitialMapContext.Provider value={initialMap.current}>
@@ -862,7 +851,7 @@ const PanelResizerVisible = React.forwardRef<
   const ref = mergeRefs(outerRef, innerRef);
   const unit = parseUnit(size);
   const { send } = GroupMachine.useActorRef();
-  const { index } = useIndex()!;
+  const { index } = useIndex();
   const handleId = GroupMachine.useSelector(
     ({ context }) => context.items[index]?.id || ""
   );

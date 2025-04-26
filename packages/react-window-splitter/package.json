@@ -53,8 +53,7 @@
   "dependencies": {
     "@react-aria/interactions": "^3.25.0",
     "@react-aria/utils": "^3.28.2",
-    "@window-splitter/state": "workspace:*",
-    "reforest": "^0.13.0"
+    "@window-splitter/state": "workspace:*"
   },
   "tshy": {
     "exclude": [
