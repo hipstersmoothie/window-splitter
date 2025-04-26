@@ -1,3 +1,16 @@
+# v0.6.2 (Sat Apr 26 2025)
+
+#### 🐛 Bug Fix
+
+- bake in invariant [#50](https://github.com/hipstersmoothie/react-window-splitter/pull/50) ([@hipstersmoothie](https://github.com/hipstersmoothie))
+- bake in invariant ([@hipstersmoothie](https://github.com/hipstersmoothie))
+
+#### Authors: 1
+
+- Andrew Lisowski ([@hipstersmoothie](https://github.com/hipstersmoothie))
+
+---
+
 # v0.6.1 (Sat Apr 26 2025)
 
 #### 🐛 Bug Fix
