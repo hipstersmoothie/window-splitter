@@ -5,6 +5,9 @@ export default {
       index: "./src/bundle.size.ts",
     },
   },
+  tools: {
+    htmlPlugin: false,
+  },
   performance: {
     bundleAnalyze: {
       generateStatsFile: true,
