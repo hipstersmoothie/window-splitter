@@ -1,3 +1,21 @@
+# v0.6.1 (Sat Apr 26 2025)
+
+#### 🐛 Bug Fix
+
+- remove tiny-cookie as runtime dep [#49](https://github.com/hipstersmoothie/react-window-splitter/pull/49) ([@hipstersmoothie](https://github.com/hipstersmoothie))
+- remove html file from bundle check ([@hipstersmoothie](https://github.com/hipstersmoothie))
+- remove tiny-cookie as runtime dep ([@hipstersmoothie](https://github.com/hipstersmoothie))
+
+#### ⚠️ Pushed to `main`
+
+- fix stats calculation for bundle size ([@hipstersmoothie](https://github.com/hipstersmoothie))
+
+#### Authors: 1
+
+- Andrew Lisowski ([@hipstersmoothie](https://github.com/hipstersmoothie))
+
+---
+
 # v0.6.0 (Fri Apr 25 2025)
 
 ### Release Notes
