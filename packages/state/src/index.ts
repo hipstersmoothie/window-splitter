@@ -382,6 +382,11 @@ export function getCursor(
 }
 
 export function prepareSnapshot(snapshot: GroupMachineContextValue) {
+  // convert from old format
+  if ("context" in snapshot) {
+    snapshot = snapshot.context as GroupMachineContextValue;
+  }
+
   if (!("items" in snapshot)) {
     return;
   }
