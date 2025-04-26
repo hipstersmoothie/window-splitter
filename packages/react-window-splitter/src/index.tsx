@@ -279,7 +279,7 @@ function useGroupItem<T extends Item>(
     : undefined;
   const onResizeRef = isPanelData(itemArg) ? itemArg.onResize : undefined;
 
-  React.useEffect(() => {
+  useLayoutEffect(() => {
     const context = machineRef.current;
 
     if (!context) {

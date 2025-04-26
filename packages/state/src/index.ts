@@ -1579,22 +1579,22 @@ function getDeltaForEvent(
   return panel.currentValue.value.minus(collapsedSize);
 }
 
-async function animationActor(
+function animationActor(
   context: GroupMachineContextValue,
   event: CollapsePanelEvent | ExpandPanelEvent,
   send: (e: GroupMachineEvent) => void,
   abortController: AbortController
 ) {
+  const panel = getPanelWithId(context, event.panelId);
+  const handle = getHandleForPanelId(context, event.panelId);
+
+  let direction = new Big(handle.direction);
+  const fullDelta = getDeltaForEvent(context, event);
+
   return new Promise<AnimationActorOutput | undefined>((resolve, reject) => {
     abortController.signal.addEventListener("abort", () => {
       reject(new Error("Operation was canceled"));
     });
-
-    const panel = getPanelWithId(context, event.panelId);
-    const handle = getHandleForPanelId(context, event.panelId);
-
-    let direction = new Big(handle.direction);
-    const fullDelta = getDeltaForEvent(context, event);
 
     if (event.type === "collapsePanel") {
       panel.sizeBeforeCollapse = panel.currentValue.value.toNumber();
