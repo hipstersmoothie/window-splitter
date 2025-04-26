@@ -2110,18 +2110,23 @@ export function groupMachine(
           }
           break;
         case "expandPanel":
-          if (guards.shouldNotifyCollapseToggle(event)) {
-            actions.notifyCollapseToggle(event);
+          if (guards.cannotExpandPanel(event)) {
+            break;
           } else {
-            transition("togglingCollapse");
-            abortController.abort();
-            animationActor(context, event, send, abortController).then(
-              (output) => {
-                actions.onAnimationEnd(output);
-                transition("idle");
-              }
-            );
+            if (guards.shouldNotifyCollapseToggle(event)) {
+              actions.notifyCollapseToggle(event);
+            } else {
+              transition("togglingCollapse");
+              abortController.abort();
+              animationActor(context, event, send, abortController).then(
+                (output) => {
+                  actions.onAnimationEnd(output);
+                  transition("idle");
+                }
+              );
+            }
           }
+
           break;
         default:
           break;
