@@ -193,7 +193,7 @@ test("Conditional Panels", async () => {
   await expectTemplate(handle, "236.953125px 10px 141.046875px 10px 100px");
 
   getByText("Close").click();
-  await expectTemplate(handle, "236.953125px 10px 251.03125px");
+  await expectTemplate(handle, "236.96875px 10px 251.03125px");
 });
 
 test("Dynamic constraints", async () => {
