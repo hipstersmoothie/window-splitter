@@ -807,7 +807,7 @@ const PanelVisible = React.forwardRef<
 
 export interface PanelResizerProps
   extends Omit<
-    React.HTMLAttributes<HTMLButtonElement>,
+    React.HTMLAttributes<HTMLDivElement>,
     "onDragStart" | "onDrag" | "onDragEnd"
   > {
   /** If the handle is disabled */
@@ -822,32 +822,31 @@ export interface PanelResizerProps
 }
 
 /** A resize handle to place between panels. */
-export const PanelResizer = React.forwardRef<
-  HTMLButtonElement,
-  PanelResizerProps
->(function PanelResizer(props, ref) {
-  const { size = "0px" } = props;
-  const isPrerender = React.useContext(PreRenderContext);
-  const data = React.useMemo(
-    () => ({
-      type: "handle" as const,
-      size: parseUnit(size) as ParsedPixelUnit,
-      id: props.id,
-    }),
-    [size, props.id]
-  );
+export const PanelResizer = React.forwardRef<HTMLDivElement, PanelResizerProps>(
+  function PanelResizer(props, ref) {
+    const { size = "0px" } = props;
+    const isPrerender = React.useContext(PreRenderContext);
+    const data = React.useMemo(
+      () => ({
+        type: "handle" as const,
+        size: parseUnit(size) as ParsedPixelUnit,
+        id: props.id,
+      }),
+      [size, props.id]
+    );
 
-  useGroupItem(data);
+    useGroupItem(data);
 
-  if (isPrerender) {
-    return null;
+    if (isPrerender) {
+      return null;
+    }
+
+    return <PanelResizerVisible ref={ref} panelHandleProp={data} {...props} />;
   }
-
-  return <PanelResizerVisible ref={ref} panelHandleProp={data} {...props} />;
-});
+);
 
 const PanelResizerVisible = React.forwardRef<
-  HTMLButtonElement,
+  HTMLDivElement,
   PanelResizerProps & { panelHandleProp: Omit<PanelHandleData, "id"> }
 >(function PanelResizerVisible(
   {
@@ -861,7 +860,7 @@ const PanelResizerVisible = React.forwardRef<
   },
   outerRef
 ) {
-  const innerRef = React.useRef<HTMLButtonElement>(null);
+  const innerRef = React.useRef<HTMLDivElement>(null);
   const ref = mergeRefs(outerRef, innerRef);
   const unit = parseUnit(size);
   const { send } = GroupMachine.useActorRef();
@@ -872,9 +871,12 @@ const PanelResizerVisible = React.forwardRef<
   const panelHandle = GroupMachine.useSelector(
     ({ context }) => context.items[index] as PanelHandleData
   );
-  const panelBeforeHandle = GroupMachine.useSelector(
-    ({ context }) => context.items[index - 1]
-  );
+  const panelBeforeHandle = GroupMachine.useSelector(({ context }) => {
+    const panel = context.items[index - 1];
+    if (!panel) return undefined;
+    if (!isPanelData(panel)) return undefined;
+    return panel;
+  });
   const collapsiblePanel = GroupMachine.useSelector(({ context }) => {
     try {
       return getCollapsiblePanelForHandleId(context, handleId);
@@ -894,11 +896,22 @@ const PanelResizerVisible = React.forwardRef<
   const activeDragHandleId = GroupMachine.useSelector(
     (state) => state.context.activeDragHandleId
   );
-  const isDragging = activeDragHandleId === handleId;
+  const [isDragging, setIsDragging] = React.useState(false);
+
+  let cursor: React.CSSProperties["cursor"];
+
+  if (disabled) {
+    cursor = "default";
+  } else {
+    cursor = getCursor({ dragOvershoot: overshoot, orientation });
+  }
+
   const { moveProps } = useMove({
     onMoveStart: () => {
       send({ type: "dragHandleStart", handleId: handleId });
       onDragStart?.();
+      setIsDragging(true);
+      document.body.style.cursor = cursor || "auto";
     },
     onMove: (e) => {
       send({ type: "dragHandle", handleId: handleId, value: e });
@@ -907,6 +920,8 @@ const PanelResizerVisible = React.forwardRef<
     onMoveEnd: () => {
       send({ type: "dragHandleEnd", handleId: handleId });
       onDragEnd?.();
+      setIsDragging(false);
+      document.body.style.cursor = "auto";
     },
   });
 
@@ -939,33 +954,6 @@ const PanelResizerVisible = React.forwardRef<
     }
   };
 
-  let cursor: React.CSSProperties["cursor"];
-
-  if (disabled) {
-    cursor = "default";
-  } else {
-    cursor = getCursor({ dragOvershoot: overshoot, orientation });
-  }
-
-  // Update the cursor while the user is dragging.
-  // This makes it so that the user can overshoot the drag handle and
-  // still see the right cursor.
-  useEffect(() => {
-    if (!isDragging) {
-      return;
-    }
-
-    document.body.style.cursor = cursor || "auto";
-
-    return () => {
-      document.body.style.cursor = "auto";
-    };
-  }, [cursor, isDragging]);
-
-  if (!panelBeforeHandle || !isPanelData(panelBeforeHandle)) {
-    return null;
-  }
-
   return (
     <div
       ref={ref as unknown as React.Ref<HTMLDivElement>}
@@ -978,19 +966,33 @@ const PanelResizerVisible = React.forwardRef<
       }
       aria-label="Resize Handle"
       aria-disabled={disabled}
-      aria-controls={panelBeforeHandle.id}
-      aria-valuemin={getUnitPercentageValue(groupsSize, panelBeforeHandle.min)}
-      aria-valuemax={
-        panelBeforeHandle.max === "1fr"
-          ? 100
-          : getUnitPercentageValue(groupsSize, panelBeforeHandle.max)
+      aria-controls={panelBeforeHandle?.id}
+      aria-valuemin={
+        panelBeforeHandle
+          ? getUnitPercentageValue(groupsSize, panelBeforeHandle.min)
+          : undefined
       }
-      aria-valuenow={getUnitPercentageValue(
-        groupsSize,
-        panelBeforeHandle.currentValue
+      aria-valuemax={
+        panelBeforeHandle?.max === "1fr"
+          ? 100
+          : panelBeforeHandle
+            ? getUnitPercentageValue(groupsSize, panelBeforeHandle.max)
+            : undefined
+      }
+      aria-valuenow={
+        panelBeforeHandle
+          ? getUnitPercentageValue(groupsSize, panelBeforeHandle.currentValue)
+          : undefined
+      }
+      {...mergeProps(
+        props,
+        disabled
+          ? {}
+          : mergeProps(moveProps as React.HTMLAttributes<HTMLDivElement>, {
+              onKeyDown,
+              tabIndex: 0,
+            })
       )}
-      {...mergeProps(props, disabled ? {} : moveProps, { onKeyDown })}
-      tabIndex={0}
       style={{
         cursor,
         ...props.style,

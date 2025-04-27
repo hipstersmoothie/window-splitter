@@ -849,7 +849,7 @@ function getStaticWidth(context: GroupMachineContextValue) {
   return width;
 }
 
-function formatUnit(unit: ParsedUnit): Unit {
+export function formatUnit(unit: ParsedUnit): Unit {
   if (unit.type === "pixel") {
     return `${unit.value.toNumber()}px`;
   }
