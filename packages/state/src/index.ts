@@ -1770,17 +1770,26 @@ export function groupMachine(
       isEvent(event, ["collapsePanel", "expandPanel"]);
 
       const handle = getHandleForPanelId(context, event.panelId);
+      const panel = getPanelWithId(context, event.panelId);
       // When collapsing a panel it will be in the opposite direction
       // that handle assumes
       const delta =
         event.type === "collapsePanel"
           ? handle.direction * -1
           : handle.direction;
+      const amount =
+        event.type === "collapsePanel"
+          ? panel.currentValue.value.minus(panel.collapsedSize.value).toNumber()
+          : panel.min.value.minus(panel.currentValue.value).toNumber();
+
       const newContext = updateLayout(context, {
         handleId: handle.item.id,
         type: "dragHandle",
         controlled: event.controlled,
-        value: dragHandlePayload({ delta, orientation: context.orientation }),
+        value: dragHandlePayload({
+          delta: delta * amount,
+          orientation: context.orientation,
+        }),
       });
 
       assign(context, newContext);
@@ -2109,23 +2118,29 @@ export function groupMachine(
           if (guards.shouldNotifyCollapseToggle(event)) {
             actions.notifyCollapseToggle(event);
           } else {
-            transition("togglingCollapse");
-            abortController.abort();
-            animationActor(context, event, send, abortController).then(
-              (output) => {
-                actions.onAnimationEnd(output);
-                transition("idle");
-              }
-            );
+            const panel = getPanelWithId(context, event.panelId);
+
+            if (!panel.collapsed) {
+              transition("togglingCollapse");
+              abortController.abort();
+              animationActor(context, event, send, abortController).then(
+                (output) => {
+                  actions.onAnimationEnd(output);
+                  transition("idle");
+                }
+              );
+            }
           }
           break;
         case "expandPanel":
           if (guards.cannotExpandPanel(event)) {
             break;
+          } else if (guards.shouldNotifyCollapseToggle(event)) {
+            actions.notifyCollapseToggle(event);
           } else {
-            if (guards.shouldNotifyCollapseToggle(event)) {
-              actions.notifyCollapseToggle(event);
-            } else {
+            const panel = getPanelWithId(context, event.panelId);
+
+            if (panel.collapsed) {
               transition("togglingCollapse");
               abortController.abort();
               animationActor(context, event, send, abortController).then(

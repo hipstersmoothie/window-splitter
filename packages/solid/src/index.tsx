@@ -14,12 +14,12 @@ import {
   PixelUnit,
   prepareSnapshot,
   Rect,
-  SendFn,
   Unit,
 } from "@window-splitter/state";
 import {
   Accessor,
   children,
+  createEffect,
   createSignal,
   createUniqueId,
   JSX,
@@ -196,7 +196,7 @@ export interface PanelProps
   extends Constraints<Unit>,
     Pick<PanelData, "collapseAnimation">,
     Omit<JSX.HTMLAttributes<HTMLDivElement>, "onResize"> {
-  collapsed?: boolean;
+  collapsed?: Accessor<boolean | undefined>;
   onCollapseChange?: (isCollapsed: boolean) => void;
   // TODO handle
   onResize?: OnResizeCallback;
@@ -234,7 +234,7 @@ export function Panel({
           min,
           max,
           collapsible,
-          collapsed,
+          collapsed: collapsed?.(),
           collapsedSize,
           onCollapseChange: { current: onCollapseChange },
           collapseAnimation,
@@ -253,6 +253,22 @@ export function Panel({
     if (!isPanelData(item)) return undefined;
     return item;
   };
+
+  const collapseIsControlled = panel?.()?.collapseIsControlled;
+
+  createEffect(() => {
+    const currentCollapsed = collapsed?.() || false;
+
+    if (!collapseIsControlled) {
+      return;
+    }
+
+    if (currentCollapsed) {
+      send?.({ type: "collapsePanel", panelId, controlled: true });
+    } else {
+      send?.({ type: "expandPanel", panelId, controlled: true });
+    }
+  });
 
   return (
     <div

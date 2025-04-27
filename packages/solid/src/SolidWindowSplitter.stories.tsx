@@ -9,6 +9,7 @@ import {
   PanelProps,
   PanelResizerProps,
 } from "./";
+import { createSignal } from "solid-js";
 
 const meta = {
   title: "Solid/WindowSplitter",
@@ -352,7 +353,43 @@ export function WithOverflow() {
   );
 }
 
-// Collapsible (controlled)
+export function Collapsible() {
+  const [collapsed, setCollapsed] = createSignal(true);
+
+  return (
+    <StyledPanelGroup>
+      <StyledPanel
+        min="100px"
+        id="panel-1"
+        collapsible
+        collapsedSize="60px"
+        style={{ border: "10px solid green", "box-sizing": "border-box" }}
+        onCollapseChange={(isCollapsed) => {
+          console.log("COLLAPSE PASSIVE", isCollapsed);
+        }}
+      >
+        <div>1</div>
+      </StyledPanel>
+      <StyledResizer id="resizer-1" />
+      <StyledPanel id="panel-2" min="100px">
+        <div>2</div>
+      </StyledPanel>
+      <StyledResizer id="resizer-2" />
+      <StyledPanel
+        min="100px"
+        id="panel-3"
+        collapsible
+        collapsedSize="60px"
+        collapseAnimation={{ easing: "bounce", duration: 1000 }}
+        style={{ border: "10px solid blue", "box-sizing": "border-box" }}
+        collapsed={collapsed}
+        onCollapseChange={setCollapsed}
+      >
+        <div>3</div>
+      </StyledPanel>
+    </StyledPanelGroup>
+  );
+}
 
 export function CustomCollapseAnimation() {
   const springFn = spring({
