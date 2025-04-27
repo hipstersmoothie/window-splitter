@@ -4,6 +4,10 @@ import {
   getCollapsiblePanelForHandleId,
   getCursor,
   getGroupSize,
+  getPanelGroupPercentageSizes,
+  getPanelGroupPixelSizes,
+  getPanelPercentageSize,
+  getPanelPixelSize,
   getUnitPercentageValue,
   groupMachine,
   GroupMachineContextValue,
@@ -12,6 +16,7 @@ import {
   PanelData,
   parseUnit,
   PixelUnit,
+  prepareItems,
   prepareSnapshot,
   Rect,
   Unit,
@@ -20,11 +25,13 @@ import {
   Accessor,
   children,
   createEffect,
+  createRenderEffect,
   createSignal,
   createUniqueId,
   JSX,
   mergeProps,
   onMount,
+  Ref,
 } from "solid-js";
 import { move } from "./move";
 import {
@@ -69,6 +76,26 @@ function measureGroupChildren(
   };
 }
 
+export interface PanelGroupHandle {
+  /** The id of the group */
+  getId: () => string;
+  /** Get the sizes of all the items in the layout as pixels */
+  getPixelSizes: () => Array<number>;
+  /** Get the sizes of all the items in the layout as percentages of the group size */
+  getPercentageSizes: () => Array<number>;
+  /**
+   * Set the size of all the items in the layout.
+   * This just calls `setSize` on each item. It is up to
+   * you to make sure the sizes make sense.
+   *
+   * NOTE: Setting handle sizes will do nothing.
+   */
+  setSizes: (items: Array<Unit>) => void;
+  /** Get the template for the group in pixels. Useful for testing */
+  getTemplate: () => string;
+  getState: () => "idle" | "dragging";
+}
+
 export interface PanelGroupProps
   extends JSX.HTMLAttributes<HTMLDivElement>,
     Partial<
@@ -78,6 +105,8 @@ export interface PanelGroupProps
   snapshot?: GroupMachineContextValue;
   /** An id to use for autosaving the layout */
   autosaveId?: string;
+  /** Imperative handle to control the group */
+  handle?: Ref<PanelGroupHandle>;
 }
 
 export function PanelGroup(props: PanelGroupProps) {
@@ -110,7 +139,7 @@ export function PanelGroup(props: PanelGroupProps) {
     GroupMachineContextValue | undefined
   >();
 
-  const [intiialValue, send] = groupMachine(
+  const [intiialValue, send, machineState] = groupMachine(
     {
       orientation,
       groupId,
@@ -158,6 +187,46 @@ export function PanelGroup(props: PanelGroupProps) {
     });
   });
 
+  createRefContent(
+    () => props.handle,
+    () => ({
+      getId: () => groupId,
+      getPixelSizes: () => {
+        const s = currentValue?.();
+        if (!s) throw new Error("No state");
+        return getPanelGroupPixelSizes(s);
+      },
+      getPercentageSizes: () => {
+        const s = currentValue?.();
+        if (!s) throw new Error("No state");
+        return getPanelGroupPercentageSizes(s);
+      },
+      setSizes: (updates) => {
+        const context = currentValue?.();
+        if (!context) throw new Error("No state");
+
+        for (let index = 0; index < updates.length; index++) {
+          const item = context.items[index];
+          const update = updates[index];
+
+          if (item && isPanelData(item) && update) {
+            send({
+              type: "setPanelPixelSize",
+              panelId: item.id,
+              size: update,
+            });
+          }
+        }
+      },
+      getTemplate: () => {
+        const context = currentValue?.();
+        if (!context) throw new Error("No state");
+        return buildTemplate({ ...context, items: prepareItems(context) });
+      },
+      getState: () => (machineState.current === "idle" ? "idle" : "dragging"),
+    })
+  );
+
   return (
     <GroupMachineProvider groupId={groupId} send={send} state={currentValue}>
       <div
@@ -192,6 +261,45 @@ export type OnResizeSize = {
 
 export type OnResizeCallback = (size: OnResizeSize) => void;
 
+function createRefContent<T extends Exclude<unknown, () => void>>(
+  getRef: () => Ref<T> | undefined,
+  createRef: () => T
+) {
+  createRenderEffect(() => {
+    const refProp = getRef();
+    if (typeof refProp !== "function") {
+      return () => {};
+    }
+    const refFunc = refProp as (value: T) => void;
+    refFunc(createRef());
+  });
+}
+
+export interface PanelHandle {
+  /** Collapse the panel */
+  collapse: () => void;
+  /** Returns true if the panel is collapsed */
+  isCollapsed: () => boolean;
+  /** Expand the panel */
+  expand: () => void;
+  /** Returns true if the panel is expanded */
+  isExpanded: () => boolean;
+  /** The id of the panel */
+  getId: () => string;
+  /** Get the size of the panel in pixels */
+  getPixelSize: () => number;
+  /** Get percentage of the panel relative to the group */
+  getPercentageSize: () => number;
+  /**
+   * Set the size of the panel in pixels.
+   *
+   * This will be clamped to the min/max values of the panel.
+   * If you want the panel to collapse/expand you should use the
+   * expand/collapse methods.
+   */
+  setSize: (size: Unit) => void;
+}
+
 export interface PanelProps
   extends Constraints<Unit>,
     Pick<PanelData, "collapseAnimation">,
@@ -200,6 +308,7 @@ export interface PanelProps
   onCollapseChange?: (isCollapsed: boolean) => void;
   // TODO handle
   onResize?: OnResizeCallback;
+  handle?: Ref<PanelHandle>;
 }
 
 export function Panel({
@@ -269,6 +378,39 @@ export function Panel({
       send?.({ type: "expandPanel", panelId, controlled: true });
     }
   });
+
+  createRefContent(
+    () => props.handle,
+    () => ({
+      getId: () => panelId,
+      collapse: () => {
+        if (collapsible) {
+          // TODO: setting controlled here might be wrong
+          send?.({ type: "collapsePanel", panelId, controlled: true });
+        }
+      },
+      isCollapsed: () => Boolean(collapsible && panel()?.collapsed),
+      expand: () => {
+        if (collapsible) {
+          send?.({ type: "expandPanel", panelId, controlled: true });
+        }
+      },
+      isExpanded: () => Boolean(collapsible && !panel()?.collapsed),
+      getPixelSize: () => {
+        const s = state?.();
+        if (!s) throw new Error("No state");
+        return getPanelPixelSize(s, panelId);
+      },
+      setSize: (size) => {
+        send?.({ type: "setPanelPixelSize", panelId, size });
+      },
+      getPercentageSize: () => {
+        const s = state?.();
+        if (!s) throw new Error("No state");
+        return getPanelPercentageSize(s, panelId);
+      },
+    })
+  );
 
   return (
     <div

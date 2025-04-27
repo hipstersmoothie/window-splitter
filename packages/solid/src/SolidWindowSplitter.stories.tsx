@@ -8,6 +8,8 @@ import {
   PanelGroupProps,
   PanelProps,
   PanelResizerProps,
+  PanelGroupHandle,
+  PanelHandle,
 } from "./";
 import { createSignal } from "solid-js";
 
@@ -434,7 +436,105 @@ export function CustomCollapseAnimation() {
   );
 }
 
-// Imperative Panel
+export function ImperativePanel() {
+  let groupRef: PanelGroupHandle | undefined;
+  let panelRef: PanelHandle | undefined;
+
+  return (
+    <>
+      <StyledPanelGroup handle={(v) => (groupRef = v)}>
+        <StyledPanel
+          handle={(v) => (panelRef = v)}
+          id="panel-1"
+          min="100px"
+          collapsible
+          collapsedSize="60px"
+        >
+          1
+        </StyledPanel>
+        <StyledResizer id="resizer-1" />
+        <StyledPanel min="100px" id="panel-2">
+          2
+        </StyledPanel>
+        <StyledResizer id="resizer-2" />
+        <StyledPanel
+          min="100px"
+          collapsible
+          collapsedSize="60px"
+          defaultCollapsed
+          id="panel-3"
+        >
+          3
+        </StyledPanel>
+      </StyledPanelGroup>
+
+      <div>
+        <button
+          type="button"
+          onClick={() => alert(`Sizes: ${groupRef?.getPixelSizes()}`)}
+        >
+          Get pixel sizes
+        </button>
+        <button
+          type="button"
+          onClick={() => alert(`Sizes: ${groupRef?.getPercentageSizes()}`)}
+        >
+          Get percent sizes
+        </button>
+        <button
+          type="button"
+          onClick={() =>
+            groupRef?.setSizes(["200px", "10px", "50%", "10px", "150px"])
+          }
+        >
+          Override sizes
+        </button>
+      </div>
+
+      <div>
+        <button type="button" onClick={() => panelRef?.collapse()}>
+          Collapse
+        </button>
+        <button
+          type="button"
+          onClick={() => alert(`Collapsed: ${panelRef?.isCollapsed()}`)}
+        >
+          Is Collapsed?
+        </button>
+        <button type="button" onClick={() => panelRef?.expand()}>
+          Expand
+        </button>
+        <button
+          type="button"
+          onClick={() => alert(`Expanded: ${panelRef?.isExpanded()}`)}
+        >
+          Is Expanded?
+        </button>
+        <button type="button" onClick={() => alert(`Id: ${panelRef?.getId()}`)}>
+          Get Id
+        </button>
+        <button
+          type="button"
+          onClick={() => alert(`Size: ${panelRef?.getPixelSize()}`)}
+        >
+          Get Pixel Size
+        </button>
+        <button
+          type="button"
+          onClick={() => alert(`Percentage: ${panelRef?.getPercentageSize()}`)}
+        >
+          Get Percentage Size
+        </button>
+        <button type="button" onClick={() => panelRef?.setSize("30px")}>
+          Set size to 100px
+        </button>
+        <button type="button" onClick={() => panelRef?.setSize("50%")}>
+          Set size to 50%
+        </button>
+      </div>
+    </>
+  );
+}
 
 // Conditional Panel
 
