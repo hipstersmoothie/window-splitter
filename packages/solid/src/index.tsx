@@ -1,3 +1,4 @@
+/* eslint-disable @eslint-react/no-unstable-context-value */
 import {
   buildTemplate,
   Constraints,
@@ -12,6 +13,7 @@ import {
   PanelData,
   parseUnit,
   PixelUnit,
+  prepareSnapshot,
   Rect,
   SendFn,
   Unit,
@@ -82,18 +84,42 @@ export interface PanelGroupProps
 }
 
 export function PanelGroup(props: PanelGroupProps) {
-  const { orientation = "horizontal", autosaveStrategy, ...attrs } = props;
+  const {
+    orientation = "horizontal",
+    autosaveStrategy = "localStorage",
+    autosaveId,
+    snapshot: snapshotProp,
+    ...attrs
+  } = props;
+
+  let snapshot: GroupMachineContextValue | undefined;
+
+  if (snapshotProp) {
+    snapshot = snapshotProp;
+  } else if (
+    typeof window !== "undefined" &&
+    autosaveId &&
+    autosaveStrategy === "localStorage"
+  ) {
+    const localSnapshot = localStorage.getItem(autosaveId);
+
+    if (localSnapshot) {
+      snapshot = JSON.parse(localSnapshot) as GroupMachineContextValue;
+    }
+  }
 
   const defaultGroupId = `panel-group-${createUniqueId()}`;
   const groupId = props.autosaveId || props.id || defaultGroupId;
   const [currentValue, setCurrentValue] = createSignal<
     GroupMachineContextValue | undefined
   >();
-  const [intiialValue, send, state] = groupMachine(
+
+  const [intiialValue, send] = groupMachine(
     {
       orientation,
       groupId,
       autosaveStrategy,
+      ...(snapshot ? prepareSnapshot(snapshot) : undefined),
     },
     (value) => {
       setCurrentValue({ ...value });
@@ -105,7 +131,9 @@ export function PanelGroup(props: PanelGroupProps) {
     <PrerenderContext.Provider value>
       <GroupIdContext.Provider value={groupId}>
         <MachineActorContext.Provider value={send}>
-          {props.children}
+          <MachineStateContext.Provider value={() => intiialValue}>
+            {props.children}
+          </MachineStateContext.Provider>
         </MachineActorContext.Provider>
       </GroupIdContext.Provider>
     </PrerenderContext.Provider>
@@ -142,7 +170,7 @@ export function PanelGroup(props: PanelGroupProps) {
         <MachineActorContext.Provider value={send}>
           <div
             ref={elementRef}
-            {...mergeProps(props, {
+            {...mergeProps(attrs, {
               style: {
                 display: "grid",
                 "grid-template-columns":
@@ -154,6 +182,8 @@ export function PanelGroup(props: PanelGroupProps) {
                     ? buildTemplate(currentValue() ?? intiialValue)
                     : undefined,
                 height: "100%",
+                // @ts-expect-error TODO: fix this
+                ...attrs.style,
               },
             })}
           >
@@ -204,23 +234,28 @@ export function Panel({
   const state = useContext(MachineStateContext);
 
   if (send && prerender) {
-    send({
-      type: "registerPanel",
-      data: initializePanel({
-        id: panelId,
-        min,
-        max,
-        collapsible,
-        collapsed,
-        collapsedSize,
-        onCollapseChange: { current: onCollapseChange },
-        collapseAnimation,
-        onResize: { current: onResize },
-        defaultCollapsed,
-        default: defaultSize,
-        isStaticAtRest,
-      }),
-    });
+    const hasRegistered = state?.()?.items.find((i) => i.id === panelId);
+
+    if (!hasRegistered) {
+      console.log("registering panel", panelId, hasRegistered, state?.());
+      send({
+        type: "registerPanel",
+        data: initializePanel({
+          id: panelId,
+          min,
+          max,
+          collapsible,
+          collapsed,
+          collapsedSize,
+          onCollapseChange: { current: onCollapseChange },
+          collapseAnimation,
+          onResize: { current: onResize },
+          defaultCollapsed,
+          default: defaultSize,
+          isStaticAtRest,
+        }),
+      });
+    }
   }
 
   const panel = () => {
@@ -280,13 +315,18 @@ export function PanelResizer({
   const state = useContext(MachineStateContext);
 
   if (isPrerender && send) {
-    send({
-      type: "registerPanelHandle",
-      data: {
-        size,
-        id: handleId,
-      },
-    });
+    const hasRegistered = state?.()?.items.find((i) => i.id === handleId);
+
+    if (!hasRegistered) {
+      console.log("registering handle", handleId);
+      send({
+        type: "registerPanelHandle",
+        data: {
+          size,
+          id: handleId,
+        },
+      });
+    }
   }
 
   const { moveProps } = move({

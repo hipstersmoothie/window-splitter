@@ -1,0 +1,226 @@
+import type { Meta, StoryObj } from "storybook-solidjs";
+
+import {
+  PanelGroup,
+  PanelResizer,
+  Panel,
+  PanelGroupProps,
+  PanelProps,
+  PanelResizerProps,
+} from "./";
+
+const meta = {
+  title: "Solid/WindowSplitter",
+  component: PanelGroup,
+} satisfies Meta<typeof PanelGroup>;
+
+export default meta;
+
+function StyledPanelGroup(props: PanelGroupProps) {
+  return (
+    <PanelGroup
+      {...props}
+      style={{
+        border: "1px solid rgba(0, 0, 0, 0.3)",
+        background: "rgba(0, 0, 0, 0.1)",
+        "border-radius": "12px",
+        "box-sizing": "border-box",
+        // @ts-expect-error TODO: fix this
+        ...props.style,
+      }}
+    />
+  );
+}
+
+function StyledPanel({ children, ...props }: PanelProps) {
+  return (
+    <Panel
+      style={{
+        overflow: "hidden",
+      }}
+      {...props}
+    >
+      <div
+        style={{
+          height: "100%",
+          width: "100%",
+          padding: "20px",
+          display: "flex",
+          "align-items": "center",
+          "justify-content": "center",
+          overflow: "hidden",
+          "box-sizing": "border-box",
+        }}
+      >
+        {children}
+      </div>
+    </Panel>
+  );
+}
+
+function StyledResizer(props: PanelResizerProps) {
+  return <PanelResizer size="10px" style={{ background: "red" }} {...props} />;
+}
+
+export function Simple() {
+  return (
+    <StyledPanelGroup style={{ height: "200px" }}>
+      <StyledPanel id="panel-1">Panel 1</StyledPanel>
+      <StyledResizer id="resizer-1" />
+      <StyledPanel id="panel-2" min="100px">
+        Panel 2
+      </StyledPanel>
+    </StyledPanelGroup>
+  );
+}
+
+export function Autosave() {
+  return (
+    <StyledPanelGroup autosaveId="autosave-example1">
+      <StyledPanel id="1">Panel 1</StyledPanel>
+      <StyledResizer id="resizer" />
+      <StyledPanel id="2">Panel 2</StyledPanel>
+    </StyledPanelGroup>
+  );
+}
+
+export function AutosaveCollapsible() {
+  return (
+    <StyledPanelGroup autosaveId="autosave-example-2">
+      <StyledPanel id="1" collapsible collapsedSize="100px" min="140px">
+        Collapsible
+      </StyledPanel>
+      <StyledResizer id="resizer" />
+      <StyledPanel id="2">Panel 2</StyledPanel>
+    </StyledPanelGroup>
+  );
+}
+
+// DynamicConstraints
+
+export function SimpleMin() {
+  return (
+    <StyledPanelGroup>
+      <StyledPanel min="100px" id="panel-1">
+        <div>Panel 1</div>
+      </StyledPanel>
+      <StyledResizer id="resizer-1" />
+      <StyledPanel min="100px" id="panel-2">
+        <div>Panel 2</div>
+      </StyledPanel>
+      <StyledResizer id="resizer-2" />
+      <StyledPanel min="100px" id="panel-3">
+        <div>Panel 3</div>
+      </StyledPanel>
+    </StyledPanelGroup>
+  );
+}
+
+export function SimpleMinMax() {
+  return (
+    <StyledPanelGroup>
+      <StyledPanel min="100px" max="200px" id="panel-1">
+        <div>Panel 1</div>
+      </StyledPanel>
+      <StyledResizer id="resizer-1" />
+      <StyledPanel min="100px" id="panel-2">
+        <div>Panel 2</div>
+      </StyledPanel>
+      <StyledResizer id="resizer-2" size="20px" />
+      <StyledPanel min="100px" id="panel-3">
+        <div>Panel 3</div>
+      </StyledPanel>
+    </StyledPanelGroup>
+  );
+}
+
+export function SimpleConstraints() {
+  return (
+    <StyledPanelGroup>
+      <StyledPanel min="100px" max="50%" id="panel-1">
+        <div>Panel 1</div>
+      </StyledPanel>
+      <StyledResizer id="resizer-1" />
+      <StyledPanel id="panel-2">
+        <div>Panel 2</div>
+      </StyledPanel>
+    </StyledPanelGroup>
+  );
+}
+
+export function HorizontalLayout() {
+  return (
+    <StyledPanelGroup orientation="horizontal">
+      <StyledPanel default="30%" min="20%" id="panel-1">
+        left
+      </StyledPanel>
+      <StyledResizer id="resizer-1" />
+      <StyledPanel min="20%" id="panel-2">
+        middle
+      </StyledPanel>
+      <StyledResizer id="resizer-2" />
+      <StyledPanel default="30%" min="20%" id="panel-3">
+        right
+      </StyledPanel>
+    </StyledPanelGroup>
+  );
+}
+
+export function VerticalLayout() {
+  return (
+    <StyledPanelGroup orientation="vertical" style={{ height: "322px" }}>
+      <StyledPanel default="30%" min="20%" id="panel-1">
+        top
+      </StyledPanel>
+      <StyledResizer id="resizer-1" />
+      <StyledPanel min="20%" id="panel-2">
+        middle
+      </StyledPanel>
+      <StyledResizer id="resizer-2" />
+      <StyledPanel default="30%" min="20%" id="panel-3">
+        bottom
+      </StyledPanel>
+    </StyledPanelGroup>
+  );
+}
+
+export function VerticalLayout2() {
+  return (
+    <StyledPanelGroup
+      orientation="vertical"
+      style={{ height: "calc(100vh - 100px)" }}
+    >
+      <StyledPanel default="200px" min="200px" id="panel-1">
+        top
+      </StyledPanel>
+      <StyledResizer id="resizer-1" />
+      <StyledPanel
+        min="200px"
+        collapsedSize="60px"
+        defaultCollapsed
+        collapsible
+        id="panel-2"
+      >
+        middle
+      </StyledPanel>
+    </StyledPanelGroup>
+  );
+}
+
+export function NestedGroups() {
+  return (
+    <StyledPanelGroup orientation="vertical" style={{ height: "322px" }}>
+      <StyledPanel default="30%" min="20%" id="panel-1">
+        top
+      </StyledPanel>
+      <StyledResizer id="resizer-1" />
+      <StyledPanel min="20%" id="panel-2">
+        middle
+      </StyledPanel>
+      <StyledResizer id="resizer-2" />
+      <StyledPanel default="30%" min="20%" id="panel-3">
+        bottom
+      </StyledPanel>
+    </StyledPanelGroup>
+  );
+}
