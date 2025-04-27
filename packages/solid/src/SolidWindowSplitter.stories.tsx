@@ -1,4 +1,5 @@
-import type { Meta, StoryObj } from "storybook-solidjs";
+import type { Meta } from "storybook-solidjs";
+import { spring } from "framer-motion";
 
 import {
   PanelGroup,
@@ -246,5 +247,192 @@ export function NestedGroups() {
         3
       </Panel>
     </PanelGroup>
+  );
+}
+
+export function WithOverflow() {
+  return (
+    <StyledPanelGroup style={{ height: "400px" }}>
+      <Panel min="200px" id="panel-1">
+        <div
+          style={{
+            overflow: "auto",
+            padding: "40px",
+            height: "100%",
+            "box-sizing": "border-box",
+          }}
+        >
+          <p>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec
+            euismod, nisl eget ultricies ultrices, nunc nisi aliquam nisi, eu
+            tincidunt nisl nisl eu nisl. Sed euismod, nisl eget ultricies
+            ultrices, nunc nisi aliquam nisi, eu tincidunt nisl nisl eu nisl.
+            Sed euismod, nisl eget ultricies ultrices, nunc nisi aliquam nisi,
+            eu tincidunt nisl nisl eu nisl.
+          </p>
+          <p>
+            Sed euismod, nisl eget ultricies ultrices, nunc nisi aliquam nisi,
+            eu tincidunt nisl nisl eu nisl. Sed euismod, nisl eget ultricies
+            ultrices, nunc nisi aliquam nisi, eu tincidunt nisl nisl eu nisl.
+            Sed euismod, nisl eget ultricies ultrices, nunc nisi aliquam nisi,
+            eu tincidunt nisl nisl eu nisl.
+          </p>
+          <p>
+            Sed euismod, nisl eget ultricies ultrices, nunc nisi aliquam nisi,
+            eu tincidunt nisl nisl eu nisl. Sed euismod, nisl eget ultricies
+            ultrices, nunc nisi aliquam nisi, eu tincidunt nisl nisl eu nisl.
+            Sed euismod, nisl eget ultricies ultrices, nunc nisi aliquam nisi,
+            eu tincidunt nisl nisl eu nisl.
+          </p>
+          <p>
+            Sed euismod, nisl eget ultricies ultrices, nunc nisi aliquam nisi,
+            eu tincidunt nisl nisl eu nisl. Sed euismod, nisl eget ultricies
+            ultrices, nunc nisi aliquam nisi, eu tincidunt nisl nisl eu nisl.
+            Sed euismod, nisl eget ultricies ultrices, nunc nisi aliquam nisi,
+            eu tincidunt nisl nisl eu nisl.
+          </p>
+          <p>
+            Sed euismod, nisl eget ultricies ultrices, nunc nisi aliquam nisi,
+            eu tincidunt nisl nisl eu nisl. Sed euismod, nisl eget ultricies
+            ultrices, nunc nisi aliquam nisi, eu tincidunt nisl nisl eu nisl.
+            Sed euismod, nisl eget ultricies ultrices, nunc nisi aliquam nisi,
+            eu tincidunt nisl nisl eu nisl.
+          </p>
+        </div>
+      </Panel>
+      <StyledResizer id="resizer-1" />
+      <Panel min="200px" id="panel-2">
+        <div
+          style={{
+            overflow: "auto",
+            padding: "40px",
+            height: "100%",
+            "box-sizing": "border-box",
+          }}
+        >
+          <p>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec
+            euismod, nisl eget ultricies ultrices, nunc nisi aliquam nisi, eu
+            tincidunt nisl nisl eu nisl. Sed euismod, nisl eget ultricies
+            ultrices, nunc nisi aliquam nisi, eu tincidunt nisl nisl eu nisl.
+            Sed euismod, nisl eget ultricies ultrices, nunc nisi aliquam nisi,
+            eu tincidunt nisl nisl eu nisl.
+          </p>
+          <p>
+            Sed euismod, nisl eget ultricies ultrices, nunc nisi aliquam nisi,
+            eu tincidunt nisl nisl eu nisl. Sed euismod, nisl eget ultricies
+            ultrices, nunc nisi aliquam nisi, eu tincidunt nisl nisl eu nisl.
+            Sed euismod, nisl eget ultricies ultrices, nunc nisi aliquam nisi,
+            eu tincidunt nisl nisl eu nisl.
+          </p>
+          <p>
+            Sed euismod, nisl eget ultricies ultrices, nunc nisi aliquam nisi,
+            eu tincidunt nisl nisl eu nisl. Sed euismod, nisl eget ultricies
+            ultrices, nunc nisi aliquam nisi, eu tincidunt nisl nisl eu nisl.
+            Sed euismod, nisl eget ultricies ultrices, nunc nisi aliquam nisi,
+            eu tincidunt nisl nisl eu nisl.
+          </p>
+          <p>
+            Sed euismod, nisl eget ultricies ultrices, nunc nisi aliquam nisi,
+            eu tincidunt nisl nisl eu nisl. Sed euismod, nisl eget ultricies
+            ultrices, nunc nisi aliquam nisi, eu tincidunt nisl nisl eu nisl.
+            Sed euismod, nisl eget ultricies ultrices, nunc nisi aliquam nisi,
+            eu tincidunt nisl nisl eu nisl.
+          </p>
+          <p>
+            Sed euismod, nisl eget ultricies ultrices, nunc nisi aliquam nisi,
+            eu tincidunt nisl nisl eu nisl. Sed euismod, nisl eget ultricies
+            ultrices, nunc nisi aliquam nisi, eu tincidunt nisl nisl eu nisl.
+            Sed euismod, nisl eget ultricies ultrices, nunc nisi aliquam nisi,
+            eu tincidunt nisl nisl eu nisl.
+          </p>
+        </div>
+      </Panel>
+    </StyledPanelGroup>
+  );
+}
+
+// Collapsible (controlled)
+
+export function CustomCollapseAnimation() {
+  const springFn = spring({
+    keyframes: [0, 1],
+    velocity: 1,
+    stiffness: 100,
+    damping: 10,
+    mass: 1.0,
+  });
+
+  return (
+    <StyledPanelGroup>
+      <StyledPanel
+        min="100px"
+        id="panel-1"
+        collapsible
+        collapsedSize="60px"
+        style={{ border: "10px solid green", "box-sizing": "border-box" }}
+      >
+        1
+      </StyledPanel>
+      <StyledResizer id="resizer-1" />
+      <StyledPanel min="100px" id="panel-2">
+        2
+      </StyledPanel>
+      <StyledResizer id="resizer-2" />
+      <StyledPanel
+        id="panel-3"
+        style={{ border: "10px solid blue", "box-sizing": "border-box" }}
+        min="100px"
+        collapsible
+        collapsedSize="60px"
+        defaultCollapsed
+        collapseAnimation={{
+          easing: (t) => springFn.next(t * 1000).value,
+          duration: 1000,
+        }}
+      >
+        3
+      </StyledPanel>
+    </StyledPanelGroup>
+  );
+}
+
+// Imperative Panel
+
+// Conditional Panel
+
+// ConditionalPanelComplex
+
+export function WithDefaultWidth() {
+  return (
+    <PanelGroup style={{ height: "400px" }}>
+      <Panel id="left" style={{ "background-color": "#333366" }} />
+      <PanelResizer id="handle" size="3px" />
+      <Panel
+        id="right"
+        default="100px"
+        min="100px"
+        max="400px"
+        style={{ "background-color": "#ff3366" }}
+      />
+    </PanelGroup>
+  );
+}
+
+export function StaticAtRest() {
+  return (
+    <StyledPanelGroup style={{ height: "200px" }}>
+      <StyledPanel id="panel-1" min="100px" max="300px" isStaticAtRest>
+        Panel 1
+      </StyledPanel>
+      <StyledResizer id="resizer-1" />
+      <StyledPanel id="panel-2" min="100px">
+        Panel 2
+      </StyledPanel>
+      <StyledResizer id="resizer-2" />
+      <StyledPanel id="panel-3" min="100px">
+        Panel 3
+      </StyledPanel>
+    </StyledPanelGroup>
   );
 }
