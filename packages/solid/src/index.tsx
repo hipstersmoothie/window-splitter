@@ -1,4 +1,3 @@
-/* eslint-disable @eslint-react/no-unstable-context-value */
 import {
   buildTemplate,
   Constraints,
@@ -21,21 +20,20 @@ import {
 import {
   Accessor,
   children,
-  createContext,
   createSignal,
   createUniqueId,
   JSX,
   mergeProps,
   onMount,
-  useContext,
 } from "solid-js";
 import { move } from "./move";
-
-const PrerenderContext = createContext(false);
-const MachineActorContext = createContext<SendFn>();
-const GroupIdContext = createContext<string>();
-const MachineStateContext =
-  createContext<Accessor<GroupMachineContextValue | undefined>>();
+import {
+  GroupMachineProvider,
+  usePrerenderContext,
+  useMachineActor,
+  useGroupId,
+  useMachineState,
+} from "./context";
 
 function measureGroupChildren(
   groupId: string,
@@ -76,7 +74,6 @@ export interface PanelGroupProps
     Partial<
       Pick<GroupMachineContextValue, "orientation" | "autosaveStrategy">
     > {
-  // TODO handle
   /** Persisted state to initialized the machine with */
   snapshot?: GroupMachineContextValue;
   /** An id to use for autosaving the layout */
@@ -128,15 +125,14 @@ export function PanelGroup(props: PanelGroupProps) {
 
   // Prerender the children with the machine context
   children(() => (
-    <PrerenderContext.Provider value>
-      <GroupIdContext.Provider value={groupId}>
-        <MachineActorContext.Provider value={send}>
-          <MachineStateContext.Provider value={() => intiialValue}>
-            {props.children}
-          </MachineStateContext.Provider>
-        </MachineActorContext.Provider>
-      </GroupIdContext.Provider>
-    </PrerenderContext.Provider>
+    <GroupMachineProvider
+      groupId={groupId}
+      send={send}
+      state={() => intiialValue}
+      prerender
+    >
+      {props.children}
+    </GroupMachineProvider>
   ));
 
   let elementRef: HTMLDivElement | undefined;
@@ -158,44 +154,39 @@ export function PanelGroup(props: PanelGroupProps) {
   });
 
   onMount(() => {
-    // TODO unmount
     return measureGroupChildren(groupId, (childrenSizes) => {
       send({ type: "setActualItemsSize", childrenSizes });
     });
   });
 
   return (
-    <GroupIdContext.Provider value={groupId}>
-      <MachineStateContext.Provider value={currentValue}>
-        <MachineActorContext.Provider value={send}>
-          <div
-            ref={elementRef}
-            {...mergeProps(attrs, {
-              style: {
-                display: "grid",
-                "grid-template-columns":
-                  orientation === "horizontal"
-                    ? buildTemplate(currentValue() ?? intiialValue)
-                    : undefined,
-                "grid-template-rows":
-                  orientation === "vertical"
-                    ? buildTemplate(currentValue() ?? intiialValue)
-                    : undefined,
-                height: "100%",
-                // @ts-expect-error TODO: fix this
-                ...attrs.style,
-              },
-            })}
-          >
-            {props.children}
-          </div>
-        </MachineActorContext.Provider>
-      </MachineStateContext.Provider>
-    </GroupIdContext.Provider>
+    <GroupMachineProvider groupId={groupId} send={send} state={currentValue}>
+      <div
+        ref={elementRef}
+        {...mergeProps(attrs, {
+          style: {
+            display: "grid",
+            "grid-template-columns":
+              orientation === "horizontal"
+                ? buildTemplate(currentValue() ?? intiialValue)
+                : undefined,
+            "grid-template-rows":
+              orientation === "vertical"
+                ? buildTemplate(currentValue() ?? intiialValue)
+                : undefined,
+            height: "100%",
+            // @ts-expect-error TODO: fix this
+            ...attrs.style,
+          },
+        })}
+      >
+        {props.children}
+      </div>
+    </GroupMachineProvider>
   );
 }
 
-type OnResizeSize = {
+export type OnResizeSize = {
   pixel: number;
   percentage: number;
 };
@@ -228,16 +219,16 @@ export function Panel({
   ...props
 }: PanelProps) {
   const panelId = id || createUniqueId();
-  const prerender = useContext(PrerenderContext);
-  const send = useContext(MachineActorContext);
-  const groupId = useContext(GroupIdContext);
-  const state = useContext(MachineStateContext);
+  const prerender = usePrerenderContext();
+  const send = useMachineActor();
+  const groupId = useGroupId();
+  const state = useMachineState();
 
   if (send && prerender) {
     const hasRegistered = state?.()?.items.find((i) => i.id === panelId);
 
     if (!hasRegistered) {
-      console.log("registering panel", panelId, hasRegistered, state?.());
+      console.log("registering panel", state?.()?.groupId, panelId);
       send({
         type: "registerPanel",
         data: initializePanel({
@@ -310,15 +301,15 @@ export function PanelResizer({
   ...props
 }: PanelResizerProps) {
   const handleId = id || createUniqueId();
-  const isPrerender = useContext(PrerenderContext);
-  const send = useContext(MachineActorContext);
-  const state = useContext(MachineStateContext);
+  const isPrerender = usePrerenderContext();
+  const send = useMachineActor();
+  const state = useMachineState();
 
   if (isPrerender && send) {
     const hasRegistered = state?.()?.items.find((i) => i.id === handleId);
 
     if (!hasRegistered) {
-      console.log("registering handle", handleId);
+      console.log("registering handle", state?.()?.groupId, handleId);
       send({
         type: "registerPanelHandle",
         data: {
