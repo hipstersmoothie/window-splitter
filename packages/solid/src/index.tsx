@@ -86,7 +86,6 @@ export function PanelGroup(props: PanelGroupProps) {
     autosaveStrategy = "localStorage",
     autosaveId,
     snapshot: snapshotProp,
-    ...attrs
   } = props;
 
   let snapshot: GroupMachineContextValue | undefined;
@@ -163,7 +162,7 @@ export function PanelGroup(props: PanelGroupProps) {
     <GroupMachineProvider groupId={groupId} send={send} state={currentValue}>
       <div
         ref={elementRef}
-        {...mergeProps(attrs, {
+        {...mergeProps(props, {
           style: {
             display: "grid",
             "grid-template-columns":
@@ -176,7 +175,7 @@ export function PanelGroup(props: PanelGroupProps) {
                 : undefined,
             height: "100%",
             // @ts-expect-error TODO: fix this
-            ...attrs.style,
+            ...props?.style,
           },
         })}
       >
@@ -228,7 +227,6 @@ export function Panel({
     const hasRegistered = state?.()?.items.find((i) => i.id === panelId);
 
     if (!hasRegistered) {
-      console.log("registering panel", state?.()?.groupId, panelId);
       send({
         type: "registerPanel",
         data: initializePanel({
@@ -309,7 +307,6 @@ export function PanelResizer({
     const hasRegistered = state?.()?.items.find((i) => i.id === handleId);
 
     if (!hasRegistered) {
-      console.log("registering handle", state?.()?.groupId, handleId);
       send({
         type: "registerPanelHandle",
         data: {

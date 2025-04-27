@@ -209,18 +209,42 @@ export function VerticalLayout2() {
 
 export function NestedGroups() {
   return (
-    <StyledPanelGroup orientation="vertical" style={{ height: "322px" }}>
-      <StyledPanel default="30%" min="20%" id="panel-1">
-        top
-      </StyledPanel>
+    <PanelGroup
+      orientation="horizontal"
+      style={{
+        border: "1px solid rgba(0, 0, 0, 0.3)",
+        "border-radius": "12px",
+        height: "400px",
+      }}
+      id="panel-group-1"
+    >
+      <Panel min="10%" id="panel-1">
+        1
+      </Panel>
       <StyledResizer id="resizer-1" />
-      <StyledPanel min="20%" id="panel-2">
-        middle
-      </StyledPanel>
-      <StyledResizer id="resizer-2" />
-      <StyledPanel default="30%" min="20%" id="panel-3">
-        bottom
-      </StyledPanel>
-    </StyledPanelGroup>
+      <Panel min="10%" id="panel-2">
+        <PanelGroup orientation="vertical" id="panel-group-2">
+          <Panel min="10%" id="panel-2-1">
+            2-1
+          </Panel>
+          <StyledResizer id="resizer-2" />
+          <Panel min="10%" id="panel-2-2">
+            <PanelGroup orientation="horizontal" id="panel-group-3">
+              <Panel min="20%" id="panel-2-2-1">
+                2-2-1
+              </Panel>
+              <StyledResizer id="resizer-3" />
+              <Panel min="20%" id="panel-2-2-2">
+                2-2-2
+              </Panel>
+            </PanelGroup>
+          </Panel>
+        </PanelGroup>
+      </Panel>
+      <StyledResizer id="resizer-4" />
+      <Panel min="10%" id="panel-3">
+        3
+      </Panel>
+    </PanelGroup>
   );
 }
