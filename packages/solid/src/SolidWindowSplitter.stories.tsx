@@ -30,7 +30,6 @@ function StyledPanelGroup(props: PanelGroupProps) {
         background: "rgba(0, 0, 0, 0.1)",
         "border-radius": "12px",
         "box-sizing": "border-box",
-        // @ts-expect-error TODO: fix this
         ...props.style,
       }}
     />

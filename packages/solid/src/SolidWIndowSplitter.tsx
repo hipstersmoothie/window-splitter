@@ -48,10 +48,11 @@ import {
 } from "@window-splitter/interface";
 
 export interface PanelGroupProps
-  extends JSX.HTMLAttributes<HTMLDivElement>,
+  extends Omit<JSX.HTMLAttributes<HTMLDivElement>, "style">,
     SharedPanelGroupProps {
   /** Imperative handle to control the group */
   handle?: Ref<PanelGroupHandle>;
+  style?: JSX.CSSProperties;
 }
 
 export function PanelGroup(props: PanelGroupProps) {
@@ -206,7 +207,6 @@ export function PanelGroup(props: PanelGroupProps) {
           "grid-template-rows":
             orientation === "vertical" ? getTemplate() : undefined,
           height: "100%",
-          // @ts-expect-error TODO: fix this
           ...props?.style,
         },
       })}
@@ -232,9 +232,10 @@ function createRefContent<T extends Exclude<unknown, () => void>>(
 
 export interface PanelProps
   extends SharedPanelProps<Accessor<boolean | undefined>>,
-    Omit<JSX.HTMLAttributes<HTMLDivElement>, "onResize"> {
+    Omit<JSX.HTMLAttributes<HTMLDivElement>, "onResize" | "style"> {
   /** Imperative handle to control the panel */
   handle?: Ref<PanelHandle>;
+  style?: JSX.CSSProperties;
 }
 
 export function Panel({
@@ -402,7 +403,6 @@ export function Panel({
         "min-width": 0,
         "min-height": 0,
         overflow: "hidden",
-        // @ts-expect-error Don't know how to merge styles
         ...props.style,
       }}
     />
@@ -413,8 +413,10 @@ export interface PanelResizerProps
   extends SharedPanelResizerProps,
     Omit<
       JSX.HTMLAttributes<HTMLDivElement>,
-      "onDragStart" | "onDrag" | "onDragEnd"
-    > {}
+      "onDragStart" | "onDrag" | "onDragEnd" | "style"
+    > {
+  style?: JSX.CSSProperties;
+}
 
 export function PanelResizer({
   size = "0px",
@@ -573,7 +575,6 @@ export function PanelResizer({
           style: {
             cursor: cursor(),
             ...dimensions(),
-            // @ts-expect-error Dont know how to merge styles
             ...props.style,
           },
         }
