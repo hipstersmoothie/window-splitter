@@ -446,7 +446,7 @@ export function Collapsible({
       <StyledPanel min="100px">
         <div>2</div>
       </StyledPanel>
-      <StyledResizer />
+      <StyledResizer id="resizer-2" />
       <StyledPanel
         handle={rightPanelHandle}
         min="100px"

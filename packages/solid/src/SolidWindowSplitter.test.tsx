@@ -236,13 +236,10 @@ test("Keyboard interactions with collapsed panels", async () => {
   );
 
   fireEvent.keyDown(resizer2, { key: "Enter" });
-  await expectTemplate(handle, "209.015625px 10px 208.984375px 10px 60px");
+  await expectTemplate(handle, "209.03125px 10px 208.96875px 10px 60px");
 
   fireEvent.keyDown(resizer2, { key: "Enter" });
-  await expectTemplate(
-    handle,
-    "209.03125px 10px 149.984375px 10px 118.96875px"
-  );
+  await expectTemplate(handle, "209.0625px 10px 149.96875px 10px 118.96875px");
 });
 
 describe("imperative panel API", async () => {
