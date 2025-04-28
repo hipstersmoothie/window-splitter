@@ -1,5 +1,5 @@
 /* eslint-disable @eslint-react/no-unstable-context-value */
-import { createContext, useContext, Accessor } from "solid-js";
+import { createContext, useContext, Accessor, JSXElement } from "solid-js";
 import { GroupMachineContextValue, SendFn } from "@window-splitter/state";
 
 export const PrerenderContext = createContext<Accessor<boolean>>(() => false);
@@ -32,7 +32,7 @@ export function useMachineState() {
 
 // Create a provider component that bundles all the contexts together
 export function GroupMachineProvider(props: {
-  children: any;
+  children: JSXElement;
   groupId: string;
   send: SendFn;
   state: Accessor<GroupMachineContextValue | undefined>;
