@@ -160,6 +160,25 @@ importers:
         specifier: ^5
         version: 5.5.4
 
+  packages/interface:
+    dependencies:
+      '@window-splitter/state':
+        specifier: workspace:*
+        version: link:../state
+    devDependencies:
+      '@internal/eslint-config':
+        specifier: workspace:*
+        version: link:../config-eslint
+      eslint:
+        specifier: ^9.9.0
+        version: 9.9.0(jiti@2.4.2)
+      tshy:
+        specifier: ^3.0.2
+        version: 3.0.2
+      typescript:
+        specifier: ^5.5.4
+        version: 5.5.4
+
   packages/react:
     dependencies:
       '@react-aria/interactions':
@@ -168,6 +187,9 @@ importers:
       '@react-aria/utils':
         specifier: ^3.28.2
         version: 3.28.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@window-splitter/interface':
+        specifier: workspace:*
+        version: link:../interface
       '@window-splitter/state':
         specifier: workspace:*
         version: link:../state
@@ -213,7 +235,7 @@ importers:
         version: 6.4.8
       '@testing-library/react':
         specifier: ^16.0.0
-        version: 16.0.0(@testing-library/dom@10.1.0)(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 16.0.0(@testing-library/dom@10.4.0)(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@types/node':
         specifier: ^20.14.10
         version: 20.14.14
@@ -265,6 +287,9 @@ importers:
 
   packages/solid:
     dependencies:
+      '@window-splitter/interface':
+        specifier: workspace:*
+        version: link:../interface
       '@window-splitter/state':
         specifier: workspace:*
         version: link:../state
@@ -13130,16 +13155,6 @@ snapshots:
       dom-accessibility-api: 0.6.3
       lodash: 4.17.21
       redent: 3.0.0
-
-  '@testing-library/react@16.0.0(@testing-library/dom@10.1.0)(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
-    dependencies:
-      '@babel/runtime': 7.25.0
-      '@testing-library/dom': 10.1.0
-      react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
-    optionalDependencies:
-      '@types/react': 18.3.3
-      '@types/react-dom': 18.3.0
 
   '@testing-library/react@16.0.0(@testing-library/dom@10.4.0)(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:

@@ -1,5 +1,12 @@
 "use client";
 
+import {
+  PanelGroupHandle,
+  PanelHandle,
+  SharedPanelGroupProps,
+  SharedPanelProps,
+  SharedPanelResizerProps,
+} from "@window-splitter/interface";
 import React, {
   useEffect,
   useImperativeHandle,
@@ -11,7 +18,6 @@ import React, {
 } from "react";
 import {
   buildTemplate,
-  Constraints,
   getCollapsiblePanelForHandleId,
   getGroupSize,
   getPanelWithId,
@@ -26,15 +32,12 @@ import {
   parseUnit,
   prepareItems,
   Rect,
-  Unit,
   prepareSnapshot,
-  PixelUnit,
   getPanelGroupPixelSizes,
   getPanelGroupPercentageSizes,
   getPanelPixelSize,
   getPanelPercentageSize,
   getCursor,
-  OnResizeCallback,
   haveConstraintsChangedForPanel,
   PanelHandleData,
   ParsedPixelUnit,
@@ -193,37 +196,11 @@ function measureGroupChildren(
   };
 }
 
-export interface PanelGroupHandle {
-  /** The id of the group */
-  getId: () => string;
-  /** Get the sizes of all the items in the layout as pixels */
-  getPixelSizes: () => Array<number>;
-  /** Get the sizes of all the items in the layout as percentages of the group size */
-  getPercentageSizes: () => Array<number>;
-  /**
-   * Set the size of all the items in the layout.
-   * This just calls `setSize` on each item. It is up to
-   * you to make sure the sizes make sense.
-   *
-   * NOTE: Setting handle sizes will do nothing.
-   */
-  setSizes: (items: Array<Unit>) => void;
-  /** Get the template for the group in pixels. Useful for testing */
-  getTemplate: () => string;
-  getState: () => "idle" | "dragging";
-}
-
 export interface PanelGroupProps
   extends React.HTMLAttributes<HTMLDivElement>,
-    Partial<
-      Pick<GroupMachineContextValue, "orientation" | "autosaveStrategy">
-    > {
+    SharedPanelGroupProps {
   /** Imperative handle to control the group */
   handle?: React.Ref<PanelGroupHandle>;
-  /** Persisted state to initialized the machine with */
-  snapshot?: GroupMachineContextValue;
-  /** An id to use for autosaving the layout */
-  autosaveId?: string;
 }
 
 const InitialMapContext = createContext<Item[]>([]);
@@ -556,60 +533,11 @@ const PanelGroupImplementation = React.forwardRef<
   );
 });
 
-export interface PanelHandle {
-  /** Collapse the panel */
-  collapse: () => void;
-  /** Returns true if the panel is collapsed */
-  isCollapsed: () => boolean;
-  /** Expand the panel */
-  expand: () => void;
-  /** Returns true if the panel is expanded */
-  isExpanded: () => boolean;
-  /** The id of the panel */
-  getId: () => string;
-  /** Get the size of the panel in pixels */
-  getPixelSize: () => number;
-  /** Get percentage of the panel relative to the group */
-  getPercentageSize: () => number;
-  /**
-   * Set the size of the panel in pixels.
-   *
-   * This will be clamped to the min/max values of the panel.
-   * If you want the panel to collapse/expand you should use the
-   * expand/collapse methods.
-   */
-  setSize: (size: Unit) => void;
-}
-
 export interface PanelProps
-  extends Constraints<Unit>,
-    Pick<PanelData, "collapseAnimation">,
+  extends SharedPanelProps<boolean>,
     Omit<React.HTMLAttributes<HTMLDivElement>, "onResize"> {
-  /**
-   * __CONTROLLED COMPONENT__
-   *
-   * If this prop is used it will be used as the source of truth for the collapsed state.
-   * It should be used in conjunction with the `onCollapseChange` prop.
-   *
-   * Use this if you want full control over the collapsed state. When trying to
-   * collapse a panel it will defer to onCollapseChange to determine if it should
-   * be collapsed.
-   */
-  collapsed?: boolean;
-  /**
-   * __CONTROLLED COMPONENT__
-   *
-   * A callback called with the new desired collapsed state. If paired w
-   * with the `collapsed` prop this will be used to control the collapsed state.
-   *
-   * Otherwise this will just be called with the new collapsed state so you can
-   * use it to update your own state.
-   */
-  onCollapseChange?: (isCollapsed: boolean) => void;
   /** Imperative handle to control the panel */
   handle?: React.Ref<PanelHandle>;
-  /** Callback called when the panel is resized */
-  onResize?: OnResizeCallback;
 }
 
 /** A panel within a `PanelGroup` */
@@ -806,20 +734,11 @@ const PanelVisible = React.forwardRef<
 });
 
 export interface PanelResizerProps
-  extends Omit<
-    React.HTMLAttributes<HTMLDivElement>,
-    "onDragStart" | "onDrag" | "onDragEnd"
-  > {
-  /** If the handle is disabled */
-  disabled?: boolean;
-  size?: PixelUnit;
-  /** Called when the user starts dragging the handle */
-  onDragStart?: () => void;
-  /** Called when the user drags the handle */
-  onDrag?: () => void;
-  /** Called when the user stops dragging the handle */
-  onDragEnd?: () => void;
-}
+  extends SharedPanelResizerProps,
+    Omit<
+      React.HTMLAttributes<HTMLDivElement>,
+      "onDragStart" | "onDrag" | "onDragEnd"
+    > {}
 
 /** A resize handle to place between panels. */
 export const PanelResizer = React.forwardRef<HTMLDivElement, PanelResizerProps>(

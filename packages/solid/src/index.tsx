@@ -1,6 +1,5 @@
 import {
   buildTemplate,
-  Constraints,
   getCollapsiblePanelForHandleId,
   getCursor,
   getGroupSize,
@@ -13,13 +12,10 @@ import {
   GroupMachineContextValue,
   initializePanel,
   isPanelData,
-  PanelData,
   parseUnit,
-  PixelUnit,
   prepareItems,
   prepareSnapshot,
   Rect,
-  Unit,
 } from "@window-splitter/state";
 import {
   Accessor,
@@ -42,6 +38,13 @@ import {
   useGroupId,
   useMachineState,
 } from "./context";
+import {
+  PanelGroupHandle,
+  SharedPanelGroupProps,
+  PanelHandle,
+  SharedPanelProps,
+  SharedPanelResizerProps,
+} from "@window-splitter/interface";
 
 function measureGroupChildren(
   groupId: string,
@@ -77,35 +80,9 @@ function measureGroupChildren(
   };
 }
 
-export interface PanelGroupHandle {
-  /** The id of the group */
-  getId: () => string;
-  /** Get the sizes of all the items in the layout as pixels */
-  getPixelSizes: () => Array<number>;
-  /** Get the sizes of all the items in the layout as percentages of the group size */
-  getPercentageSizes: () => Array<number>;
-  /**
-   * Set the size of all the items in the layout.
-   * This just calls `setSize` on each item. It is up to
-   * you to make sure the sizes make sense.
-   *
-   * NOTE: Setting handle sizes will do nothing.
-   */
-  setSizes: (items: Array<Unit>) => void;
-  /** Get the template for the group in pixels. Useful for testing */
-  getTemplate: () => string;
-  getState: () => "idle" | "dragging";
-}
-
 export interface PanelGroupProps
   extends JSX.HTMLAttributes<HTMLDivElement>,
-    Partial<
-      Pick<GroupMachineContextValue, "orientation" | "autosaveStrategy">
-    > {
-  /** Persisted state to initialized the machine with */
-  snapshot?: GroupMachineContextValue;
-  /** An id to use for autosaving the layout */
-  autosaveId?: string;
+    SharedPanelGroupProps {
   /** Imperative handle to control the group */
   handle?: Ref<PanelGroupHandle>;
 }
@@ -258,13 +235,6 @@ export function PanelGroup(props: PanelGroupProps) {
   );
 }
 
-export type OnResizeSize = {
-  pixel: number;
-  percentage: number;
-};
-
-export type OnResizeCallback = (size: OnResizeSize) => void;
-
 function createRefContent<T extends Exclude<unknown, () => void>>(
   getRef: () => Ref<T> | undefined,
   createRef: () => T
@@ -279,39 +249,10 @@ function createRefContent<T extends Exclude<unknown, () => void>>(
   });
 }
 
-export interface PanelHandle {
-  /** Collapse the panel */
-  collapse: () => void;
-  /** Returns true if the panel is collapsed */
-  isCollapsed: () => boolean;
-  /** Expand the panel */
-  expand: () => void;
-  /** Returns true if the panel is expanded */
-  isExpanded: () => boolean;
-  /** The id of the panel */
-  getId: () => string;
-  /** Get the size of the panel in pixels */
-  getPixelSize: () => number;
-  /** Get percentage of the panel relative to the group */
-  getPercentageSize: () => number;
-  /**
-   * Set the size of the panel in pixels.
-   *
-   * This will be clamped to the min/max values of the panel.
-   * If you want the panel to collapse/expand you should use the
-   * expand/collapse methods.
-   */
-  setSize: (size: Unit) => void;
-}
-
 export interface PanelProps
-  extends Constraints<Unit>,
-    Pick<PanelData, "collapseAnimation">,
+  extends SharedPanelProps<Accessor<boolean | undefined>>,
     Omit<JSX.HTMLAttributes<HTMLDivElement>, "onResize"> {
-  collapsed?: Accessor<boolean | undefined>;
-  onCollapseChange?: (isCollapsed: boolean) => void;
-  // TODO handle
-  onResize?: OnResizeCallback;
+  /** Imperative handle to control the panel */
   handle?: Ref<PanelHandle>;
 }
 
@@ -470,20 +411,11 @@ export function Panel({
 }
 
 export interface PanelResizerProps
-  extends Omit<
-    JSX.HTMLAttributes<HTMLDivElement>,
-    "onDragStart" | "onDrag" | "onDragEnd"
-  > {
-  /** If the handle is disabled */
-  disabled?: boolean;
-  size?: PixelUnit;
-  /** Called when the user starts dragging the handle */
-  onDragStart?: () => void;
-  /** Called when the user drags the handle */
-  onDrag?: () => void;
-  /** Called when the user stops dragging the handle */
-  onDragEnd?: () => void;
-}
+  extends SharedPanelResizerProps,
+    Omit<
+      JSX.HTMLAttributes<HTMLDivElement>,
+      "onDragStart" | "onDrag" | "onDragEnd"
+    > {}
 
 export function PanelResizer({
   size = "0px",

@@ -65,6 +65,7 @@
   "dependencies": {
     "@react-aria/interactions": "^3.25.0",
     "@react-aria/utils": "^3.28.2",
+    "@window-splitter/interface": "workspace:*",
     "@window-splitter/state": "workspace:*"
   },
   "tshy": {
