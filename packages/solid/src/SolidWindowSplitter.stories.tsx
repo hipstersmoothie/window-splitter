@@ -123,12 +123,20 @@ export function AutosaveCookie({
 
 export function AutosaveCollapsible({
   handle,
+  onCollapseChange,
 }: {
   handle?: Ref<PanelGroupHandle>;
+  onCollapseChange?: (isCollapsed: boolean) => void;
 }) {
   return (
     <StyledPanelGroup autosaveId="autosave-example-2" handle={handle}>
-      <StyledPanel id="1" collapsible collapsedSize="100px" min="140px">
+      <StyledPanel
+        id="1"
+        collapsible
+        collapsedSize="100px"
+        min="140px"
+        onCollapseChange={onCollapseChange}
+      >
         Collapsible
       </StyledPanel>
       <StyledResizer id="resizer" />

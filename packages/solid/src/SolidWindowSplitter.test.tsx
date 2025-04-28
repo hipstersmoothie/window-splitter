@@ -14,7 +14,6 @@ import {
   AutosaveCookie,
 } from "./SolidWindowSplitter.stories.jsx";
 import { createTestUtils, dragHandle } from "@window-splitter/interface/test";
-import { Panel, PanelGroup, PanelResizer } from "./SolidWindowSplitter.jsx";
 
 const { expectTemplate, waitForMeasurement, waitForCondition } =
   createTestUtils({ waitFor });
@@ -131,7 +130,7 @@ describe("Autosave", () => {
     expect(obj.items).toMatchSnapshot();
   });
 
-  test.skip("callback", async () => {
+  test("callback", async () => {
     localStorage.clear();
 
     let handle: PanelGroupHandle | null = null!;
@@ -153,11 +152,14 @@ describe("Autosave", () => {
 
     cleanup();
 
-    render(
-      <div style={{ width: 500 }}>
-        <AutosaveCollapsible handle={handle} onCollapseChange={spy} />
+    render(() => (
+      <div style={{ width: "500px" }}>
+        <AutosaveCollapsible
+          handle={(v) => (handle = v)}
+          onCollapseChange={spy}
+        />
       </div>
-    );
+    ));
 
     await expectTemplate(handle, "100px 10px 388px");
     await dragHandle({ delta: 200 });

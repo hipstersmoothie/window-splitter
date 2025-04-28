@@ -283,6 +283,15 @@ export function Panel({
       } else if (!isPrerender) {
         dynamicPanelMounted = true;
       }
+    } else {
+      send?.({
+        type: "rebindPanelCallbacks",
+        data: {
+          id: panelId,
+          onCollapseChange: { current: onCollapseChange },
+          onResize: { current: onResize },
+        },
+      });
     }
   }
 
