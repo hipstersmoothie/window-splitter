@@ -5,18 +5,11 @@ import { GroupMachineContextValue, SendFn } from "@window-splitter/state";
 export const InitialPrerenderContext = createContext<Accessor<boolean>>(
   () => false
 );
-export const PrerenderContext = createContext<boolean>(false);
 export const MachineActorContext = createContext<SendFn | undefined>();
 export const GroupIdContext = createContext<string | undefined>();
 export const MachineStateContext = createContext<
   Accessor<GroupMachineContextValue | undefined> | undefined
 >();
-
-// Helper hooks to enforce proper context usage
-export function usePrerenderContext() {
-  const context = useContext(PrerenderContext);
-  return context;
-}
 
 export function useInitialPrerenderContext() {
   const context = useContext(InitialPrerenderContext);
@@ -44,22 +37,19 @@ export function GroupMachineProvider(props: {
   groupId: string;
   send: SendFn;
   state: Accessor<GroupMachineContextValue | undefined>;
-  prerender?: boolean;
   initialPrerender?: Accessor<boolean>;
 }) {
   return (
     <InitialPrerenderContext.Provider
       value={props.initialPrerender ?? (() => false)}
     >
-      <PrerenderContext.Provider value={props.prerender ?? false}>
-        <GroupIdContext.Provider value={props.groupId}>
-          <MachineActorContext.Provider value={props.send}>
-            <MachineStateContext.Provider value={props.state}>
-              {props.children}
-            </MachineStateContext.Provider>
-          </MachineActorContext.Provider>
-        </GroupIdContext.Provider>
-      </PrerenderContext.Provider>
+      <GroupIdContext.Provider value={props.groupId}>
+        <MachineActorContext.Provider value={props.send}>
+          <MachineStateContext.Provider value={props.state}>
+            {props.children}
+          </MachineStateContext.Provider>
+        </MachineActorContext.Provider>
+      </GroupIdContext.Provider>
     </InitialPrerenderContext.Provider>
   );
 }

@@ -30,7 +30,6 @@ import {
 } from "solid-js";
 import {
   GroupMachineProvider,
-  usePrerenderContext,
   useMachineActor,
   useGroupId,
   useMachineState,
@@ -110,7 +109,6 @@ export function PanelGroup(props: PanelGroupProps) {
       groupId={groupId}
       send={send}
       state={getContext}
-      prerender
       initialPrerender={isInitialPrerender}
     >
       {props.children}
@@ -255,7 +253,6 @@ export function Panel({
   ...props
 }: PanelProps) {
   const panelId = id || createUniqueId();
-  const isPrerender = usePrerenderContext();
   const isInitialPrerender = useInitialPrerenderContext();
   const send = useMachineActor();
   const groupId = useGroupId();
@@ -284,7 +281,7 @@ export function Panel({
     if (!hasRegistered) {
       if (isInitialPrerender()) {
         send({ type: "registerPanel", data: panel });
-      } else if (!isPrerender) {
+      } else {
         dynamicPanelMounted = true;
       }
     } else {
@@ -429,7 +426,6 @@ export function PanelResizer({
   ...props
 }: PanelResizerProps) {
   const handleId = id || createUniqueId();
-  const isPrerender = usePrerenderContext();
   const isInitialPrerender = useInitialPrerenderContext();
   const send = useMachineActor();
   const state = useMachineState();
@@ -445,7 +441,7 @@ export function PanelResizer({
           type: "registerPanelHandle",
           data: { size, id: handleId },
         });
-      } else if (!isPrerender) {
+      } else {
         dynamicPanelHandleMounted = true;
       }
     }
