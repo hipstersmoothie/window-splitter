@@ -30,6 +30,7 @@ import {
   createUniqueId,
   JSX,
   mergeProps,
+  onCleanup,
   onMount,
   Ref,
 } from "solid-js";
@@ -152,16 +153,18 @@ export function PanelGroup(props: PanelGroupProps) {
   );
 
   // Prerender the children with the machine context
+  const [isPrerender, setIsPrerender] = createSignal(true);
   children(() => (
     <GroupMachineProvider
       groupId={groupId}
       send={send}
       state={() => intiialValue}
-      prerender
+      prerender={isPrerender}
     >
       {props.children}
     </GroupMachineProvider>
   ));
+  setIsPrerender(false);
 
   let elementRef: HTMLDivElement | undefined;
 
@@ -231,6 +234,7 @@ export function PanelGroup(props: PanelGroupProps) {
     <GroupMachineProvider groupId={groupId} send={send} state={currentValue}>
       <div
         ref={elementRef}
+        data-panel-group-wrapper
         {...mergeProps(props, {
           style: {
             display: "grid",
@@ -332,38 +336,68 @@ export function Panel({
   const groupId = useGroupId();
   const state = useMachineState();
 
-  if (send && prerender) {
+  const panel = initializePanel({
+    id: panelId,
+    min,
+    max,
+    collapsible,
+    collapsed: collapsed?.(),
+    collapsedSize,
+    onCollapseChange: { current: onCollapseChange },
+    collapseAnimation,
+    onResize: { current: onResize },
+    defaultCollapsed,
+    default: defaultSize,
+    isStaticAtRest,
+  });
+
+  let dynamicPanelMounted = false;
+
+  if (send) {
     const hasRegistered = state?.()?.items.find((i) => i.id === panelId);
 
     if (!hasRegistered) {
-      send({
-        type: "registerPanel",
-        data: initializePanel({
-          id: panelId,
-          min,
-          max,
-          collapsible,
-          collapsed: collapsed?.(),
-          collapsedSize,
-          onCollapseChange: { current: onCollapseChange },
-          collapseAnimation,
-          onResize: { current: onResize },
-          defaultCollapsed,
-          default: defaultSize,
-          isStaticAtRest,
-        }),
-      });
+      if (prerender()) {
+        send({ type: "registerPanel", data: panel });
+      } else {
+        send({ type: "registerDynamicPanel", data: panel });
+        dynamicPanelMounted = true;
+      }
     }
   }
 
-  const panel = () => {
+  onMount(() => {
+    if (dynamicPanelMounted) {
+      // get the index of the panel in it's group
+      const panelElement = document.getElementById(panelId);
+
+      if (!panelElement) return;
+
+      const groupElement = panelElement.closest(
+        `[data-panel-group-wrapper]`
+      ) as HTMLDivElement;
+
+      if (groupElement && panelElement) {
+        const order = Array.from(groupElement.children).indexOf(panelElement);
+
+        if (typeof order === "number") {
+          send?.({
+            type: "registerDynamicPanel",
+            data: { ...panel, order },
+          });
+        }
+      }
+    }
+  });
+
+  const panelData = () => {
     const item = state?.()?.items.find((i) => i.id === panelId);
     if (!item) return undefined;
     if (!isPanelData(item)) return undefined;
     return item;
   };
 
-  const collapseIsControlled = panel?.()?.collapseIsControlled;
+  const collapseIsControlled = panelData?.()?.collapseIsControlled;
 
   createEffect(() => {
     const currentCollapsed = collapsed?.() || false;
@@ -389,13 +423,13 @@ export function Panel({
           send?.({ type: "collapsePanel", panelId, controlled: true });
         }
       },
-      isCollapsed: () => Boolean(collapsible && panel()?.collapsed),
+      isCollapsed: () => Boolean(collapsible && panelData()?.collapsed),
       expand: () => {
         if (collapsible) {
           send?.({ type: "expandPanel", panelId, controlled: true });
         }
       },
-      isExpanded: () => Boolean(collapsible && !panel()?.collapsed),
+      isExpanded: () => Boolean(collapsible && !panelData()?.collapsed),
       getPixelSize: () => {
         const s = state?.();
         if (!s) throw new Error("No state");
@@ -412,13 +446,17 @@ export function Panel({
     })
   );
 
+  onCleanup(() => {
+    send?.({ type: "unregisterPanel", id: panelId });
+  });
+
   return (
     <div
       id={panelId}
       data-splitter-group-id={groupId}
       data-splitter-type="panel"
       data-splitter-id={panelId}
-      data-collapsed={panel()?.collapsed && panel()?.collapsible}
+      data-collapsed={panelData()?.collapsed && panelData()?.collapsible}
       {...props}
       style={{
         // @ts-expect-error Don't know how to merge styles
@@ -461,19 +499,50 @@ export function PanelResizer({
   const send = useMachineActor();
   const state = useMachineState();
 
-  if (isPrerender && send) {
+  let dynamicPanelHandleMounted = false;
+
+  if (send) {
     const hasRegistered = state?.()?.items.find((i) => i.id === handleId);
 
     if (!hasRegistered) {
+      if (!isPrerender()) {
+        dynamicPanelHandleMounted = true;
+      }
+
       send({
         type: "registerPanelHandle",
-        data: {
-          size,
-          id: handleId,
-        },
+        data: { size, id: handleId },
       });
     }
   }
+
+  onMount(() => {
+    if (dynamicPanelHandleMounted) {
+      // get the index of the panel in it's group
+      const handleElement = document.getElementById(handleId);
+
+      if (!handleElement) return;
+
+      const groupElement = handleElement.closest(
+        `[data-panel-group-wrapper]`
+      ) as HTMLDivElement;
+
+      if (groupElement && handleElement) {
+        const order = Array.from(groupElement.children).indexOf(handleElement);
+
+        if (typeof order === "number") {
+          send?.({
+            type: "registerPanelHandle",
+            data: {
+              size: size,
+              id: handleId,
+              order,
+            },
+          });
+        }
+      }
+    }
+  });
 
   const { moveProps } = move({
     onMoveStart: () => {
@@ -556,6 +625,10 @@ export function PanelResizer({
       }
     }
   };
+
+  onCleanup(() => {
+    send?.({ type: "unregisterPanelHandle", id: handleId });
+  });
 
   return (
     <div

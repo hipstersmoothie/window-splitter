@@ -11,7 +11,7 @@ import {
   PanelGroupHandle,
   PanelHandle,
 } from "./";
-import { createSignal } from "solid-js";
+import { createSignal, Show } from "solid-js";
 
 const meta = {
   title: "Solid/WindowSplitter",
@@ -536,9 +536,83 @@ export function ImperativePanel() {
   );
 }
 
-// Conditional Panel
+export function ConditionalPanel() {
+  const [isExpanded, setIsExpanded] = createSignal(false);
 
-// ConditionalPanelComplex
+  return (
+    <>
+      <StyledPanelGroup>
+        <StyledPanel id="panel-1" min="100px" collapsible collapsedSize="60px">
+          <div>1</div>
+        </StyledPanel>
+        <StyledResizer id="handle-1" />
+        <StyledPanel id="panel-2" min="100px">
+          <div>2</div>
+        </StyledPanel>
+
+        {isExpanded() && (
+          <>
+            <StyledResizer id="handle-2" />
+            <StyledPanel id="panel-3" min="100px">
+              3
+              <button type="button" onClick={() => setIsExpanded(false)}>
+                Close
+              </button>
+            </StyledPanel>
+          </>
+        )}
+      </StyledPanelGroup>
+
+      <button type="button" onClick={() => setIsExpanded(true)}>
+        Expand
+      </button>
+    </>
+  );
+}
+
+export function ConditionalPanelComplex() {
+  const [isExpanded, setIsExpanded] = createSignal(false);
+
+  return (
+    <>
+      <StyledPanelGroup>
+        <StyledPanel id="panel-1" min="100px" collapsible collapsedSize="60px">
+          <div>1</div>
+        </StyledPanel>
+        <StyledResizer id="handle-1" />
+        <StyledPanel id="panel-2" min="100px">
+          <div>2</div>
+        </StyledPanel>
+        <StyledResizer id="handle-2" />
+        <StyledPanel id="panel-3" min="100px">
+          <div>3</div>
+        </StyledPanel>
+        <Show when={isExpanded()}>
+          <StyledResizer id="handle-3" />
+          <StyledPanel id="panel-4" min="250px">
+            expanded
+            <button type="button" onClick={() => setIsExpanded(false)}>
+              Close
+            </button>
+          </StyledPanel>
+        </Show>
+        <StyledResizer id="handle-4" />
+        <StyledPanel
+          min="200px"
+          collapsible
+          collapsedSize="60px"
+          defaultCollapsed
+          id="panel-5"
+        >
+          <div>4</div>
+        </StyledPanel>
+      </StyledPanelGroup>
+      <button type="button" onClick={() => setIsExpanded(true)}>
+        Expand
+      </button>
+    </>
+  );
+}
 
 export function WithDefaultWidth() {
   return (

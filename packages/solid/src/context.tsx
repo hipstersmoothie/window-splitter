@@ -1,7 +1,8 @@
+/* eslint-disable @eslint-react/no-unstable-context-value */
 import { createContext, useContext, Accessor } from "solid-js";
 import { GroupMachineContextValue, SendFn } from "@window-splitter/state";
 
-export const PrerenderContext = createContext<boolean>(false);
+export const PrerenderContext = createContext<Accessor<boolean>>(() => false);
 export const MachineActorContext = createContext<SendFn | undefined>();
 export const GroupIdContext = createContext<string | undefined>();
 export const MachineStateContext = createContext<
@@ -35,10 +36,10 @@ export function GroupMachineProvider(props: {
   groupId: string;
   send: SendFn;
   state: Accessor<GroupMachineContextValue | undefined>;
-  prerender?: boolean;
+  prerender?: Accessor<boolean>;
 }) {
   return (
-    <PrerenderContext.Provider value={props.prerender ?? false}>
+    <PrerenderContext.Provider value={props.prerender ?? (() => false)}>
       <GroupIdContext.Provider value={props.groupId}>
         <MachineActorContext.Provider value={props.send}>
           <MachineStateContext.Provider value={props.state}>
