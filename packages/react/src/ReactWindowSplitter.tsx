@@ -9,6 +9,7 @@ import {
   SharedPanelGroupProps,
   SharedPanelProps,
   SharedPanelResizerProps,
+  mergeAttributes,
 } from "@window-splitter/interface";
 import React, {
   useEffect,
@@ -48,7 +49,6 @@ import {
   State,
 } from "@window-splitter/state";
 import {
-  mergeProps,
   useEffectEvent,
   useId,
   useLayoutEffect,
@@ -484,14 +484,13 @@ const PanelGroupImplementation = React.forwardRef<
       ref={ref}
       data-group-id={groupId}
       data-group-orientation={orientation}
-      {...mergeProps(props, {
+      {...mergeAttributes(props, {
         style: {
           display: "grid",
           gridTemplateColumns:
             orientation === "horizontal" ? template : undefined,
           gridTemplateRows: orientation === "vertical" ? template : undefined,
           height: "100%",
-          ...props.style,
         },
       })}
     />
@@ -683,21 +682,22 @@ const PanelVisible = React.forwardRef<
   return (
     <div
       ref={ref}
-      {...mergeProps(
+      {...mergeAttributes(
         props,
         getPanelDomAttributes({
           groupId,
           id: panelId,
           collapsed,
           collapsible: panel?.collapsible,
-        })
+        }),
+        {
+          style: {
+            minWidth: 0,
+            minHeight: 0,
+            overflow: "hidden",
+          },
+        }
       )}
-      style={{
-        minWidth: 0,
-        minHeight: 0,
-        overflow: "hidden",
-        ...props.style,
-      }}
     />
   );
 });
@@ -846,11 +846,11 @@ const PanelResizerVisible = React.forwardRef<
   return (
     <div
       ref={ref as unknown as React.Ref<HTMLDivElement>}
-      {...mergeProps(
+      {...mergeAttributes(
         props,
         disabled
           ? {}
-          : mergeProps(moveProps as React.HTMLAttributes<HTMLDivElement>, {
+          : mergeAttributes(moveProps as React.HTMLAttributes<HTMLDivElement>, {
               onKeyDown,
               tabIndex: 0,
             }),
@@ -866,15 +866,16 @@ const PanelResizerVisible = React.forwardRef<
           max: panelBeforeHandle?.max,
           currentValue: panelBeforeHandle?.currentValue,
           groupSize: groupsSize,
-        })
+        }),
+        {
+          style: {
+            cursor,
+            ...(orientation === "horizontal"
+              ? { width: unit.value.toNumber(), height: "100%" }
+              : { height: unit.value.toNumber(), width: "100%" }),
+          },
+        }
       )}
-      style={{
-        cursor,
-        ...props.style,
-        ...(orientation === "horizontal"
-          ? { width: unit.value.toNumber(), height: "100%" }
-          : { height: unit.value.toNumber(), width: "100%" }),
-      }}
     />
   );
 });

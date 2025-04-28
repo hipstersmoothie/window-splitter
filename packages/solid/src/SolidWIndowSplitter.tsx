@@ -18,12 +18,12 @@ import {
 import {
   Accessor,
   children,
+  createDeferred,
   createEffect,
   createRenderEffect,
   createSignal,
   createUniqueId,
   JSX,
-  mergeProps,
   onCleanup,
   onMount,
   Ref,
@@ -45,6 +45,7 @@ import {
   getPanelDomAttributes,
   getPanelResizerDomAttributes,
   move,
+  mergeAttributes,
 } from "@window-splitter/interface";
 
 export interface PanelGroupProps
@@ -138,12 +139,23 @@ export function PanelGroup(props: PanelGroupProps) {
     return () => observer.disconnect();
   });
 
+  const childIds = createDeferred(() => {
+    const s = currentValue?.();
+    if (!s) throw new Error("No state");
+    return s.items.map((i) => i.id).join(",");
+  });
+
   // Measure children size
-  onMount(() => {
-    // TODO unmount not working
-    return measureGroupChildren(groupId, (childrenSizes) => {
+  createEffect(() => {
+    // This sets up a dep on the childIds. When new ids are added this
+    // effect will clean up and re-run to measure the new children.
+    childIds();
+
+    const cleanup = measureGroupChildren(groupId, (childrenSizes) => {
       send({ type: "setActualItemsSize", childrenSizes });
     });
+
+    onCleanup(cleanup);
   });
 
   createRefContent(
@@ -199,7 +211,7 @@ export function PanelGroup(props: PanelGroupProps) {
     <div
       ref={elementRef}
       data-panel-group-wrapper
-      {...mergeProps(props, {
+      {...mergeAttributes(props, {
         style: {
           display: "grid",
           "grid-template-columns":
@@ -207,7 +219,6 @@ export function PanelGroup(props: PanelGroupProps) {
           "grid-template-rows":
             orientation === "vertical" ? getTemplate() : undefined,
           height: "100%",
-          ...props?.style,
         },
       })}
     >
@@ -398,7 +409,7 @@ export function Panel({
 
   return (
     <div
-      {...mergeProps(props, domAttributes())}
+      {...mergeAttributes(props, domAttributes())}
       style={{
         "min-width": 0,
         "min-height": 0,
@@ -551,8 +562,6 @@ export function PanelResizer({
       } else {
         send?.({ type: "collapsePanel", panelId: collapsiblePanel.id });
       }
-    } else {
-      moveProps.onKeyDown?.(e);
     }
   };
 
@@ -567,9 +576,9 @@ export function PanelResizer({
 
   return (
     <div
-      {...mergeProps(
+      {...mergeAttributes(
         props,
-        disabled ? {} : mergeProps(moveProps, { onKeyDown, tabIndex: 0 }),
+        disabled ? {} : mergeAttributes(moveProps, { onKeyDown, tabIndex: 0 }),
         panelAttributes(),
         {
           style: {
