@@ -12,6 +12,11 @@ export function useMove({ onMoveStart, onMove, onMoveEnd }: MoveEvents) {
       onMoveStart: onMoveStartEvent,
       onMove: onMoveEvent,
       onMoveEnd: onMoveEndEvent,
-    });
+    }) as unknown as {
+      moveProps: {
+        onPointerDown: (e: React.PointerEvent) => void;
+        onKeyDown: (e: React.KeyboardEvent) => void;
+      };
+    };
   }, [onMoveStartEvent, onMoveEvent, onMoveEndEvent]);
 }
