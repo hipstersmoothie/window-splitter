@@ -28,7 +28,6 @@ import {
   onMount,
   Ref,
 } from "solid-js";
-import { move } from "./move";
 import {
   GroupMachineProvider,
   usePrerenderContext,
@@ -45,6 +44,7 @@ import {
   measureGroupChildren,
   getPanelDomAttributes,
   getPanelResizerDomAttributes,
+  move,
 } from "@window-splitter/interface";
 
 export interface PanelGroupProps
