@@ -1,5 +1,6 @@
 import type { Meta } from "storybook-solidjs";
 import { spring } from "framer-motion";
+import * as Cookies from "tiny-cookie";
 
 import {
   PanelGroup,
@@ -8,8 +9,8 @@ import {
   PanelGroupProps,
   PanelProps,
   PanelResizerProps,
-} from "./SolidWIndowSplitter.jsx";
-import { createSignal, Show } from "solid-js";
+} from "./SolidWindowSplitter.jsx";
+import { createSignal, Ref, Show } from "solid-js";
 import { PanelHandle } from "@window-splitter/interface";
 import { PanelGroupHandle } from "@window-splitter/interface";
 
@@ -66,9 +67,9 @@ function StyledResizer(props: PanelResizerProps) {
   return <PanelResizer size="10px" style={{ background: "red" }} {...props} />;
 }
 
-export function Simple() {
+export function Simple({ handle }: { handle?: Ref<PanelGroupHandle> }) {
   return (
-    <StyledPanelGroup style={{ height: "200px" }}>
+    <StyledPanelGroup handle={handle} style={{ height: "200px" }}>
       <StyledPanel id="panel-1">Panel 1</StyledPanel>
       <StyledResizer id="resizer-1" />
       <StyledPanel id="panel-2" min="100px">
@@ -78,9 +79,19 @@ export function Simple() {
   );
 }
 
-export function Autosave() {
+export function Autosave({
+  handle,
+  snapshot,
+}: {
+  handle?: Ref<PanelGroupHandle>;
+  snapshot?: GroupMachineContextValue;
+}) {
   return (
-    <StyledPanelGroup autosaveId="autosave-example1">
+    <StyledPanelGroup
+      autosaveId="autosave-example-solid"
+      handle={handle}
+      snapshot={snapshot}
+    >
       <StyledPanel id="1">Panel 1</StyledPanel>
       <StyledResizer id="resizer" />
       <StyledPanel id="2">Panel 2</StyledPanel>
@@ -88,9 +99,35 @@ export function Autosave() {
   );
 }
 
-export function AutosaveCollapsible() {
+export function AutosaveCookie({
+  handle,
+  snapshot,
+}: {
+  handle?: Ref<PanelGroupHandle>;
+  snapshot?: GroupMachineContextValue;
+}) {
   return (
-    <StyledPanelGroup autosaveId="autosave-example-2">
+    <StyledPanelGroup
+      autosaveId="autosave-cookie-solid"
+      autosaveStrategy="cookie"
+      style={{ height: "200px" }}
+      handle={handle}
+      snapshot={snapshot}
+    >
+      <StyledPanel id="1">Panel 1</StyledPanel>
+      <StyledResizer id="resizer1" size="10px" style={{ background: "red" }} />
+      <StyledPanel id="2">Panel 2</StyledPanel>
+    </StyledPanelGroup>
+  );
+}
+
+export function AutosaveCollapsible({
+  handle,
+}: {
+  handle?: Ref<PanelGroupHandle>;
+}) {
+  return (
+    <StyledPanelGroup autosaveId="autosave-example-2" handle={handle}>
       <StyledPanel id="1" collapsible collapsedSize="100px" min="140px">
         Collapsible
       </StyledPanel>
@@ -170,9 +207,13 @@ export function HorizontalLayout() {
   );
 }
 
-export function VerticalLayout() {
+export function VerticalLayout({ handle }: { handle?: Ref<PanelGroupHandle> }) {
   return (
-    <StyledPanelGroup orientation="vertical" style={{ height: "322px" }}>
+    <StyledPanelGroup
+      orientation="vertical"
+      style={{ height: "322px" }}
+      handle={handle}
+    >
       <StyledPanel default="30%" min="20%" id="panel-1">
         top
       </StyledPanel>
@@ -355,12 +396,21 @@ export function WithOverflow() {
   );
 }
 
-export function Collapsible() {
+export function Collapsible({
+  handle,
+  rightPanelHandle,
+  leftPanelHandle,
+}: {
+  handle?: Ref<PanelGroupHandle>;
+  rightPanelHandle?: Ref<PanelHandle>;
+  leftPanelHandle?: Ref<PanelHandle>;
+}) {
   const [collapsed, setCollapsed] = createSignal(true);
 
   return (
-    <StyledPanelGroup>
+    <StyledPanelGroup handle={handle}>
       <StyledPanel
+        handle={leftPanelHandle}
         min="100px"
         id="panel-1"
         collapsible
@@ -378,6 +428,7 @@ export function Collapsible() {
       </StyledPanel>
       <StyledResizer id="resizer-2" />
       <StyledPanel
+        handle={rightPanelHandle}
         min="100px"
         id="panel-3"
         collapsible
@@ -536,12 +587,16 @@ export function ImperativePanel() {
   );
 }
 
-export function ConditionalPanel() {
+export function ConditionalPanel({
+  handle,
+}: {
+  handle?: Ref<PanelGroupHandle>;
+}) {
   const [isExpanded, setIsExpanded] = createSignal(false);
 
   return (
     <>
-      <StyledPanelGroup>
+      <StyledPanelGroup handle={handle}>
         <StyledPanel id="panel-1" min="100px" collapsible collapsedSize="60px">
           <div>1</div>
         </StyledPanel>

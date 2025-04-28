@@ -1685,7 +1685,7 @@ export function groupMachine(
   let locked = false;
 
   const context: GroupMachineContextValue = {
-    size: { width: 0, height: 0 },
+    size: input.size || { width: 0, height: 0 },
     items: input.items || [],
     orientation: input.orientation || "horizontal",
     dragOvershoot: new Big(0),

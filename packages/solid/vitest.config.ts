@@ -7,7 +7,6 @@ export default defineConfig({
     target: "esnext",
   },
   test: {
-    setupFiles: ["./vitest.setup.ts"],
     coverage: {
       provider: "istanbul",
       include: ["**/*.tsx", "!**/*.stories.tsx", "!**/*.test.tsx"],

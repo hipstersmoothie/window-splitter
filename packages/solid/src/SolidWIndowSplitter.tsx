@@ -179,8 +179,19 @@ export function PanelGroup(props: PanelGroupProps) {
     })
   );
 
+  const getContext = () => {
+    const context = currentValue?.() || intiialValue;
+    if (!context) throw new Error("No state");
+    return context;
+  };
+  const getTemplate = () => {
+    const context = getContext();
+    const tempalte = buildTemplate(context);
+    return tempalte;
+  };
+
   return (
-    <GroupMachineProvider groupId={groupId} send={send} state={currentValue}>
+    <GroupMachineProvider groupId={groupId} send={send} state={getContext}>
       <div
         ref={elementRef}
         data-panel-group-wrapper
@@ -188,13 +199,9 @@ export function PanelGroup(props: PanelGroupProps) {
           style: {
             display: "grid",
             "grid-template-columns":
-              orientation === "horizontal"
-                ? buildTemplate(currentValue() ?? intiialValue)
-                : undefined,
+              orientation === "horizontal" ? getTemplate() : undefined,
             "grid-template-rows":
-              orientation === "vertical"
-                ? buildTemplate(currentValue() ?? intiialValue)
-                : undefined,
+              orientation === "vertical" ? getTemplate() : undefined,
             height: "100%",
             // @ts-expect-error TODO: fix this
             ...props?.style,
@@ -529,6 +536,8 @@ export function PanelResizer({
       } else {
         send?.({ type: "collapsePanel", panelId: collapsiblePanel.id });
       }
+    } else {
+      moveProps.onKeyDown?.(e);
     }
   };
 
