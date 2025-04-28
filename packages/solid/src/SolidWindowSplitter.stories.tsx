@@ -8,10 +8,10 @@ import {
   PanelGroupProps,
   PanelProps,
   PanelResizerProps,
-  PanelGroupHandle,
-  PanelHandle,
-} from "./";
+} from "./SolidWIndowSplitter.jsx";
 import { createSignal, Show } from "solid-js";
+import { PanelHandle } from "@window-splitter/interface";
+import { PanelGroupHandle } from "@window-splitter/interface";
 
 const meta = {
   title: "Solid/WindowSplitter",
