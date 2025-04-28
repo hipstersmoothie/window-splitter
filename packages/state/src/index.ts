@@ -25,7 +25,7 @@ export interface ParsedPixelUnit {
   value: Big.Big;
 }
 
-type ParsedUnit = ParsedPercentUnit | ParsedPixelUnit;
+export type ParsedUnit = ParsedPercentUnit | ParsedPixelUnit;
 
 export function makePercentUnit(value: number): ParsedPercentUnit {
   return { type: "percent", value: new Big(value) };

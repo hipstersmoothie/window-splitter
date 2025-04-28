@@ -4,7 +4,7 @@ import {
   GroupMachineContextValue,
   OnResizeCallback,
   PanelData,
-  ParsedUnit,
+  ParsedPixelUnit,
   PixelUnit,
   Rect,
   Unit,
@@ -146,9 +146,9 @@ export function getPanelResizerDomAttributes({
   activeDragHandleId: string | undefined;
   disabled: boolean | undefined;
   controlsId: string | undefined;
-  min: ParsedUnit | undefined;
-  max: ParsedUnit | "1fr" | undefined;
-  currentValue: ParsedUnit | undefined;
+  min: ParsedPixelUnit | undefined;
+  max: ParsedPixelUnit | "1fr" | undefined;
+  currentValue: ParsedPixelUnit | undefined;
   groupSize: number;
 }) {
   return {

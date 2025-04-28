@@ -49,7 +49,7 @@ interface MoveEndEvent extends BaseMoveEvent {
   type: "moveend";
 }
 
-interface MoveEvents {
+export interface MoveEvents {
   /** Handler that is called when a move interaction starts. */
   onMoveStart?: (e: MoveStartEvent) => void;
   /** Handler that is called when the element is moved. */

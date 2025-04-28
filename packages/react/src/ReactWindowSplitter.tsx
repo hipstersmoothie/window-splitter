@@ -54,8 +54,8 @@ import {
   useLayoutEffect,
   mergeRefs,
 } from "@react-aria/utils";
-import { useMove } from "@react-aria/interactions";
 import { useIndex, useIndexedChildren } from "./useIndexedChildren.js";
+import { useMove } from "./useMove.js";
 
 // #region Components
 
