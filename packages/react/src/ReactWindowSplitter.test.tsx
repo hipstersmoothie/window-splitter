@@ -3,6 +3,7 @@ import { test, expect, describe, vi } from "vitest";
 import { cleanup, fireEvent, render, waitFor } from "@testing-library/react";
 import * as Cookies from "tiny-cookie";
 
+import { PanelGroupHandle, PanelHandle } from "@window-splitter/interface";
 import {
   Autosave,
   AutosaveCollapsible,
@@ -12,13 +13,7 @@ import {
   VerticalLayout,
   DynamicConstraints,
 } from "./ReactWindowSplitter.stories.js";
-import {
-  PanelGroupHandle,
-  PanelResizer,
-  PanelHandle,
-  PanelGroup,
-  Panel,
-} from "./index.js";
+import { PanelResizer, PanelGroup, Panel } from "./ReactWindowSplitter.js";
 
 async function dragHandle(options: {
   handleId?: string;

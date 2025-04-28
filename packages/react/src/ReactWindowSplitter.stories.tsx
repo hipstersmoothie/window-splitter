@@ -6,10 +6,9 @@ import {
   Panel,
   PanelProps,
   PanelResizer,
-  PanelHandle,
-  PanelGroupHandle,
   PanelResizerProps,
-} from "./index.js";
+} from "./ReactWindowSplitter.js";
+import { PanelGroupHandle, PanelHandle } from "@window-splitter/interface";
 
 export default {
   title: "Components/ResizeableGridPanels",
