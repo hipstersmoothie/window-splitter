@@ -1,6 +1,9 @@
 "use client";
 
 import {
+  getPanelDomAttributes,
+  getPanelResizerDomAttributes,
+  measureGroupChildren,
   PanelGroupHandle,
   PanelHandle,
   SharedPanelGroupProps,
@@ -21,7 +24,6 @@ import {
   getCollapsiblePanelForHandleId,
   getGroupSize,
   getPanelWithId,
-  getUnitPercentageValue,
   groupMachine,
   GroupMachineContextValue,
   initializePanel,
@@ -31,7 +33,6 @@ import {
   PanelData,
   parseUnit,
   prepareItems,
-  Rect,
   prepareSnapshot,
   getPanelGroupPixelSizes,
   getPanelGroupPercentageSizes,
@@ -159,42 +160,6 @@ const GroupMachine = {
 //     )
 //   );
 // }
-
-function measureGroupChildren(
-  groupId: string,
-  cb: (childrenSizes: Record<string, Rect>) => void
-) {
-  const childrenObserver = new ResizeObserver((childrenEntries) => {
-    const childrenSizes: Record<string, { width: number; height: number }> = {};
-
-    for (const childEntry of childrenEntries) {
-      const child = childEntry.target as HTMLElement;
-      const childId = child.getAttribute("data-splitter-id");
-      const childSize = childEntry.borderBoxSize[0];
-
-      if (childId && childSize) {
-        childrenSizes[childId] = {
-          width: childSize.inlineSize,
-          height: childSize.blockSize,
-        };
-      }
-    }
-
-    cb(childrenSizes);
-  });
-
-  const children = document.querySelectorAll(
-    `[data-splitter-group-id="${groupId}"]`
-  );
-
-  for (const child of children) {
-    childrenObserver.observe(child);
-  }
-
-  return () => {
-    childrenObserver.disconnect();
-  };
-}
 
 export interface PanelGroupProps
   extends React.HTMLAttributes<HTMLDivElement>,
@@ -718,16 +683,20 @@ const PanelVisible = React.forwardRef<
   return (
     <div
       ref={ref}
-      data-splitter-group-id={groupId}
-      data-splitter-type="panel"
-      data-splitter-id={panelId}
-      data-collapsed={collapsible && panel?.collapsed}
-      {...props}
+      {...mergeProps(
+        props,
+        getPanelDomAttributes({
+          groupId,
+          id: panelId,
+          collapsed,
+          collapsible: panel?.collapsible,
+        })
+      )}
       style={{
-        ...props.style,
         minWidth: 0,
         minHeight: 0,
         overflow: "hidden",
+        ...props.style,
       }}
     />
   );
@@ -815,6 +784,7 @@ const PanelResizerVisible = React.forwardRef<
   const activeDragHandleId = GroupMachine.useSelector(
     (state) => state.context.activeDragHandleId
   );
+  const groupId = GroupMachine.useSelector((state) => state.context.groupId);
   const [isDragging, setIsDragging] = React.useState(false);
 
   let cursor: React.CSSProperties["cursor"];
@@ -876,33 +846,6 @@ const PanelResizerVisible = React.forwardRef<
   return (
     <div
       ref={ref as unknown as React.Ref<HTMLDivElement>}
-      role="separator"
-      data-splitter-type="handle"
-      data-splitter-id={handleId}
-      data-handle-orientation={orientation}
-      data-state={
-        isDragging ? "dragging" : activeDragHandleId ? "inactive" : "idle"
-      }
-      aria-label="Resize Handle"
-      aria-disabled={disabled}
-      aria-controls={panelBeforeHandle?.id}
-      aria-valuemin={
-        panelBeforeHandle
-          ? getUnitPercentageValue(groupsSize, panelBeforeHandle.min)
-          : undefined
-      }
-      aria-valuemax={
-        panelBeforeHandle?.max === "1fr"
-          ? 100
-          : panelBeforeHandle
-            ? getUnitPercentageValue(groupsSize, panelBeforeHandle.max)
-            : undefined
-      }
-      aria-valuenow={
-        panelBeforeHandle
-          ? getUnitPercentageValue(groupsSize, panelBeforeHandle.currentValue)
-          : undefined
-      }
       {...mergeProps(
         props,
         disabled
@@ -910,7 +853,20 @@ const PanelResizerVisible = React.forwardRef<
           : mergeProps(moveProps as React.HTMLAttributes<HTMLDivElement>, {
               onKeyDown,
               tabIndex: 0,
-            })
+            }),
+        getPanelResizerDomAttributes({
+          groupId,
+          id: handleId,
+          orientation,
+          isDragging,
+          activeDragHandleId,
+          disabled,
+          controlsId: panelBeforeHandle?.id,
+          min: panelBeforeHandle?.min,
+          max: panelBeforeHandle?.max,
+          currentValue: panelBeforeHandle?.currentValue,
+          groupSize: groupsSize,
+        })
       )}
       style={{
         cursor,

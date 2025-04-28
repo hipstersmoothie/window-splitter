@@ -7,7 +7,6 @@ import {
   getPanelGroupPixelSizes,
   getPanelPercentageSize,
   getPanelPixelSize,
-  getUnitPercentageValue,
   groupMachine,
   GroupMachineContextValue,
   initializePanel,
@@ -15,7 +14,6 @@ import {
   parseUnit,
   prepareItems,
   prepareSnapshot,
-  Rect,
 } from "@window-splitter/state";
 import {
   Accessor,
@@ -44,41 +42,10 @@ import {
   PanelHandle,
   SharedPanelProps,
   SharedPanelResizerProps,
+  measureGroupChildren,
+  getPanelDomAttributes,
+  getPanelResizerDomAttributes,
 } from "@window-splitter/interface";
-
-function measureGroupChildren(
-  groupId: string,
-  cb: (childrenSizes: Record<string, Rect>) => void
-) {
-  const childrenObserver = new ResizeObserver((childrenEntries) => {
-    const childrenSizes: Record<string, { width: number; height: number }> = {};
-
-    for (const childEntry of childrenEntries) {
-      const child = childEntry.target as HTMLElement;
-      const childId = child.getAttribute("data-splitter-id");
-      const childSize = childEntry.borderBoxSize[0];
-
-      if (childId && childSize) {
-        childrenSizes[childId] = {
-          width: childSize.inlineSize,
-          height: childSize.blockSize,
-        };
-      }
-    }
-
-    cb(childrenSizes);
-  });
-
-  const c = document.querySelectorAll(`[data-splitter-group-id="${groupId}"]`);
-
-  for (const child of c) {
-    childrenObserver.observe(child);
-  }
-
-  return () => {
-    childrenObserver.disconnect();
-  };
-}
 
 export interface PanelGroupProps
   extends JSX.HTMLAttributes<HTMLDivElement>,
@@ -145,6 +112,7 @@ export function PanelGroup(props: PanelGroupProps) {
 
   let elementRef: HTMLDivElement | undefined;
 
+  // Measure group size
   onMount(() => {
     const observer = new ResizeObserver(([entry]) => {
       if (!entry) return;
@@ -161,7 +129,9 @@ export function PanelGroup(props: PanelGroupProps) {
     return () => observer.disconnect();
   });
 
+  // Measure children size
   onMount(() => {
+    // TODO unmount not working
     return measureGroupChildren(groupId, (childrenSizes) => {
       send({ type: "setActualItemsSize", childrenSizes });
     });
@@ -391,20 +361,26 @@ export function Panel({
     send?.({ type: "unregisterPanel", id: panelId });
   });
 
+  const domAttributes = () => {
+    const currentPanel = panelData();
+
+    return getPanelDomAttributes({
+      groupId,
+      id: panelId,
+      collapsible: currentPanel?.collapsible,
+      collapsed: currentPanel?.collapsed,
+    });
+  };
+
   return (
     <div
-      id={panelId}
-      data-splitter-group-id={groupId}
-      data-splitter-type="panel"
-      data-splitter-id={panelId}
-      data-collapsed={panelData()?.collapsed && panelData()?.collapsible}
-      {...props}
+      {...mergeProps(props, domAttributes())}
       style={{
+        "min-width": 0,
+        "min-height": 0,
+        overflow: "hidden",
         // @ts-expect-error Don't know how to merge styles
         ...props.style,
-        minWidth: 0,
-        minHeight: 0,
-        overflow: "hidden",
       }}
     />
   );
@@ -508,27 +484,26 @@ export function PanelResizer({
       return undefined;
     }
   };
-  const ariaValues = () => {
+  const panelAttributes = () => {
     const panelBefore = panelBeforeHandle();
     const currentState = state?.();
+
     if (!panelBefore || !currentState || !isPanelData(panelBefore))
       return undefined;
 
-    return {
-      "aria-controls": panelBefore.id,
-      "aria-valuemin": getUnitPercentageValue(
-        getGroupSize(currentState),
-        panelBefore.min
-      ),
-      "aria-valuemax":
-        panelBefore.max === "1fr"
-          ? 100
-          : getUnitPercentageValue(getGroupSize(currentState), panelBefore.max),
-      "aria-valuenow": getUnitPercentageValue(
-        getGroupSize(currentState),
-        panelBefore.currentValue
-      ),
-    };
+    return getPanelResizerDomAttributes({
+      groupId: currentState.groupId,
+      id: handleId,
+      orientation: currentState.orientation,
+      isDragging: isDragging(),
+      activeDragHandleId: activeDragHandleId(),
+      disabled,
+      controlsId: panelBefore.id,
+      min: panelBefore.min,
+      max: panelBefore.max,
+      currentValue: panelBefore.currentValue,
+      groupSize: getGroupSize(currentState),
+    });
   };
 
   const cursor = () => {
@@ -564,20 +539,10 @@ export function PanelResizer({
 
   return (
     <div
-      role="separator"
-      id={handleId}
-      data-splitter-type="handle"
-      data-splitter-id={handleId}
-      data-handle-orientation={state?.()?.orientation}
-      data-state={
-        isDragging() ? "dragging" : activeDragHandleId() ? "inactive" : "idle"
-      }
-      aria-label="Resize Handle"
-      aria-disabled={disabled}
       {...mergeProps(
         props,
         disabled ? {} : mergeProps(moveProps, { onKeyDown, tabIndex: 0 }),
-        ariaValues(),
+        panelAttributes(),
         {
           style: {
             cursor: cursor(),
