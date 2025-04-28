@@ -34,7 +34,7 @@ import {
   useMachineActor,
   useGroupId,
   useMachineState,
-} from "./context";
+} from "./context.js";
 import {
   PanelGroupHandle,
   SharedPanelGroupProps,
@@ -521,7 +521,7 @@ export function PanelResizer({
       : { height: `${unit.value.toNumber()}px`, width: "100%" };
   };
 
-  const onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+  const onKeyDown = (e: KeyboardEvent) => {
     const collapsiblePanel = getCollapsiblePanel();
 
     if (e.key === "Enter" && collapsiblePanel) {
