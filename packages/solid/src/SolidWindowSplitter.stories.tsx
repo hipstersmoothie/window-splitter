@@ -14,7 +14,7 @@ import { PanelHandle } from "@window-splitter/interface";
 import { PanelGroupHandle } from "@window-splitter/interface";
 
 const meta = {
-  title: "Solid/WindowSplitter",
+  title: "Components/Solid",
   component: PanelGroup,
 } satisfies Meta<typeof PanelGroup>;
 
@@ -589,7 +589,7 @@ export function ConditionalPanelComplex() {
         </StyledPanel>
         <Show when={isExpanded()}>
           <StyledResizer id="handle-3" />
-          <StyledPanel id="panel-4" min="250px">
+          <StyledPanel id="panel-4" min="100px">
             expanded
             <button type="button" onClick={() => setIsExpanded(false)}>
               Close

@@ -2,7 +2,10 @@
 import { createContext, useContext, Accessor, JSXElement } from "solid-js";
 import { GroupMachineContextValue, SendFn } from "@window-splitter/state";
 
-export const PrerenderContext = createContext<Accessor<boolean>>(() => false);
+export const InitialPrerenderContext = createContext<Accessor<boolean>>(
+  () => false
+);
+export const PrerenderContext = createContext<boolean>(false);
 export const MachineActorContext = createContext<SendFn | undefined>();
 export const GroupIdContext = createContext<string | undefined>();
 export const MachineStateContext = createContext<
@@ -12,6 +15,11 @@ export const MachineStateContext = createContext<
 // Helper hooks to enforce proper context usage
 export function usePrerenderContext() {
   const context = useContext(PrerenderContext);
+  return context;
+}
+
+export function useInitialPrerenderContext() {
+  const context = useContext(InitialPrerenderContext);
   return context;
 }
 
@@ -36,17 +44,22 @@ export function GroupMachineProvider(props: {
   groupId: string;
   send: SendFn;
   state: Accessor<GroupMachineContextValue | undefined>;
-  prerender?: Accessor<boolean>;
+  prerender?: boolean;
+  initialPrerender?: Accessor<boolean>;
 }) {
   return (
-    <PrerenderContext.Provider value={props.prerender ?? (() => false)}>
-      <GroupIdContext.Provider value={props.groupId}>
-        <MachineActorContext.Provider value={props.send}>
-          <MachineStateContext.Provider value={props.state}>
-            {props.children}
-          </MachineStateContext.Provider>
-        </MachineActorContext.Provider>
-      </GroupIdContext.Provider>
-    </PrerenderContext.Provider>
+    <InitialPrerenderContext.Provider
+      value={props.initialPrerender ?? (() => false)}
+    >
+      <PrerenderContext.Provider value={props.prerender ?? false}>
+        <GroupIdContext.Provider value={props.groupId}>
+          <MachineActorContext.Provider value={props.send}>
+            <MachineStateContext.Provider value={props.state}>
+              {props.children}
+            </MachineStateContext.Provider>
+          </MachineActorContext.Provider>
+        </GroupIdContext.Provider>
+      </PrerenderContext.Provider>
+    </InitialPrerenderContext.Provider>
   );
 }

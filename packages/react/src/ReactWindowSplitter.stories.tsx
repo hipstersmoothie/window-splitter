@@ -11,7 +11,7 @@ import {
 import { PanelGroupHandle, PanelHandle } from "@window-splitter/interface";
 
 export default {
-  title: "Components/ResizeableGridPanels",
+  title: "Components/React",
 };
 
 function StyledPanelGroup(props: PanelGroupProps) {

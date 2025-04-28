@@ -34,7 +34,8 @@ import {
   useMachineActor,
   useGroupId,
   useMachineState,
-} from "./context.js";
+  useInitialPrerenderContext,
+} from "./context.jsx";
 import {
   PanelGroupHandle,
   SharedPanelGroupProps,
@@ -97,18 +98,19 @@ export function PanelGroup(props: PanelGroupProps) {
   );
 
   // Prerender the children with the machine context
-  const [isPrerender, setIsPrerender] = createSignal(true);
+  const [isInitialPrerender, setIsInitialPrerender] = createSignal(true);
   children(() => (
     <GroupMachineProvider
       groupId={groupId}
       send={send}
       state={() => intiialValue}
-      prerender={isPrerender}
+      prerender
+      initialPrerender={isInitialPrerender}
     >
       {props.children}
     </GroupMachineProvider>
   ));
-  setIsPrerender(false);
+  setIsInitialPrerender(false);
 
   let elementRef: HTMLDivElement | undefined;
 
@@ -242,7 +244,8 @@ export function Panel({
   ...props
 }: PanelProps) {
   const panelId = id || createUniqueId();
-  const prerender = usePrerenderContext();
+  const isPrerender = usePrerenderContext();
+  const isInitialPrerender = useInitialPrerenderContext();
   const send = useMachineActor();
   const groupId = useGroupId();
   const state = useMachineState();
@@ -268,37 +271,36 @@ export function Panel({
     const hasRegistered = state?.()?.items.find((i) => i.id === panelId);
 
     if (!hasRegistered) {
-      if (prerender()) {
+      if (isInitialPrerender()) {
         send({ type: "registerPanel", data: panel });
-      } else {
-        send({ type: "registerDynamicPanel", data: panel });
+      } else if (!isPrerender) {
         dynamicPanelMounted = true;
       }
     }
   }
 
   onMount(() => {
-    if (dynamicPanelMounted) {
-      // get the index of the panel in it's group
-      const panelElement = document.getElementById(panelId);
+    if (!dynamicPanelMounted) return;
 
-      if (!panelElement) return;
+    // get the index of the panel in it's group
+    const panelElement = document.getElementById(panelId);
 
-      const groupElement = panelElement.closest(
-        `[data-panel-group-wrapper]`
-      ) as HTMLDivElement;
+    if (!panelElement) return;
 
-      if (groupElement && panelElement) {
-        const order = Array.from(groupElement.children).indexOf(panelElement);
+    const groupElement = panelElement.closest(
+      `[data-panel-group-wrapper]`
+    ) as HTMLDivElement;
 
-        if (typeof order === "number") {
-          send?.({
-            type: "registerDynamicPanel",
-            data: { ...panel, order },
-          });
-        }
-      }
-    }
+    if (!groupElement || !panelElement) return;
+
+    const order = Array.from(groupElement.children).indexOf(panelElement);
+
+    if (typeof order !== "number") return;
+
+    send?.({
+      type: "registerDynamicPanel",
+      data: { ...panel, order },
+    });
   });
 
   const panelData = () => {
@@ -404,6 +406,7 @@ export function PanelResizer({
 }: PanelResizerProps) {
   const handleId = id || createUniqueId();
   const isPrerender = usePrerenderContext();
+  const isInitialPrerender = useInitialPrerenderContext();
   const send = useMachineActor();
   const state = useMachineState();
 
@@ -413,43 +416,39 @@ export function PanelResizer({
     const hasRegistered = state?.()?.items.find((i) => i.id === handleId);
 
     if (!hasRegistered) {
-      if (!isPrerender()) {
+      if (isInitialPrerender()) {
+        send({
+          type: "registerPanelHandle",
+          data: { size, id: handleId },
+        });
+      } else if (!isPrerender) {
         dynamicPanelHandleMounted = true;
       }
-
-      send({
-        type: "registerPanelHandle",
-        data: { size, id: handleId },
-      });
     }
   }
 
   onMount(() => {
-    if (dynamicPanelHandleMounted) {
-      // get the index of the panel in it's group
-      const handleElement = document.getElementById(handleId);
+    if (!dynamicPanelHandleMounted) return;
 
-      if (!handleElement) return;
+    // get the index of the panel in it's group
+    const handleElement = document.getElementById(handleId);
 
-      const groupElement = handleElement.closest(
-        `[data-panel-group-wrapper]`
-      ) as HTMLDivElement;
+    if (!handleElement) return;
 
-      if (groupElement && handleElement) {
-        const order = Array.from(groupElement.children).indexOf(handleElement);
+    const groupElement = handleElement.closest(
+      `[data-panel-group-wrapper]`
+    ) as HTMLDivElement;
 
-        if (typeof order === "number") {
-          send?.({
-            type: "registerPanelHandle",
-            data: {
-              size: size,
-              id: handleId,
-              order,
-            },
-          });
-        }
-      }
-    }
+    if (!groupElement || !handleElement) return;
+
+    const order = Array.from(groupElement.children).indexOf(handleElement);
+
+    if (typeof order !== "number") return;
+
+    send?.({
+      type: "registerPanelHandle",
+      data: { size: size, id: handleId, order },
+    });
   });
 
   const { moveProps } = move({
@@ -489,7 +488,7 @@ export function PanelResizer({
     const currentState = state?.();
 
     if (!panelBefore || !currentState || !isPanelData(panelBefore))
-      return undefined;
+      return { id: handleId };
 
     return getPanelResizerDomAttributes({
       groupId: currentState.groupId,

@@ -1770,17 +1770,12 @@ export function groupMachine(
       isEvent(event, ["collapsePanel", "expandPanel"]);
 
       const handle = getHandleForPanelId(context, event.panelId);
-      const panel = getPanelWithId(context, event.panelId);
       // When collapsing a panel it will be in the opposite direction
       // that handle assumes
       const delta =
         event.type === "collapsePanel"
           ? handle.direction * -1
           : handle.direction;
-      // const amount =
-      //   event.type === "collapsePanel"
-      //     ? panel.currentValue.value.minus(panel.collapsedSize.value).toNumber()
-      //     : panel.min.value.minus(panel.currentValue.value).toNumber();
 
       const newContext = updateLayout(context, {
         handleId: handle.item.id,
