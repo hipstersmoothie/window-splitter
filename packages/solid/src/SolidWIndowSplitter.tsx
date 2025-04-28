@@ -45,8 +45,8 @@ import {
   getPanelDomAttributes,
   getPanelResizerDomAttributes,
   move,
-  mergeAttributes,
 } from "@window-splitter/interface";
+import { mergeSolidAttributes } from "./mergeSolidAttributes.js";
 
 export interface PanelGroupProps
   extends Omit<JSX.HTMLAttributes<HTMLDivElement>, "style">,
@@ -211,16 +211,16 @@ export function PanelGroup(props: PanelGroupProps) {
     <div
       ref={elementRef}
       data-panel-group-wrapper
-      {...mergeAttributes(props, {
-        style: {
-          display: "grid",
-          "grid-template-columns":
-            orientation === "horizontal" ? getTemplate() : undefined,
-          "grid-template-rows":
-            orientation === "vertical" ? getTemplate() : undefined,
-          height: "100%",
-        },
-      })}
+      {...props}
+      style={{
+        display: "grid",
+        "grid-template-columns":
+          orientation === "horizontal" ? getTemplate() : undefined,
+        "grid-template-rows":
+          orientation === "vertical" ? getTemplate() : undefined,
+        height: "100%",
+        ...props.style,
+      }}
     >
       {resolvedChildren()}
     </div>
@@ -409,7 +409,7 @@ export function Panel({
 
   return (
     <div
-      {...mergeAttributes(props, domAttributes())}
+      {...mergeSolidAttributes(props, domAttributes())}
       style={{
         "min-width": 0,
         "min-height": 0,
@@ -576,9 +576,11 @@ export function PanelResizer({
 
   return (
     <div
-      {...mergeAttributes(
+      {...mergeSolidAttributes(
         props,
-        disabled ? {} : mergeAttributes(moveProps, { onKeyDown, tabIndex: 0 }),
+        disabled
+          ? {}
+          : mergeSolidAttributes(moveProps, { onKeyDown, tabIndex: 0 }),
         panelAttributes(),
         {
           style: {
