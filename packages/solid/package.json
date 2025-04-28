@@ -22,7 +22,8 @@
     "lint": "eslint .",
     "stats": "rsbuild --mode production build",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "clean": "rm -rf dist .turbo .tshy .tshy-build"
   },
   "license": "MIT",
   "devDependencies": {
@@ -67,7 +68,10 @@
     ],
     "exports": {
       ".": "./src/index.tsx"
-    }
+    },
+    "dialects": [
+      "esm"
+    ]
   },
   "type": "module",
   "exports": {
@@ -75,15 +79,9 @@
       "import": {
         "types": "./dist/esm/index.d.ts",
         "default": "./dist/esm/index.js"
-      },
-      "require": {
-        "types": "./dist/commonjs/index.d.ts",
-        "default": "./dist/commonjs/index.js"
       }
     }
   },
-  "main": "./dist/commonjs/index.js",
-  "types": "./dist/commonjs/index.d.ts",
   "module": "./dist/esm/index.js",
   "keywords": [
     "solid",

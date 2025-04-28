@@ -880,3 +880,5 @@ const PanelResizerVisible = React.forwardRef<
 });
 
 // #endregion
+
+export { PanelHandle, PanelGroupHandle } from "@window-splitter/interface";

@@ -31,7 +31,9 @@ export interface PanelGroupHandle {
 }
 
 export interface SharedPanelGroupProps
-  extends Pick<GroupMachineContextValue, "orientation" | "autosaveStrategy"> {
+  extends Partial<
+    Pick<GroupMachineContextValue, "orientation" | "autosaveStrategy">
+  > {
   /** Persisted state to initialized the machine with */
   snapshot?: GroupMachineContextValue;
   /** An id to use for autosaving the layout */
@@ -110,7 +112,8 @@ export function getPanelDomAttributes({
   };
 }
 
-export interface SharedPanelResizerProps extends Pick<PanelHandle, "setSize"> {
+export interface SharedPanelResizerProps
+  extends Partial<Pick<PanelHandle, "setSize">> {
   /** If the handle is disabled */
   disabled?: boolean;
   /** The size of the handle */

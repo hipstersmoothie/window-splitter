@@ -22,7 +22,8 @@
   "scripts": {
     "build": "tshy",
     "dev": "tshy -w",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "clean": "rm -rf dist .turbo .tshy .tshy-build"
   },
   "license": "MIT",
   "devDependencies": {

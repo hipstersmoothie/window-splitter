@@ -23,7 +23,8 @@
     "lint": "eslint .",
     "stats": "rsbuild --mode production build",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "clean": "rm -rf dist .turbo .tshy .tshy-build"
   },
   "license": "MIT",
   "peerDependencies": {

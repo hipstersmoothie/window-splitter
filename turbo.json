@@ -15,6 +15,7 @@
       "passThroughEnv": ["DISPLAY", "XAUTHORITY", "XDG_RUNTIME_DIR"]
     },
     "lint": { "outputs": [] },
+    "clean": { "outputs": [] },
     "//#lint-root": { "outputs": [] }
   }
 }

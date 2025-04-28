@@ -24,7 +24,8 @@
     "dev": "tshy -w",
     "lint": "eslint .",
     "test": "vitest",
-    "test:browser": "vitest"
+    "test:browser": "vitest",
+    "clean": "rm -rf dist .turbo .tshy .tshy-build"
   },
   "license": "MIT",
   "devDependencies": {
