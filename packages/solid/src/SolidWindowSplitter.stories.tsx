@@ -70,11 +70,9 @@ function StyledResizer(props: PanelResizerProps) {
 export function Simple({ handle }: { handle?: Ref<PanelGroupHandle> }) {
   return (
     <StyledPanelGroup handle={handle} style={{ height: "200px" }}>
-      <StyledPanel id="panel-1">Panel 1</StyledPanel>
-      <StyledResizer id="resizer-1" />
-      <StyledPanel id="panel-2" min="100px">
-        Panel 2
-      </StyledPanel>
+      <StyledPanel>Panel 1</StyledPanel>
+      <StyledResizer />
+      <StyledPanel min="100px">Panel 2</StyledPanel>
     </StyledPanelGroup>
   );
 }
@@ -156,20 +154,15 @@ export function DynamicConstraints({
   return (
     <>
       <StyledPanelGroup handle={handle}>
-        <StyledPanel
-          id="panel-1"
-          default="100px"
-          min={customOn() ? "200px" : "100px"}
-        >
+        <StyledPanel default="100px" min={customOn() ? "200px" : "100px"}>
           <div>Panel 1</div>
         </StyledPanel>
-        <StyledResizer id="resizer-1" />
-        <StyledPanel id="panel-2" min="100px">
+        <StyledResizer />
+        <StyledPanel min="100px">
           <div>Panel 2</div>
         </StyledPanel>
-        <StyledResizer id="resizer-2" />
+        <StyledResizer />
         <StyledPanel
-          id="panel-3"
           min={customOn() ? "100px" : "400px"}
           max={customOn() ? "300px" : "700px"}
         >
@@ -186,15 +179,15 @@ export function DynamicConstraints({
 export function SimpleMin() {
   return (
     <StyledPanelGroup>
-      <StyledPanel min="100px" id="panel-1">
+      <StyledPanel min="100px">
         <div>Panel 1</div>
       </StyledPanel>
-      <StyledResizer id="resizer-1" />
-      <StyledPanel min="100px" id="panel-2">
+      <StyledResizer />
+      <StyledPanel min="100px">
         <div>Panel 2</div>
       </StyledPanel>
-      <StyledResizer id="resizer-2" />
-      <StyledPanel min="100px" id="panel-3">
+      <StyledResizer />
+      <StyledPanel min="100px">
         <div>Panel 3</div>
       </StyledPanel>
     </StyledPanelGroup>
@@ -204,15 +197,15 @@ export function SimpleMin() {
 export function SimpleMinMax() {
   return (
     <StyledPanelGroup>
-      <StyledPanel min="100px" max="200px" id="panel-1">
+      <StyledPanel min="100px" max="200px">
         <div>Panel 1</div>
       </StyledPanel>
-      <StyledResizer id="resizer-1" />
-      <StyledPanel min="100px" id="panel-2">
+      <StyledResizer />
+      <StyledPanel min="100px">
         <div>Panel 2</div>
       </StyledPanel>
-      <StyledResizer id="resizer-2" size="20px" />
-      <StyledPanel min="100px" id="panel-3">
+      <StyledResizer size="20px" />
+      <StyledPanel min="100px">
         <div>Panel 3</div>
       </StyledPanel>
     </StyledPanelGroup>
@@ -222,11 +215,11 @@ export function SimpleMinMax() {
 export function SimpleConstraints() {
   return (
     <StyledPanelGroup>
-      <StyledPanel min="100px" max="50%" id="panel-1">
+      <StyledPanel min="100px" max="50%">
         <div>Panel 1</div>
       </StyledPanel>
-      <StyledResizer id="resizer-1" />
-      <StyledPanel id="panel-2">
+      <StyledResizer />
+      <StyledPanel>
         <div>Panel 2</div>
       </StyledPanel>
     </StyledPanelGroup>
@@ -236,15 +229,13 @@ export function SimpleConstraints() {
 export function HorizontalLayout() {
   return (
     <StyledPanelGroup orientation="horizontal">
-      <StyledPanel default="30%" min="20%" id="panel-1">
+      <StyledPanel default="30%" min="20%">
         left
       </StyledPanel>
-      <StyledResizer id="resizer-1" />
-      <StyledPanel min="20%" id="panel-2">
-        middle
-      </StyledPanel>
-      <StyledResizer id="resizer-2" />
-      <StyledPanel default="30%" min="20%" id="panel-3">
+      <StyledResizer />
+      <StyledPanel min="20%">middle</StyledPanel>
+      <StyledResizer />
+      <StyledPanel default="30%" min="20%">
         right
       </StyledPanel>
     </StyledPanelGroup>
@@ -258,15 +249,13 @@ export function VerticalLayout({ handle }: { handle?: Ref<PanelGroupHandle> }) {
       style={{ height: "322px" }}
       handle={handle}
     >
-      <StyledPanel default="30%" min="20%" id="panel-1">
+      <StyledPanel default="30%" min="20%">
         top
       </StyledPanel>
-      <StyledResizer id="resizer-1" />
-      <StyledPanel min="20%" id="panel-2">
-        middle
-      </StyledPanel>
-      <StyledResizer id="resizer-2" />
-      <StyledPanel default="30%" min="20%" id="panel-3">
+      <StyledResizer />
+      <StyledPanel min="20%">middle</StyledPanel>
+      <StyledResizer />
+      <StyledPanel default="30%" min="20%">
         bottom
       </StyledPanel>
     </StyledPanelGroup>
@@ -279,16 +268,15 @@ export function VerticalLayout2() {
       orientation="vertical"
       style={{ height: "calc(100vh - 100px)" }}
     >
-      <StyledPanel default="200px" min="200px" id="panel-1">
+      <StyledPanel default="200px" min="200px">
         top
       </StyledPanel>
-      <StyledResizer id="resizer-1" />
+      <StyledResizer />
       <StyledPanel
         min="200px"
         collapsedSize="60px"
         defaultCollapsed
         collapsible
-        id="panel-2"
       >
         middle
       </StyledPanel>
@@ -305,35 +293,24 @@ export function NestedGroups() {
         "border-radius": "12px",
         height: "400px",
       }}
-      id="panel-group-1"
     >
-      <Panel min="10%" id="panel-1">
-        1
-      </Panel>
-      <StyledResizer id="resizer-1" />
-      <Panel min="10%" id="panel-2">
-        <PanelGroup orientation="vertical" id="panel-group-2">
-          <Panel min="10%" id="panel-2-1">
-            2-1
-          </Panel>
-          <StyledResizer id="resizer-2" />
-          <Panel min="10%" id="panel-2-2">
-            <PanelGroup orientation="horizontal" id="panel-group-3">
-              <Panel min="20%" id="panel-2-2-1">
-                2-2-1
-              </Panel>
-              <StyledResizer id="resizer-3" />
-              <Panel min="20%" id="panel-2-2-2">
-                2-2-2
-              </Panel>
+      <Panel min="10%">1</Panel>
+      <StyledResizer />
+      <Panel min="10%">
+        <PanelGroup orientation="vertical">
+          <Panel min="10%">2-1</Panel>
+          <StyledResizer />
+          <Panel min="10%">
+            <PanelGroup orientation="horizontal">
+              <Panel min="20%">2-2-1</Panel>
+              <StyledResizer />
+              <Panel min="20%">2-2-2</Panel>
             </PanelGroup>
           </Panel>
         </PanelGroup>
       </Panel>
-      <StyledResizer id="resizer-4" />
-      <Panel min="10%" id="panel-3">
-        3
-      </Panel>
+      <StyledResizer />
+      <Panel min="10%">3</Panel>
     </PanelGroup>
   );
 }
@@ -341,7 +318,7 @@ export function NestedGroups() {
 export function WithOverflow() {
   return (
     <StyledPanelGroup style={{ height: "400px" }}>
-      <Panel min="200px" id="panel-1">
+      <Panel min="200px">
         <div
           style={{
             overflow: "auto",
@@ -388,8 +365,8 @@ export function WithOverflow() {
           </p>
         </div>
       </Panel>
-      <StyledResizer id="resizer-1" />
-      <Panel min="200px" id="panel-2">
+      <StyledResizer />
+      <Panel min="200px">
         <div
           style={{
             overflow: "auto",
@@ -456,7 +433,6 @@ export function Collapsible({
       <StyledPanel
         handle={leftPanelHandle}
         min="100px"
-        id="panel-1"
         collapsible
         collapsedSize="60px"
         style={{ border: "10px solid green", "box-sizing": "border-box" }}
@@ -466,15 +442,14 @@ export function Collapsible({
       >
         <div>1</div>
       </StyledPanel>
-      <StyledResizer id="resizer-1" />
-      <StyledPanel id="panel-2" min="100px">
+      <StyledResizer />
+      <StyledPanel min="100px">
         <div>2</div>
       </StyledPanel>
-      <StyledResizer id="resizer-2" />
+      <StyledResizer />
       <StyledPanel
         handle={rightPanelHandle}
         min="100px"
-        id="panel-3"
         collapsible
         collapsedSize="60px"
         collapseAnimation={{ easing: "bounce", duration: 1000 }}
@@ -501,20 +476,16 @@ export function CustomCollapseAnimation() {
     <StyledPanelGroup>
       <StyledPanel
         min="100px"
-        id="panel-1"
         collapsible
         collapsedSize="60px"
         style={{ border: "10px solid green", "box-sizing": "border-box" }}
       >
         1
       </StyledPanel>
-      <StyledResizer id="resizer-1" />
-      <StyledPanel min="100px" id="panel-2">
-        2
-      </StyledPanel>
-      <StyledResizer id="resizer-2" />
+      <StyledResizer />
+      <StyledPanel min="100px">2</StyledPanel>
+      <StyledResizer />
       <StyledPanel
-        id="panel-3"
         style={{ border: "10px solid blue", "box-sizing": "border-box" }}
         min="100px"
         collapsible
@@ -540,24 +511,20 @@ export function ImperativePanel() {
       <StyledPanelGroup handle={(v) => (groupRef = v)}>
         <StyledPanel
           handle={(v) => (panelRef = v)}
-          id="panel-1"
           min="100px"
           collapsible
           collapsedSize="60px"
         >
           1
         </StyledPanel>
-        <StyledResizer id="resizer-1" />
-        <StyledPanel min="100px" id="panel-2">
-          2
-        </StyledPanel>
-        <StyledResizer id="resizer-2" />
+        <StyledResizer />
+        <StyledPanel min="100px">2</StyledPanel>
+        <StyledResizer />
         <StyledPanel
           min="100px"
           collapsible
           collapsedSize="60px"
           defaultCollapsed
-          id="panel-3"
         >
           3
         </StyledPanel>
@@ -716,10 +683,9 @@ export function ConditionalPanelComplex() {
 export function WithDefaultWidth() {
   return (
     <PanelGroup style={{ height: "400px" }}>
-      <Panel id="left" style={{ "background-color": "#333366" }} />
-      <PanelResizer id="handle" size="3px" />
+      <Panel style={{ "background-color": "#333366" }} />
+      <PanelResizer size="3px" />
       <Panel
-        id="right"
         default="100px"
         min="100px"
         max="400px"
@@ -732,17 +698,13 @@ export function WithDefaultWidth() {
 export function StaticAtRest() {
   return (
     <StyledPanelGroup style={{ height: "200px" }}>
-      <StyledPanel id="panel-1" min="100px" max="300px" isStaticAtRest>
+      <StyledPanel min="100px" max="300px" isStaticAtRest>
         Panel 1
       </StyledPanel>
-      <StyledResizer id="resizer-1" />
-      <StyledPanel id="panel-2" min="100px">
-        Panel 2
-      </StyledPanel>
-      <StyledResizer id="resizer-2" />
-      <StyledPanel id="panel-3" min="100px">
-        Panel 3
-      </StyledPanel>
+      <StyledResizer />
+      <StyledPanel min="100px">Panel 2</StyledPanel>
+      <StyledResizer />
+      <StyledPanel min="100px">Panel 3</StyledPanel>
     </StyledPanelGroup>
   );
 }

@@ -97,13 +97,19 @@ export function PanelGroup(props: PanelGroupProps) {
     }
   );
 
+  const getContext = () => {
+    const context = currentValue?.() || intiialValue;
+    if (!context) throw new Error("No state");
+    return context;
+  };
+
   // Prerender the children with the machine context
   const [isInitialPrerender, setIsInitialPrerender] = createSignal(true);
-  children(() => (
+  const resolvedChildren = children(() => (
     <GroupMachineProvider
       groupId={groupId}
       send={send}
-      state={() => intiialValue}
+      state={getContext}
       prerender
       initialPrerender={isInitialPrerender}
     >
@@ -181,11 +187,6 @@ export function PanelGroup(props: PanelGroupProps) {
     })
   );
 
-  const getContext = () => {
-    const context = currentValue?.() || intiialValue;
-    if (!context) throw new Error("No state");
-    return context;
-  };
   const getTemplate = () => {
     const context = getContext();
     const tempalte = buildTemplate(context);
@@ -196,26 +197,24 @@ export function PanelGroup(props: PanelGroupProps) {
   onCleanup(() => send?.({ type: "lockGroup" }));
 
   return (
-    <GroupMachineProvider groupId={groupId} send={send} state={getContext}>
-      <div
-        ref={elementRef}
-        data-panel-group-wrapper
-        {...mergeProps(props, {
-          style: {
-            display: "grid",
-            "grid-template-columns":
-              orientation === "horizontal" ? getTemplate() : undefined,
-            "grid-template-rows":
-              orientation === "vertical" ? getTemplate() : undefined,
-            height: "100%",
-            // @ts-expect-error TODO: fix this
-            ...props?.style,
-          },
-        })}
-      >
-        {props.children}
-      </div>
-    </GroupMachineProvider>
+    <div
+      ref={elementRef}
+      data-panel-group-wrapper
+      {...mergeProps(props, {
+        style: {
+          display: "grid",
+          "grid-template-columns":
+            orientation === "horizontal" ? getTemplate() : undefined,
+          "grid-template-rows":
+            orientation === "vertical" ? getTemplate() : undefined,
+          height: "100%",
+          // @ts-expect-error TODO: fix this
+          ...props?.style,
+        },
+      })}
+    >
+      {resolvedChildren()}
+    </div>
   );
 }
 

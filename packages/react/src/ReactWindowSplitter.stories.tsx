@@ -673,11 +673,10 @@ export function ConditionalPanelComplex() {
 export function WithDefaultWidth() {
   return (
     <PanelGroup style={{ height: "400px" }}>
-      <Panel id="left" style={{ backgroundColor: "#333366" }} />
-      <PanelResizer id="handle" size="3px" />
+      <Panel style={{ backgroundColor: "#333366" }} />
+      <PanelResizer size="3px" />
       {/* I expected the right panel to be 100px wide */}
       <Panel
-        id="right"
         default="100px"
         min="100px"
         max="400px"
