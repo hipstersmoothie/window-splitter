@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { PanelGroup, Panel, PanelResizer } from "react-window-splitter";
+import { PanelGroup, Panel, PanelResizer } from "@window-splitter/react";
 
 export function PersistanceExamplePage() {
   const persistedState = cookies().get("autosave");

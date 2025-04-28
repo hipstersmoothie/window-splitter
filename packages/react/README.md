@@ -1,4 +1,4 @@
-# `react-window-splitter`
+# `@window-splitter/react`
 
 A full featured window splitter for React.
 
@@ -13,15 +13,15 @@ A full featured window splitter for React.
 ## Install
 
 ```bash
-npm install react-window-splitter
-yarn add react-window-splitter
-pnpm add react-window-splitter
+npm install @window-splitter/react
+yarn add @window-splitter/react
+pnpm add @window-splitter/react
 ```
 
 ## Usage
 
 ```tsx
-import { PanelGroup, Panel, PanelResizer } from "react-window-splitter";
+import { PanelGroup, Panel, PanelResizer } from "@window-splitter/react";
 
 function Example() {
   return (

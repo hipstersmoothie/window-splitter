@@ -14,7 +14,7 @@ export function CopyPackageNameButton() {
   const timeoutRef = useRef<NodeJS.Timeout>();
 
   const onPress = () => {
-    navigator.clipboard.writeText("react-window-splitter");
+    navigator.clipboard.writeText("@window-splitter/react");
 
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);

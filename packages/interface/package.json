@@ -6,7 +6,7 @@
   "description": "Shared component interface for window splitter components",
   "homepage": "https://react-window-splitter-six.vercel.app",
   "repository": {
-    "url": "https://github.com/hipstersmoothie/react-window-splitter",
+    "url": "https://github.com/hipstersmoothie/react-splitter",
     "directory": "packages/interface"
   },
   "publishConfig": {

@@ -3,7 +3,7 @@
 A state machine for a WAI-ARIA compliant window splitter.
 This package can be used to build your own window splitter for a framework or even vanilla html/js.
 
-If you're using a framework like React, you can use the `react-window-splitter` package instead.
+If you're using a framework like React, you should use the framework package instead.
 
 [Read the full docs](https://react-window-splitter-six.vercel.app)
 
@@ -95,7 +95,7 @@ The context of the state machine is an object with the following shape:
 
 #### Events
 
-For a full list of events and their payloads see the [source code](https://github.com/hipstersmoothie/react-window-splitter/blob/main/packages/state/src/index.ts).
+For a full list of events and their payloads see the [source code](https://github.com/hipstersmoothie/react-splitter/blob/main/packages/state/src/index.ts).
 
 - `registerPanel`: Register a new panel with the state machine
 - `registerDynamicPanel`: Register a new panel after the initial render

@@ -1150,7 +1150,7 @@ describe("collapsible panel", () => {
     });
   });
 
-  test.only("panel collapse can be controlled", async () => {
+  test("panel collapse can be controlled", async () => {
     const actor = createActor({ groupId: "group" });
 
     const spy = vi.fn();

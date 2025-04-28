@@ -16,13 +16,13 @@ function Header() {
           rounded px-2 py-0.5
         "
         >
-          react-window-splitter
+          @window-splitter/react
         </h1>
       </Link>
 
       <TooltipTrigger>
         <IconLink
-          href="https://github.com/hipstersmoothie/react-window-splitter"
+          href="https://github.com/hipstersmoothie/react-splitter"
           aria-label="Open repo on GitHub"
           target="_blank"
         >

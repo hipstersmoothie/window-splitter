@@ -42,14 +42,14 @@ jobs:
         run: pnpm build
 
       - name: Generate Bundle Stats
-        working-directory: packages/react-window-splitter
+        working-directory: packages/react
         run: pnpm stats
 
       # Send bundle stats and build information to RelativeCI
       - name: Send bundle stats to RelativeCI
         uses: relative-ci/agent-action@v2
         with:
-          webpackStatsFile: packages/react-window-splitter/dist/stats.json
+          webpackStatsFile: packages/react/dist/stats.json
           key: ${{ secrets.RELATIVE_CI_KEY }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -63,7 +63,7 @@ jobs:
             ${{ runner.os }}-playwright-
 
       - name: Install Playwright Browsers
-        working-directory: packages/react-window-splitter
+        working-directory: packages/react
         if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: pnpm exec playwright install --with-deps chromium
 

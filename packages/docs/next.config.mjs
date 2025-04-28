@@ -3,7 +3,7 @@ import bundleAnalyzer from "@next/bundle-analyzer";
 
 const withMdxts = createMdxtsPlugin({
   theme: "github-dark-dimmed",
-  gitSource: "https://github.com/hipstersmoothie/react-window-splitter",
+  gitSource: "https://github.com/hipstersmoothie/window-splitter",
 });
 
 const withBundleAnalyzer = bundleAnalyzer({ enabled: true });
