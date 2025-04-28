@@ -1,1 +1,1 @@
-export * from "./SolidWindowSplitter.jsx";
+export * from "./SolidWIndowSplitter.js";

@@ -57,7 +57,9 @@ export async function dragHandle(options: {
 
 type WaitForFn = <T>(
   callback: () => T | Promise<T>,
-  options?: {}
+  options?: {
+    timeout?: number;
+  }
 ) => Promise<T>;
 
 function waitForCondition(waitFor: WaitForFn, condition: () => boolean) {

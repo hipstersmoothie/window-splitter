@@ -118,10 +118,12 @@ export function PanelGroup(props: PanelGroupProps) {
   onMount(() => {
     const observer = new ResizeObserver(([entry]) => {
       if (!entry) return;
-      send({
-        type: "setSize",
-        size: entry.contentRect,
-      });
+      if (entry.contentRect.width > 0 && entry.contentRect.height > 0) {
+        send({
+          type: "setSize",
+          size: entry.contentRect,
+        });
+      }
     });
 
     if (elementRef) {
@@ -189,6 +191,9 @@ export function PanelGroup(props: PanelGroupProps) {
     const tempalte = buildTemplate(context);
     return tempalte;
   };
+
+  onMount(() => send?.({ type: "unlockGroup" }));
+  onCleanup(() => send?.({ type: "lockGroup" }));
 
   return (
     <GroupMachineProvider groupId={groupId} send={send} state={getContext}>
@@ -348,7 +353,6 @@ export function Panel({
       getId: () => panelId,
       collapse: () => {
         if (collapsible) {
-          // TODO: setting controlled here might be wrong
           send?.({ type: "collapsePanel", panelId, controlled: true });
         }
       },
@@ -376,7 +380,12 @@ export function Panel({
   );
 
   onCleanup(() => {
-    send?.({ type: "unregisterPanel", id: panelId });
+    // We wait a frame because in Solid children unmount before their parent
+    // and we want to only unregister if just the panel is being removed, not
+    // the whole group. This frame allows for the parent to lock the machine.
+    requestAnimationFrame(() => {
+      send?.({ type: "unregisterPanel", id: panelId });
+    });
   });
 
   const domAttributes = () => {
@@ -551,7 +560,12 @@ export function PanelResizer({
   };
 
   onCleanup(() => {
-    send?.({ type: "unregisterPanelHandle", id: handleId });
+    // We wait a frame because in Solid children unmount before their parent
+    // and we want to only unregister if just the panel is being removed, not
+    // the whole group. This frame allows for the parent to lock the machine.
+    requestAnimationFrame(() => {
+      send?.({ type: "unregisterPanelHandle", id: handleId });
+    });
   });
 
   return (

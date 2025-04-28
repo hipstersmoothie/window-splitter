@@ -1,6 +1,5 @@
 import type { Meta } from "storybook-solidjs";
 import { spring } from "framer-motion";
-import * as Cookies from "tiny-cookie";
 
 import {
   PanelGroup,
@@ -9,10 +8,11 @@ import {
   PanelGroupProps,
   PanelProps,
   PanelResizerProps,
-} from "./SolidWindowSplitter.jsx";
+} from "./SolidWIndowSplitter.jsx";
 import { createSignal, Ref, Show } from "solid-js";
 import { PanelHandle } from "@window-splitter/interface";
 import { PanelGroupHandle } from "@window-splitter/interface";
+import { GroupMachineContextValue } from "@window-splitter/state";
 
 const meta = {
   title: "Components/Solid",
@@ -145,7 +145,43 @@ export function AutosaveCollapsible({
   );
 }
 
-// DynamicConstraints
+// TODO: fix this
+export function DynamicConstraints({
+  handle,
+}: {
+  handle?: Ref<PanelGroupHandle>;
+}) {
+  const [customOn, setCustomOn] = createSignal(false);
+
+  return (
+    <>
+      <StyledPanelGroup handle={handle}>
+        <StyledPanel
+          id="panel-1"
+          default="100px"
+          min={customOn() ? "200px" : "100px"}
+        >
+          <div>Panel 1</div>
+        </StyledPanel>
+        <StyledResizer id="resizer-1" />
+        <StyledPanel id="panel-2" min="100px">
+          <div>Panel 2</div>
+        </StyledPanel>
+        <StyledResizer id="resizer-2" />
+        <StyledPanel
+          id="panel-3"
+          min={customOn() ? "100px" : "400px"}
+          max={customOn() ? "300px" : "700px"}
+        >
+          <div>Panel 3</div>
+        </StyledPanel>
+      </StyledPanelGroup>
+      <button type="button" onClick={() => setCustomOn(!customOn)}>
+        Toggle Custom
+      </button>
+    </>
+  );
+}
 
 export function SimpleMin() {
   return (
