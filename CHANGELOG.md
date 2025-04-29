@@ -1,3 +1,16 @@
+# v0.8.1 (Mon Apr 28 2025)
+
+#### ⚠️ Pushed to `main`
+
+- `@window-splitter/solid`
+  - add docs ([@hipstersmoothie](https://github.com/hipstersmoothie))
+
+#### Authors: 1
+
+- Andrew Lisowski ([@hipstersmoothie](https://github.com/hipstersmoothie))
+
+---
+
 # v0.7.0 (Mon Apr 28 2025)
 
 ### Release Notes
