@@ -1,3 +1,16 @@
+# v0.8.2 (Tue Apr 29 2025)
+
+#### ⚠️ Pushed to `main`
+
+- `@window-splitter/solid`
+  - fix import (lisowski54@gmail.com)
+
+#### Authors: 1
+
+- Andrew Lisowski (lisowski54@gmail.com)
+
+---
+
 # v0.8.1 (Mon Apr 28 2025)
 
 #### ⚠️ Pushed to `main`
