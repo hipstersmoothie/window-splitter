@@ -9,6 +9,9 @@
     "url": "https://github.com/hipstersmoothie/react-splitter",
     "directory": "packages/react"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "author": {
     "name": "Andrew Lisowski",
     "email": "lisowski54@gmail.com"
