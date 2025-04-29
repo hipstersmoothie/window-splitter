@@ -259,64 +259,69 @@ export interface PanelProps
   style?: JSX.CSSProperties;
 }
 
-export function Panel({
-  min,
-  max,
-  id,
-  collapsible,
-  collapsed,
-  collapsedSize,
-  onCollapseChange,
-  collapseAnimation,
-  onResize,
-  defaultCollapsed,
-  default: defaultSize,
-  isStaticAtRest,
-  ...props
-}: PanelProps) {
-  const panelId = id || createUniqueId();
+export function Panel(props: PanelProps) {
+  const [, attrs] = splitProps(props, [
+    "min",
+    "max",
+    "id",
+    "collapsible",
+    "collapsed",
+    "collapsedSize",
+    "onCollapseChange",
+    "collapseAnimation",
+    "onResize",
+    "defaultCollapsed",
+    "default",
+    "isStaticAtRest",
+  ]);
+
   const isInitialPrerender = useInitialPrerenderContext();
   const send = useMachineActor();
   const groupId = useGroupId();
   const state = useMachineState();
 
-  const panel = initializePanel({
-    id: panelId,
-    min,
-    max,
-    collapsible,
-    collapsed: collapsed?.(),
-    collapsedSize,
-    onCollapseChange: { current: onCollapseChange },
-    collapseAnimation,
-    onResize: { current: onResize },
-    defaultCollapsed,
-    default: defaultSize,
-    isStaticAtRest,
-  });
-
   let dynamicPanelMounted = false;
 
-  if (send) {
-    const hasRegistered = state?.()?.items.find((i) => i.id === panelId);
+  const [panelId, panel] = createRoot(() => {
+    const id = props.id || createUniqueId();
+    const panelData = initializePanel({
+      id: id,
+      min: props.min,
+      max: props.max,
+      collapsible: props.collapsible,
+      collapsed: props.collapsed?.(),
+      collapsedSize: props.collapsedSize,
+      onCollapseChange: { current: props.onCollapseChange },
+      collapseAnimation: props.collapseAnimation,
+      onResize: { current: props.onResize },
+      defaultCollapsed: props.defaultCollapsed,
+      default: props.default,
+      isStaticAtRest: props.isStaticAtRest,
+    });
 
-    if (!hasRegistered) {
-      if (isInitialPrerender()) {
-        send({ type: "registerPanel", data: panel });
+    if (send) {
+      const hasRegistered = state?.()?.items.find((i) => i.id === id);
+
+      if (!hasRegistered) {
+        if (isInitialPrerender()) {
+          send({ type: "registerPanel", data: panelData });
+        } else {
+          dynamicPanelMounted = true;
+        }
       } else {
-        dynamicPanelMounted = true;
+        send?.({
+          type: "rebindPanelCallbacks",
+          data: {
+            id: id,
+            onCollapseChange: { current: props.onCollapseChange },
+            onResize: { current: props.onResize },
+          },
+        });
       }
-    } else {
-      send?.({
-        type: "rebindPanelCallbacks",
-        data: {
-          id: panelId,
-          onCollapseChange: { current: onCollapseChange },
-          onResize: { current: onResize },
-        },
-      });
     }
-  }
+
+    return [id, panelData];
+  });
 
   onMount(() => {
     if (!dynamicPanelMounted) return;
@@ -352,7 +357,7 @@ export function Panel({
   const collapseIsControlled = panelData?.()?.collapseIsControlled;
 
   createEffect(() => {
-    const currentCollapsed = collapsed?.() || false;
+    const currentCollapsed = props.collapsed?.() || false;
 
     if (!collapseIsControlled) {
       return;
@@ -370,17 +375,17 @@ export function Panel({
     () => ({
       getId: () => panelId,
       collapse: () => {
-        if (collapsible) {
+        if (panel.collapsible) {
           send?.({ type: "collapsePanel", panelId, controlled: true });
         }
       },
-      isCollapsed: () => Boolean(collapsible && panelData()?.collapsed),
+      isCollapsed: () => Boolean(panel.collapsible && panelData()?.collapsed),
       expand: () => {
-        if (collapsible) {
+        if (panel.collapsible) {
           send?.({ type: "expandPanel", panelId, controlled: true });
         }
       },
-      isExpanded: () => Boolean(collapsible && !panelData()?.collapsed),
+      isExpanded: () => Boolean(panel.collapsible && !panelData()?.collapsed),
       getPixelSize: () => {
         const s = state?.();
         if (!s) throw new Error("No state");
@@ -419,7 +424,7 @@ export function Panel({
 
   return (
     <div
-      {...mergeSolidAttributes(props, domAttributes())}
+      {...mergeSolidAttributes(attrs, domAttributes())}
       style={{
         "min-width": 0,
         "min-height": 0,
@@ -439,36 +444,42 @@ export interface PanelResizerProps
   style?: JSX.CSSProperties;
 }
 
-export function PanelResizer({
-  size = "0px",
-  id,
-  onDragStart,
-  onDrag,
-  onDragEnd,
-  disabled,
-  ...props
-}: PanelResizerProps) {
-  const handleId = id || createUniqueId();
+export function PanelResizer(props: PanelResizerProps) {
+  const [, attrs] = splitProps(props, [
+    "size",
+    "id",
+    "onDragStart",
+    "onDrag",
+    "onDragEnd",
+    "disabled",
+  ]);
+
   const isInitialPrerender = useInitialPrerenderContext();
   const send = useMachineActor();
   const state = useMachineState();
 
   let dynamicPanelHandleMounted = false;
 
-  if (send) {
-    const hasRegistered = state?.()?.items.find((i) => i.id === handleId);
+  const [handleId] = createRoot(() => {
+    const id = props.id || createUniqueId();
 
-    if (!hasRegistered) {
-      if (isInitialPrerender()) {
-        send({
-          type: "registerPanelHandle",
-          data: { size, id: handleId },
-        });
-      } else {
-        dynamicPanelHandleMounted = true;
+    if (send) {
+      const hasRegistered = state?.()?.items.find((i) => i.id === id);
+
+      if (!hasRegistered) {
+        if (isInitialPrerender()) {
+          send({
+            type: "registerPanelHandle",
+            data: { size: props.size || "0px", id: id },
+          });
+        } else {
+          dynamicPanelHandleMounted = true;
+        }
       }
     }
-  }
+
+    return [id];
+  });
 
   onMount(() => {
     if (!dynamicPanelHandleMounted) return;
@@ -490,23 +501,23 @@ export function PanelResizer({
 
     send?.({
       type: "registerPanelHandle",
-      data: { size: size, id: handleId, order },
+      data: { size: props.size || "0px", id: handleId, order },
     });
   });
 
   const { moveProps } = move({
     onMoveStart: () => {
       send?.({ type: "dragHandleStart", handleId });
-      onDragStart?.();
+      props.onDragStart?.();
       document.body.style.cursor = cursor() || "auto";
     },
     onMove: (e) => {
       send?.({ type: "dragHandle", handleId, value: e });
-      onDrag?.();
+      props.onDrag?.();
     },
     onMoveEnd: () => {
       send?.({ type: "dragHandleEnd", handleId });
-      onDragEnd?.();
+      props.onDragEnd?.();
       document.body.style.cursor = "auto";
     },
   });
@@ -539,7 +550,7 @@ export function PanelResizer({
       orientation: currentState.orientation,
       isDragging: isDragging(),
       activeDragHandleId: activeDragHandleId(),
-      disabled,
+      disabled: props.disabled,
       controlsId: panelBefore.id,
       min: panelBefore.min,
       max: panelBefore.max,
@@ -549,7 +560,7 @@ export function PanelResizer({
   };
 
   const cursor = () => {
-    if (disabled) return;
+    if (props.disabled) return;
     const currentState = state?.();
     if (!currentState) return;
     return getCursor(currentState);
@@ -557,7 +568,7 @@ export function PanelResizer({
   const dimensions = () => {
     const currentState = state?.();
     if (!currentState) return {};
-    const unit = parseUnit(size);
+    const unit = parseUnit(props.size || "0px");
     return currentState.orientation === "horizontal"
       ? { width: `${unit.value.toNumber()}px`, height: "100%" }
       : { height: `${unit.value.toNumber()}px`, width: "100%" };
@@ -587,8 +598,8 @@ export function PanelResizer({
   return (
     <div
       {...mergeSolidAttributes(
-        props,
-        disabled
+        attrs,
+        props.disabled
           ? {}
           : mergeSolidAttributes(moveProps, { onKeyDown, tabIndex: 0 }),
         panelAttributes(),

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { mergeAttributes as mergeAttributesBase } from "@window-splitter/interface";
 
 export type MaybeAccessor<T> = T | (() => T);
@@ -46,10 +47,9 @@ export function mergeSolidAttributes(...sources: any[]) {
               return (e as any)[key];
             }
             for (let j = sources.length - 1; j >= 0; j--) {
-              let v,
-                s = sources[j];
+              let s = sources[j];
               if (typeof s === "function") s = s();
-              v = (s || {})[key];
+              const v = (s || {})[key];
               if (v !== undefined) return v;
             }
           },

@@ -1,4 +1,3 @@
-/* eslint-disable @eslint-react/no-unstable-context-value */
 import { createContext, useContext, Accessor, JSXElement } from "solid-js";
 import { GroupMachineContextValue, SendFn } from "@window-splitter/state";
 
@@ -43,8 +42,12 @@ export function GroupMachineProvider(props: {
     <InitialPrerenderContext.Provider
       value={props.initialPrerender ?? (() => false)}
     >
+      {/* The rule is wrong. the docs even suggust this pattern */}
+      {/* eslint-disable-next-line solid/reactivity */}
       <GroupIdContext.Provider value={props.groupId}>
+        {/* eslint-disable-next-line solid/reactivity */}
         <MachineActorContext.Provider value={props.send}>
+          {/* eslint-disable-next-line solid/reactivity */}
           <MachineStateContext.Provider value={props.state}>
             {props.children}
           </MachineStateContext.Provider>
