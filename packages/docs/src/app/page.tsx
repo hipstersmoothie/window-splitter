@@ -35,7 +35,7 @@ export default async function Home() {
           <ButtonLink
             icon={<GitHubLogoIcon />}
             variant="secondary"
-            href="https://github.com/hipstersmoothie/react-splitter"
+            href="https://github.com/hipstersmoothie/window-splitter"
             target="_blank"
           >
             View on Github

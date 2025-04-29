@@ -6,7 +6,7 @@
   "description": "A WAI-ARIA compliant window splitter for React.",
   "homepage": "https://react-window-splitter-six.vercel.app",
   "repository": {
-    "url": "https://github.com/hipstersmoothie/react-splitter",
+    "url": "https://github.com/hipstersmoothie/window-splitter",
     "directory": "packages/react"
   },
   "publishConfig": {

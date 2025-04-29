@@ -95,7 +95,7 @@ The context of the state machine is an object with the following shape:
 
 #### Events
 
-For a full list of events and their payloads see the [source code](https://github.com/hipstersmoothie/react-splitter/blob/main/packages/state/src/index.ts).
+For a full list of events and their payloads see the [source code](https://github.com/hipstersmoothie/window-splitter/blob/main/packages/state/src/index.ts).
 
 - `registerPanel`: Register a new panel with the state machine
 - `registerDynamicPanel`: Register a new panel after the initial render

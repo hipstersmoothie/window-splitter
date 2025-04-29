@@ -22,7 +22,7 @@ function Header() {
 
       <TooltipTrigger>
         <IconLink
-          href="https://github.com/hipstersmoothie/react-splitter"
+          href="https://github.com/hipstersmoothie/window-splitter"
           aria-label="Open repo on GitHub"
           target="_blank"
         >
