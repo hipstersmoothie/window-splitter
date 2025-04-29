@@ -84,7 +84,7 @@ test("Conditional Panels", async () => {
   await expectTemplate(handle, "244px 10px 244px");
 });
 
-test.skip("Dynamic constraints", async () => {
+test("Dynamic constraints", async () => {
   let handle: PanelGroupHandle | null = null!;
 
   const { getByText } = render(() => (
@@ -239,7 +239,10 @@ test("Keyboard interactions with collapsed panels", async () => {
   await expectTemplate(handle, "209.015625px 10px 208.984375px 10px 60px");
 
   fireEvent.keyDown(resizer2, { key: "Enter" });
-  await expectTemplate(handle, "209.03125px 10px 149.984375px 10px 118.96875px");
+  await expectTemplate(
+    handle,
+    "209.03125px 10px 149.984375px 10px 118.96875px"
+  );
 });
 
 describe("imperative panel API", async () => {

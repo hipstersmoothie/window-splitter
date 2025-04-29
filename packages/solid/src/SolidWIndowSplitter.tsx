@@ -9,8 +9,13 @@ import {
   getPanelPixelSize,
   groupMachine,
   GroupMachineContextValue,
+  haveConstraintsChangedForPanel,
+  haveConstraintsChangedForPanelHandle,
   initializePanel,
+  initializePanelHandleData,
   isPanelData,
+  isPanelHandle,
+  PanelData,
   parseUnit,
   prepareItems,
   prepareSnapshot,
@@ -25,6 +30,7 @@ import {
   createSignal,
   createUniqueId,
   JSX,
+  on,
   onCleanup,
   onMount,
   Ref,
@@ -142,7 +148,7 @@ export function PanelGroup(props: PanelGroupProps) {
       observer.observe(elementRef);
     }
 
-    return () => observer.disconnect();
+    onCleanup(() => observer.disconnect());
   });
 
   const childIds = createDeferred(() => {
@@ -152,17 +158,15 @@ export function PanelGroup(props: PanelGroupProps) {
   });
 
   // Measure children size
-  createEffect(() => {
-    // This sets up a dep on the childIds. When new ids are added this
-    // effect will clean up and re-run to measure the new children.
-    childIds();
+  createEffect(
+    on(childIds, () => {
+      const cleanup = measureGroupChildren(groupId, (childrenSizes) => {
+        send({ type: "setActualItemsSize", childrenSizes });
+      });
 
-    const cleanup = measureGroupChildren(groupId, (childrenSizes) => {
-      send({ type: "setActualItemsSize", childrenSizes });
-    });
-
-    onCleanup(cleanup);
-  });
+      onCleanup(cleanup);
+    })
+  );
 
   createRefContent(
     () => props.handle,
@@ -279,13 +283,15 @@ export function Panel(props: PanelProps) {
   const send = useMachineActor();
   const groupId = useGroupId();
   const state = useMachineState();
+  const defaultId = createUniqueId();
+  const panelId = () => props.id || defaultId;
 
-  let dynamicPanelMounted = false;
+  let dynamicPanelIsMounting = false;
+  let hasMounted = false;
 
-  const [panelId, panel] = createRoot(() => {
-    const id = props.id || createUniqueId();
-    const panelData = initializePanel({
-      id: id,
+  const initPanel = (): PanelData =>
+    initializePanel({
+      id: panelId(),
       min: props.min,
       max: props.max,
       collapsible: props.collapsible,
@@ -299,20 +305,23 @@ export function Panel(props: PanelProps) {
       isStaticAtRest: props.isStaticAtRest,
     });
 
+  createRoot(() => {
+    const panelData = initPanel();
+
     if (send) {
-      const hasRegistered = state?.()?.items.find((i) => i.id === id);
+      const hasRegistered = state?.()?.items.find((i) => i.id === panelData.id);
 
       if (!hasRegistered) {
         if (isInitialPrerender()) {
           send({ type: "registerPanel", data: panelData });
         } else {
-          dynamicPanelMounted = true;
+          dynamicPanelIsMounting = true;
         }
       } else {
         send?.({
           type: "rebindPanelCallbacks",
           data: {
-            id: id,
+            id: panelData.id,
             onCollapseChange: { current: props.onCollapseChange },
             onResize: { current: props.onResize },
           },
@@ -320,14 +329,38 @@ export function Panel(props: PanelProps) {
       }
     }
 
-    return [id, panelData];
+    return panelData.id;
   });
 
+  const panel = () => {
+    const currentPanel = state?.()?.items.find((i) => i.id === panelId());
+    if (!currentPanel || !isPanelData(currentPanel))
+      throw new Error("Panel not found");
+    return currentPanel;
+  };
+
+  const contraintChanged = createDeferred(() => {
+    const currentPanel = dynamicPanelIsMounting === false ? panel() : undefined;
+    if (!currentPanel || !isPanelData(currentPanel)) return;
+    return haveConstraintsChangedForPanel(initPanel(), currentPanel);
+  });
+
+  createEffect(
+    on(contraintChanged, () => {
+      if (!hasMounted) return;
+      send?.({
+        type: "updateConstraints",
+        data: initPanel(),
+      });
+    })
+  );
+
   onMount(() => {
-    if (!dynamicPanelMounted) return;
+    hasMounted = true;
+    if (!dynamicPanelIsMounting) return;
 
     // get the index of the panel in it's group
-    const panelElement = document.getElementById(panelId);
+    const panelElement = document.getElementById(panelId());
 
     if (!panelElement) return;
 
@@ -343,61 +376,64 @@ export function Panel(props: PanelProps) {
 
     send?.({
       type: "registerDynamicPanel",
-      data: { ...panel, order },
+      data: { ...initPanel(), order },
     });
+    dynamicPanelIsMounting = false;
   });
 
   const panelData = () => {
-    const item = state?.()?.items.find((i) => i.id === panelId);
-    if (!item) return undefined;
-    if (!isPanelData(item)) return undefined;
+    const item = state?.()?.items.find((i) => i.id === panelId());
+    if (!item || !isPanelData(item)) return undefined;
     return item;
   };
 
-  const collapseIsControlled = panelData?.()?.collapseIsControlled;
+  const currentCollapsed = () => props.collapsed?.() || false;
+  createEffect(
+    on(currentCollapsed, () => {
+      const collapsed = props.collapsed?.() || false;
 
-  createEffect(() => {
-    const currentCollapsed = props.collapsed?.() || false;
+      if (!panelData?.()?.collapseIsControlled) {
+        return;
+      }
 
-    if (!collapseIsControlled) {
-      return;
-    }
-
-    if (currentCollapsed) {
-      send?.({ type: "collapsePanel", panelId, controlled: true });
-    } else {
-      send?.({ type: "expandPanel", panelId, controlled: true });
-    }
-  });
+      if (collapsed) {
+        send?.({
+          type: "collapsePanel",
+          panelId: panelId(),
+          controlled: true,
+        });
+      } else {
+        send?.({ type: "expandPanel", panelId: panelId(), controlled: true });
+      }
+    })
+  );
 
   createRefContent(
     () => props.handle,
     () => ({
-      getId: () => panelId,
+      getId: () => panelId(),
       collapse: () => {
-        if (panel.collapsible) {
-          send?.({ type: "collapsePanel", panelId, controlled: true });
-        }
+        if (!panel().collapsible) return;
+        send?.({ type: "collapsePanel", panelId: panelId(), controlled: true });
       },
-      isCollapsed: () => Boolean(panel.collapsible && panelData()?.collapsed),
+      isCollapsed: () => Boolean(panel().collapsible && panel().collapsed),
       expand: () => {
-        if (panel.collapsible) {
-          send?.({ type: "expandPanel", panelId, controlled: true });
-        }
+        if (!panel().collapsible) return;
+        send?.({ type: "expandPanel", panelId: panelId(), controlled: true });
       },
-      isExpanded: () => Boolean(panel.collapsible && !panelData()?.collapsed),
+      isExpanded: () => Boolean(panel().collapsible && !panel().collapsed),
       getPixelSize: () => {
         const s = state?.();
         if (!s) throw new Error("No state");
-        return getPanelPixelSize(s, panelId);
+        return getPanelPixelSize(s, panelId());
       },
       setSize: (size) => {
-        send?.({ type: "setPanelPixelSize", panelId, size });
+        send?.({ type: "setPanelPixelSize", panelId: panelId(), size });
       },
       getPercentageSize: () => {
         const s = state?.();
         if (!s) throw new Error("No state");
-        return getPanelPercentageSize(s, panelId);
+        return getPanelPercentageSize(s, panelId());
       },
     })
   );
@@ -407,7 +443,7 @@ export function Panel(props: PanelProps) {
     // and we want to only unregister if just the panel is being removed, not
     // the whole group. This frame allows for the parent to lock the machine.
     requestAnimationFrame(() => {
-      send?.({ type: "unregisterPanel", id: panelId });
+      send?.({ type: "unregisterPanel", id: panelId() });
     });
   });
 
@@ -416,7 +452,7 @@ export function Panel(props: PanelProps) {
 
     return getPanelDomAttributes({
       groupId,
-      id: panelId,
+      id: panelId(),
       collapsible: currentPanel?.collapsible,
       collapsed: currentPanel?.collapsed,
     });
@@ -457,35 +493,64 @@ export function PanelResizer(props: PanelResizerProps) {
   const isInitialPrerender = useInitialPrerenderContext();
   const send = useMachineActor();
   const state = useMachineState();
+  const defaultId = createUniqueId();
+  const handleId = () => props.id || defaultId;
+  const handle = () => {
+    const currentHandle = state?.()?.items.find((i) => i.id === handleId());
+    if (!currentHandle || !isPanelHandle(currentHandle))
+      throw new Error("Handle not found");
+    return currentHandle;
+  };
 
-  let dynamicPanelHandleMounted = false;
+  let dynamicPanelHandleIsMounting = false;
+  let hasMounted = false;
 
-  const [handleId] = createRoot(() => {
-    const id = props.id || createUniqueId();
+  const initHandle = () =>
+    initializePanelHandleData({
+      size: props.size || "0px",
+      id: handleId(),
+    });
 
+  createRoot(() => {
     if (send) {
-      const hasRegistered = state?.()?.items.find((i) => i.id === id);
+      const hasRegistered = state?.()?.items.find((i) => i.id === handleId());
 
       if (!hasRegistered) {
         if (isInitialPrerender()) {
           send({
             type: "registerPanelHandle",
-            data: { size: props.size || "0px", id: id },
+            data: initHandle(),
           });
         } else {
-          dynamicPanelHandleMounted = true;
+          dynamicPanelHandleIsMounting = true;
         }
       }
     }
-
-    return [id];
   });
 
+  const contraintChanged = createDeferred(() => {
+    const currentHandle =
+      dynamicPanelHandleIsMounting === false ? handle() : undefined;
+    if (!currentHandle || !isPanelHandle(currentHandle)) return;
+    return haveConstraintsChangedForPanelHandle(initHandle(), currentHandle);
+  });
+
+  createEffect(
+    on(contraintChanged, () => {
+      if (!hasMounted) return;
+      send?.({
+        type: "updateConstraints",
+        data: initHandle(),
+      });
+    })
+  );
+
   onMount(() => {
-    if (!dynamicPanelHandleMounted) return;
+    hasMounted = true;
+    if (!dynamicPanelHandleIsMounting) return;
 
     // get the index of the panel in it's group
-    const handleElement = document.getElementById(handleId);
+    const handleElement = document.getElementById(handleId());
 
     if (!handleElement) return;
 
@@ -501,38 +566,39 @@ export function PanelResizer(props: PanelResizerProps) {
 
     send?.({
       type: "registerPanelHandle",
-      data: { size: props.size || "0px", id: handleId, order },
+      data: { ...initHandle(), order },
     });
+    dynamicPanelHandleIsMounting = false;
   });
 
   const { moveProps } = move({
     onMoveStart: () => {
-      send?.({ type: "dragHandleStart", handleId });
+      send?.({ type: "dragHandleStart", handleId: handleId() });
       props.onDragStart?.();
       document.body.style.cursor = cursor() || "auto";
     },
     onMove: (e) => {
-      send?.({ type: "dragHandle", handleId, value: e });
+      send?.({ type: "dragHandle", handleId: handleId(), value: e });
       props.onDrag?.();
     },
     onMoveEnd: () => {
-      send?.({ type: "dragHandleEnd", handleId });
+      send?.({ type: "dragHandleEnd", handleId: handleId() });
       props.onDragEnd?.();
       document.body.style.cursor = "auto";
     },
   });
 
   const itemIndex = () =>
-    state?.()?.items.findIndex((item) => item.id === handleId) || -1;
+    state?.()?.items.findIndex((item) => item.id === handleId()) || -1;
   const activeDragHandleId = () => state?.()?.activeDragHandleId;
-  const isDragging = () => activeDragHandleId() === handleId;
+  const isDragging = () => activeDragHandleId() === handleId();
   const panelBeforeHandle = () => state?.()?.items[itemIndex() - 1];
   const getCollapsiblePanel = () => {
     const currentState = state?.();
     if (!currentState) return undefined;
 
     try {
-      return getCollapsiblePanelForHandleId(currentState, handleId);
+      return getCollapsiblePanelForHandleId(currentState, handleId());
     } catch {
       return undefined;
     }
@@ -546,7 +612,7 @@ export function PanelResizer(props: PanelResizerProps) {
 
     return getPanelResizerDomAttributes({
       groupId: currentState.groupId,
-      id: handleId,
+      id: handleId(),
       orientation: currentState.orientation,
       isDragging: isDragging(),
       activeDragHandleId: activeDragHandleId(),
@@ -591,7 +657,7 @@ export function PanelResizer(props: PanelResizerProps) {
     // and we want to only unregister if just the panel is being removed, not
     // the whole group. This frame allows for the parent to lock the machine.
     requestAnimationFrame(() => {
-      send?.({ type: "unregisterPanelHandle", id: handleId });
+      send?.({ type: "unregisterPanelHandle", id: handleId() });
     });
   });
 
@@ -599,10 +665,10 @@ export function PanelResizer(props: PanelResizerProps) {
     <div
       {...mergeSolidAttributes(
         attrs,
+        panelAttributes(),
         props.disabled
           ? {}
           : mergeSolidAttributes(moveProps, { onKeyDown, tabIndex: 0 }),
-        panelAttributes(),
         {
           style: {
             cursor: cursor(),
@@ -611,6 +677,7 @@ export function PanelResizer(props: PanelResizerProps) {
           },
         }
       )}
+      id={handleId()}
     />
   );
 }

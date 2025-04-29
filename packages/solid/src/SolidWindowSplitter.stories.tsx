@@ -156,7 +156,7 @@ export function DynamicConstraints(props: { handle?: Ref<PanelGroupHandle> }) {
           <div>Panel 3</div>
         </StyledPanel>
       </StyledPanelGroup>
-      <button type="button" onClick={() => setCustomOn(!customOn)}>
+      <button type="button" onClick={() => setCustomOn(!customOn())}>
         Toggle Custom
       </button>
     </>

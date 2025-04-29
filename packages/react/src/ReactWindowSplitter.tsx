@@ -47,6 +47,7 @@ import {
   GroupMachineInput,
   GroupMachineEvent,
   State,
+  initializePanelHandleData,
 } from "@window-splitter/state";
 import {
   useEffectEvent,
@@ -253,10 +254,10 @@ function useGroupItem<T extends Item>(
         } else {
           send({
             type: "registerPanelHandle",
-            data: {
+            data: initializePanelHandleData({
               ...(itemArg as unknown as InitializePanelHandleData),
               order: index,
-            },
+            }),
           });
         }
       } else if (onCollapseChangeRef || onResizeRef) {

@@ -205,7 +205,7 @@ export type InitializePanelHandleData = Omit<
 interface RegisterPanelHandleEvent {
   /** Register a new panel handle with the state machine */
   type: "registerPanelHandle";
-  data: InitializePanelHandleData;
+  data: PanelHandleData;
 }
 
 interface UnregisterPanelHandleEvent {
@@ -1907,19 +1907,7 @@ export function groupMachine(
         actions.onAutosave();
         break;
       case "registerPanelHandle": {
-        const unit =
-          typeof event.data.size === "string"
-            ? parseUnit(event.data.size)
-            : event.data.size;
-
-        context.items = addDeDuplicatedItems(context.items, {
-          type: "handle",
-          ...event.data,
-          size: {
-            type: "pixel",
-            value: new Big(unit.value),
-          },
-        });
+        context.items = addDeDuplicatedItems(context.items, event.data);
         break;
       }
       case "unregisterPanelHandle":
