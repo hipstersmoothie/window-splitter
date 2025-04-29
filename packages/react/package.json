@@ -1,13 +1,13 @@
 {
   "$schema": "https://json.schemastore.org/package.json",
-  "name": "react-window-splitter",
+  "name": "@window-splitter/react",
   "sideEffects": false,
   "version": "0.6.5",
   "description": "A WAI-ARIA compliant window splitter for React.",
   "homepage": "https://react-window-splitter-six.vercel.app",
   "repository": {
-    "url": "https://github.com/hipstersmoothie/react-window-splitter",
-    "directory": "packages/react-window-splitter"
+    "url": "https://github.com/hipstersmoothie/react-splitter",
+    "directory": "packages/react"
   },
   "author": {
     "name": "Andrew Lisowski",
@@ -21,7 +21,10 @@
     "test": "CI=true vitest",
     "dev": "tshy -w",
     "lint": "eslint .",
-    "stats": "rsbuild --mode production build"
+    "stats": "rsbuild --mode production build",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build",
+    "clean": "rm -rf dist .turbo .tshy .tshy-build"
   },
   "license": "MIT",
   "peerDependencies": {
@@ -29,9 +32,18 @@
     "react-dom": ">=16"
   },
   "devDependencies": {
+    "@chromatic-com/storybook": "^1.6.1",
     "@internal/eslint-config": "workspace:*",
     "@rsbuild/core": "^1.3.12",
     "@rsdoctor/rspack-plugin": "^1.0.2",
+    "@storybook/addon-essentials": "^8.2.9",
+    "@storybook/addon-interactions": "^8.2.9",
+    "@storybook/addon-links": "^8.2.9",
+    "@storybook/addon-onboarding": "^8.2.9",
+    "@storybook/blocks": "^8.2.9",
+    "@storybook/react": "^8.2.9",
+    "@storybook/react-vite": "^8.2.9",
+    "@storybook/test": "^8.2.9",
     "@testing-library/jest-dom": "^6.4.8",
     "@testing-library/react": "^16.0.0",
     "@types/node": "^20.14.10",
@@ -45,14 +57,15 @@
     "playwright": "^1.46.0",
     "react": "^18",
     "react-dom": "^18",
+    "storybook": "^8.2.9",
     "tiny-cookie": "^2.5.1",
     "tshy": "^3.0.2",
     "typescript": "^5.5.4",
     "vitest": "^3.1.2"
   },
   "dependencies": {
-    "@react-aria/interactions": "^3.25.0",
     "@react-aria/utils": "^3.28.2",
+    "@window-splitter/interface": "workspace:*",
     "@window-splitter/state": "workspace:*"
   },
   "tshy": {

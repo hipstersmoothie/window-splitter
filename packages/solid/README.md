@@ -1,6 +1,6 @@
-# `react-window-splitter`
+# `@window-splitter/solid`
 
-A full featured window splitter for React.
+A full featured window splitter for SolidJS.
 
 - Support for the full [window splitter](https://www.w3.org/WAI/ARIA/apg/patterns/windowsplitter/) ARIA spec
 - Support for percentage and pixel based constraints
@@ -10,18 +10,20 @@ A full featured window splitter for React.
 
 [Read the full docs](https://react-window-splitter-six.vercel.app)
 
+> NOTE: Docs are currently on react but it's the same API. Refer the the stories for usage examples.
+
 ## Install
 
 ```bash
-npm install react-window-splitter
-yarn add react-window-splitter
-pnpm add react-window-splitter
+npm install @window-splitter/solid
+yarn add @window-splitter/solid
+pnpm add @window-splitter/solid
 ```
 
 ## Usage
 
 ```tsx
-import { PanelGroup, Panel, PanelResizer } from "react-window-splitter";
+import { PanelGroup, Panel, PanelResizer } from "@window-splitter/solid";
 
 function Example() {
   return (
@@ -44,7 +46,6 @@ Features that require `id`:
 
 - Conditional Panels
 - Server Side Rendering
-- React Strict Mode
 
 ## Prior Art
 

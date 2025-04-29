@@ -13,10 +13,7 @@ import {
   H2,
 } from "../../../../Components/Content";
 
-const splitterPackage = path.join(
-  __dirname,
-  "../../../../../../../react-window-splitter"
-);
+const splitterPackage = path.join(__dirname, "../../../../../../../react");
 const tsConfig = path.join(splitterPackage, "tsconfig.json");
 const targetFile = path.join(splitterPackage, "src/index.tsx");
 

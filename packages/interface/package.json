@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json.schemastore.org/package.json",
+  "name": "@window-splitter/interface",
+  "sideEffects": false,
+  "version": "0.6.5",
+  "description": "Shared component interface for window splitter components",
+  "homepage": "https://react-window-splitter-six.vercel.app",
+  "repository": {
+    "url": "https://github.com/hipstersmoothie/react-splitter",
+    "directory": "packages/interface"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "author": {
+    "name": "Andrew Lisowski",
+    "email": "lisowski54@gmail.com"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "build": "tshy",
+    "dev": "tshy -w",
+    "lint": "eslint .",
+    "clean": "rm -rf dist .turbo .tshy .tshy-build"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@internal/eslint-config": "workspace:*",
+    "@testing-library/jest-dom": "^6.4.8",
+    "eslint": "^9.9.0",
+    "tshy": "^3.0.2",
+    "typescript": "^5.5.4",
+    "vitest": "^3.1.2"
+  },
+  "dependencies": {
+    "@window-splitter/state": "workspace:*"
+  },
+  "tshy": {
+    "exclude": [
+      "src/**/*.test.ts",
+      "node_modules"
+    ],
+    "exports": {
+      ".": "./src/index.ts",
+      "./test": "./src/test.ts"
+    }
+  },
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/esm/index.d.ts",
+        "default": "./dist/esm/index.js"
+      },
+      "require": {
+        "types": "./dist/commonjs/index.d.ts",
+        "default": "./dist/commonjs/index.js"
+      }
+    },
+    "./test": {
+      "import": {
+        "types": "./dist/esm/test.d.ts",
+        "default": "./dist/esm/test.js"
+      },
+      "require": {
+        "types": "./dist/commonjs/test.d.ts",
+        "default": "./dist/commonjs/test.js"
+      }
+    }
+  },
+  "main": "./dist/commonjs/index.js",
+  "module": "./dist/esm/index.js",
+  "keywords": [
+    "panel",
+    "splitter",
+    "resizable",
+    "window"
+  ],
+  "types": "./dist/commonjs/index.d.ts"
+}

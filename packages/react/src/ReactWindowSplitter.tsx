@@ -1,5 +1,16 @@
 "use client";
 
+import {
+  getPanelDomAttributes,
+  getPanelResizerDomAttributes,
+  measureGroupChildren,
+  PanelGroupHandle,
+  PanelHandle,
+  SharedPanelGroupProps,
+  SharedPanelProps,
+  SharedPanelResizerProps,
+  mergeAttributes,
+} from "@window-splitter/interface";
 import React, {
   useEffect,
   useImperativeHandle,
@@ -11,11 +22,9 @@ import React, {
 } from "react";
 import {
   buildTemplate,
-  Constraints,
   getCollapsiblePanelForHandleId,
   getGroupSize,
   getPanelWithId,
-  getUnitPercentageValue,
   groupMachine,
   GroupMachineContextValue,
   initializePanel,
@@ -25,16 +34,12 @@ import {
   PanelData,
   parseUnit,
   prepareItems,
-  Rect,
-  Unit,
   prepareSnapshot,
-  PixelUnit,
   getPanelGroupPixelSizes,
   getPanelGroupPercentageSizes,
   getPanelPixelSize,
   getPanelPercentageSize,
   getCursor,
-  OnResizeCallback,
   haveConstraintsChangedForPanel,
   PanelHandleData,
   ParsedPixelUnit,
@@ -42,16 +47,16 @@ import {
   GroupMachineInput,
   GroupMachineEvent,
   State,
+  initializePanelHandleData,
 } from "@window-splitter/state";
 import {
-  mergeProps,
   useEffectEvent,
   useId,
   useLayoutEffect,
   mergeRefs,
 } from "@react-aria/utils";
-import { useMove } from "@react-aria/interactions";
 import { useIndex, useIndexedChildren } from "./useIndexedChildren.js";
+import { useMove } from "./useMove.js";
 
 // #region Components
 
@@ -157,73 +162,11 @@ const GroupMachine = {
 //   );
 // }
 
-function measureGroupChildren(
-  groupId: string,
-  cb: (childrenSizes: Record<string, Rect>) => void
-) {
-  const childrenObserver = new ResizeObserver((childrenEntries) => {
-    const childrenSizes: Record<string, { width: number; height: number }> = {};
-
-    for (const childEntry of childrenEntries) {
-      const child = childEntry.target as HTMLElement;
-      const childId = child.getAttribute("data-splitter-id");
-      const childSize = childEntry.borderBoxSize[0];
-
-      if (childId && childSize) {
-        childrenSizes[childId] = {
-          width: childSize.inlineSize,
-          height: childSize.blockSize,
-        };
-      }
-    }
-
-    cb(childrenSizes);
-  });
-
-  const children = document.querySelectorAll(
-    `[data-splitter-group-id="${groupId}"]`
-  );
-
-  for (const child of children) {
-    childrenObserver.observe(child);
-  }
-
-  return () => {
-    childrenObserver.disconnect();
-  };
-}
-
-export interface PanelGroupHandle {
-  /** The id of the group */
-  getId: () => string;
-  /** Get the sizes of all the items in the layout as pixels */
-  getPixelSizes: () => Array<number>;
-  /** Get the sizes of all the items in the layout as percentages of the group size */
-  getPercentageSizes: () => Array<number>;
-  /**
-   * Set the size of all the items in the layout.
-   * This just calls `setSize` on each item. It is up to
-   * you to make sure the sizes make sense.
-   *
-   * NOTE: Setting handle sizes will do nothing.
-   */
-  setSizes: (items: Array<Unit>) => void;
-  /** Get the template for the group in pixels. Useful for testing */
-  getTemplate: () => string;
-  getState: () => "idle" | "dragging";
-}
-
 export interface PanelGroupProps
   extends React.HTMLAttributes<HTMLDivElement>,
-    Partial<
-      Pick<GroupMachineContextValue, "orientation" | "autosaveStrategy">
-    > {
+    SharedPanelGroupProps {
   /** Imperative handle to control the group */
   handle?: React.Ref<PanelGroupHandle>;
-  /** Persisted state to initialized the machine with */
-  snapshot?: GroupMachineContextValue;
-  /** An id to use for autosaving the layout */
-  autosaveId?: string;
 }
 
 const InitialMapContext = createContext<Item[]>([]);
@@ -311,10 +254,10 @@ function useGroupItem<T extends Item>(
         } else {
           send({
             type: "registerPanelHandle",
-            data: {
+            data: initializePanelHandleData({
               ...(itemArg as unknown as InitializePanelHandleData),
               order: index,
-            },
+            }),
           });
         }
       } else if (onCollapseChangeRef || onResizeRef) {
@@ -542,74 +485,24 @@ const PanelGroupImplementation = React.forwardRef<
       ref={ref}
       data-group-id={groupId}
       data-group-orientation={orientation}
-      {...mergeProps(props, {
+      {...mergeAttributes(props, {
         style: {
           display: "grid",
           gridTemplateColumns:
             orientation === "horizontal" ? template : undefined,
           gridTemplateRows: orientation === "vertical" ? template : undefined,
           height: "100%",
-          ...props.style,
         },
       })}
     />
   );
 });
 
-export interface PanelHandle {
-  /** Collapse the panel */
-  collapse: () => void;
-  /** Returns true if the panel is collapsed */
-  isCollapsed: () => boolean;
-  /** Expand the panel */
-  expand: () => void;
-  /** Returns true if the panel is expanded */
-  isExpanded: () => boolean;
-  /** The id of the panel */
-  getId: () => string;
-  /** Get the size of the panel in pixels */
-  getPixelSize: () => number;
-  /** Get percentage of the panel relative to the group */
-  getPercentageSize: () => number;
-  /**
-   * Set the size of the panel in pixels.
-   *
-   * This will be clamped to the min/max values of the panel.
-   * If you want the panel to collapse/expand you should use the
-   * expand/collapse methods.
-   */
-  setSize: (size: Unit) => void;
-}
-
 export interface PanelProps
-  extends Constraints<Unit>,
-    Pick<PanelData, "collapseAnimation">,
+  extends SharedPanelProps<boolean>,
     Omit<React.HTMLAttributes<HTMLDivElement>, "onResize"> {
-  /**
-   * __CONTROLLED COMPONENT__
-   *
-   * If this prop is used it will be used as the source of truth for the collapsed state.
-   * It should be used in conjunction with the `onCollapseChange` prop.
-   *
-   * Use this if you want full control over the collapsed state. When trying to
-   * collapse a panel it will defer to onCollapseChange to determine if it should
-   * be collapsed.
-   */
-  collapsed?: boolean;
-  /**
-   * __CONTROLLED COMPONENT__
-   *
-   * A callback called with the new desired collapsed state. If paired w
-   * with the `collapsed` prop this will be used to control the collapsed state.
-   *
-   * Otherwise this will just be called with the new collapsed state so you can
-   * use it to update your own state.
-   */
-  onCollapseChange?: (isCollapsed: boolean) => void;
   /** Imperative handle to control the panel */
   handle?: React.Ref<PanelHandle>;
-  /** Callback called when the panel is resized */
-  onResize?: OnResizeCallback;
 }
 
 /** A panel within a `PanelGroup` */
@@ -790,64 +683,59 @@ const PanelVisible = React.forwardRef<
   return (
     <div
       ref={ref}
-      data-splitter-group-id={groupId}
-      data-splitter-type="panel"
-      data-splitter-id={panelId}
-      data-collapsed={collapsible && panel?.collapsed}
-      {...props}
-      style={{
-        ...props.style,
-        minWidth: 0,
-        minHeight: 0,
-        overflow: "hidden",
-      }}
+      {...mergeAttributes(
+        props,
+        getPanelDomAttributes({
+          groupId,
+          id: panelId,
+          collapsed,
+          collapsible: panel?.collapsible,
+        }),
+        {
+          style: {
+            minWidth: 0,
+            minHeight: 0,
+            overflow: "hidden",
+          },
+        }
+      )}
     />
   );
 });
 
 export interface PanelResizerProps
-  extends Omit<
-    React.HTMLAttributes<HTMLButtonElement>,
-    "onDragStart" | "onDrag" | "onDragEnd"
-  > {
-  /** If the handle is disabled */
-  disabled?: boolean;
-  size?: PixelUnit;
-  /** Called when the user starts dragging the handle */
-  onDragStart?: () => void;
-  /** Called when the user drags the handle */
-  onDrag?: () => void;
-  /** Called when the user stops dragging the handle */
-  onDragEnd?: () => void;
-}
+  extends SharedPanelResizerProps,
+    Omit<
+      React.HTMLAttributes<HTMLDivElement>,
+      "onDragStart" | "onDrag" | "onDragEnd"
+    > {}
 
 /** A resize handle to place between panels. */
-export const PanelResizer = React.forwardRef<
-  HTMLButtonElement,
-  PanelResizerProps
->(function PanelResizer(props, ref) {
-  const { size = "0px" } = props;
-  const isPrerender = React.useContext(PreRenderContext);
-  const data = React.useMemo(
-    () => ({
-      type: "handle" as const,
-      size: parseUnit(size) as ParsedPixelUnit,
-      id: props.id,
-    }),
-    [size, props.id]
-  );
+export const PanelResizer = React.forwardRef<HTMLDivElement, PanelResizerProps>(
+  function PanelResizer(props, ref) {
+    const { size = "0px" } = props;
+    const isPrerender = React.useContext(PreRenderContext);
+    const data = React.useMemo(
+      () => ({
+        type: "handle" as const,
+        size: parseUnit(size) as ParsedPixelUnit,
+        id: props.id,
+      }),
+      [size, props.id]
+    );
 
-  useGroupItem(data);
+    useGroupItem(data);
 
-  if (isPrerender) {
-    return null;
+    if (isPrerender) {
+      return null;
+    }
+
+    return <PanelResizerVisible ref={ref} panelHandleProp={data} {...props} />;
   }
-
-  return <PanelResizerVisible ref={ref} panelHandleProp={data} {...props} />;
-});
+);
 
 const PanelResizerVisible = React.forwardRef<
-  HTMLButtonElement,
+  HTMLDivElement,
   PanelResizerProps & { panelHandleProp: Omit<PanelHandleData, "id"> }
 >(function PanelResizerVisible(
   {
@@ -861,7 +749,7 @@ const PanelResizerVisible = React.forwardRef<
   },
   outerRef
 ) {
-  const innerRef = React.useRef<HTMLButtonElement>(null);
+  const innerRef = React.useRef<HTMLDivElement>(null);
   const ref = mergeRefs(outerRef, innerRef);
   const unit = parseUnit(size);
   const { send } = GroupMachine.useActorRef();
@@ -872,9 +760,12 @@ const PanelResizerVisible = React.forwardRef<
   const panelHandle = GroupMachine.useSelector(
     ({ context }) => context.items[index] as PanelHandleData
   );
-  const panelBeforeHandle = GroupMachine.useSelector(
-    ({ context }) => context.items[index - 1]
-  );
+  const panelBeforeHandle = GroupMachine.useSelector(({ context }) => {
+    const panel = context.items[index - 1];
+    if (!panel) return undefined;
+    if (!isPanelData(panel)) return undefined;
+    return panel;
+  });
   const collapsiblePanel = GroupMachine.useSelector(({ context }) => {
     try {
       return getCollapsiblePanelForHandleId(context, handleId);
@@ -894,11 +785,23 @@ const PanelResizerVisible = React.forwardRef<
   const activeDragHandleId = GroupMachine.useSelector(
     (state) => state.context.activeDragHandleId
   );
-  const isDragging = activeDragHandleId === handleId;
+  const groupId = GroupMachine.useSelector((state) => state.context.groupId);
+  const [isDragging, setIsDragging] = React.useState(false);
+
+  let cursor: React.CSSProperties["cursor"];
+
+  if (disabled) {
+    cursor = "default";
+  } else {
+    cursor = getCursor({ dragOvershoot: overshoot, orientation });
+  }
+
   const { moveProps } = useMove({
     onMoveStart: () => {
       send({ type: "dragHandleStart", handleId: handleId });
       onDragStart?.();
+      setIsDragging(true);
+      document.body.style.cursor = cursor || "auto";
     },
     onMove: (e) => {
       send({ type: "dragHandle", handleId: handleId, value: e });
@@ -907,6 +810,8 @@ const PanelResizerVisible = React.forwardRef<
     onMoveEnd: () => {
       send({ type: "dragHandleEnd", handleId: handleId });
       onDragEnd?.();
+      setIsDragging(false);
+      document.body.style.cursor = "auto";
     },
   });
 
@@ -939,65 +844,39 @@ const PanelResizerVisible = React.forwardRef<
     }
   };
 
-  let cursor: React.CSSProperties["cursor"];
-
-  if (disabled) {
-    cursor = "default";
-  } else {
-    cursor = getCursor({ dragOvershoot: overshoot, orientation });
-  }
-
-  // Update the cursor while the user is dragging.
-  // This makes it so that the user can overshoot the drag handle and
-  // still see the right cursor.
-  useEffect(() => {
-    if (!isDragging) {
-      return;
-    }
-
-    document.body.style.cursor = cursor || "auto";
-
-    return () => {
-      document.body.style.cursor = "auto";
-    };
-  }, [cursor, isDragging]);
-
-  if (!panelBeforeHandle || !isPanelData(panelBeforeHandle)) {
-    return null;
-  }
-
   return (
     <div
       ref={ref as unknown as React.Ref<HTMLDivElement>}
-      role="separator"
-      data-splitter-type="handle"
-      data-splitter-id={handleId}
-      data-handle-orientation={orientation}
-      data-state={
-        isDragging ? "dragging" : activeDragHandleId ? "inactive" : "idle"
-      }
-      aria-label="Resize Handle"
-      aria-disabled={disabled}
-      aria-controls={panelBeforeHandle.id}
-      aria-valuemin={getUnitPercentageValue(groupsSize, panelBeforeHandle.min)}
-      aria-valuemax={
-        panelBeforeHandle.max === "1fr"
-          ? 100
-          : getUnitPercentageValue(groupsSize, panelBeforeHandle.max)
-      }
-      aria-valuenow={getUnitPercentageValue(
-        groupsSize,
-        panelBeforeHandle.currentValue
+      {...mergeAttributes(
+        props,
+        disabled
+          ? {}
+          : mergeAttributes(moveProps as React.HTMLAttributes<HTMLDivElement>, {
+              onKeyDown,
+              tabIndex: 0,
+            }),
+        getPanelResizerDomAttributes({
+          groupId,
+          id: handleId,
+          orientation,
+          isDragging,
+          activeDragHandleId,
+          disabled,
+          controlsId: panelBeforeHandle?.id,
+          min: panelBeforeHandle?.min,
+          max: panelBeforeHandle?.max,
+          currentValue: panelBeforeHandle?.currentValue,
+          groupSize: groupsSize,
+        }),
+        {
+          style: {
+            cursor,
+            ...(orientation === "horizontal"
+              ? { width: unit.value.toNumber(), height: "100%" }
+              : { height: unit.value.toNumber(), width: "100%" }),
+          },
+        }
       )}
-      {...mergeProps(props, disabled ? {} : moveProps, { onKeyDown })}
-      tabIndex={0}
-      style={{
-        cursor,
-        ...props.style,
-        ...(orientation === "horizontal"
-          ? { width: unit.value.toNumber(), height: "100%" }
-          : { height: unit.value.toNumber(), width: "100%" }),
-      }}
     />
   );
 });

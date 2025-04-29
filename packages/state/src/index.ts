@@ -25,7 +25,7 @@ export interface ParsedPixelUnit {
   value: Big.Big;
 }
 
-type ParsedUnit = ParsedPercentUnit | ParsedPixelUnit;
+export type ParsedUnit = ParsedPercentUnit | ParsedPixelUnit;
 
 export function makePercentUnit(value: number): ParsedPercentUnit {
   return { type: "percent", value: new Big(value) };
@@ -205,7 +205,7 @@ export type InitializePanelHandleData = Omit<
 interface RegisterPanelHandleEvent {
   /** Register a new panel handle with the state machine */
   type: "registerPanelHandle";
-  data: InitializePanelHandleData;
+  data: PanelHandleData;
 }
 
 interface UnregisterPanelHandleEvent {
@@ -849,7 +849,7 @@ function getStaticWidth(context: GroupMachineContextValue) {
   return width;
 }
 
-function formatUnit(unit: ParsedUnit): Unit {
+export function formatUnit(unit: ParsedUnit): Unit {
   if (unit.type === "pixel") {
     return `${unit.value.toNumber()}px`;
   }
@@ -1685,7 +1685,7 @@ export function groupMachine(
   let locked = false;
 
   const context: GroupMachineContextValue = {
-    size: { width: 0, height: 0 },
+    size: input.size || { width: 0, height: 0 },
     items: input.items || [],
     orientation: input.orientation || "horizontal",
     dragOvershoot: new Big(0),
@@ -1776,11 +1776,15 @@ export function groupMachine(
         event.type === "collapsePanel"
           ? handle.direction * -1
           : handle.direction;
+
       const newContext = updateLayout(context, {
         handleId: handle.item.id,
         type: "dragHandle",
         controlled: event.controlled,
-        value: dragHandlePayload({ delta, orientation: context.orientation }),
+        value: dragHandlePayload({
+          delta: delta,
+          orientation: context.orientation,
+        }),
       });
 
       assign(context, newContext);
@@ -1903,19 +1907,7 @@ export function groupMachine(
         actions.onAutosave();
         break;
       case "registerPanelHandle": {
-        const unit =
-          typeof event.data.size === "string"
-            ? parseUnit(event.data.size)
-            : event.data.size;
-
-        context.items = addDeDuplicatedItems(context.items, {
-          type: "handle",
-          ...event.data,
-          size: {
-            type: "pixel",
-            value: new Big(unit.value),
-          },
-        });
+        context.items = addDeDuplicatedItems(context.items, event.data);
         break;
       }
       case "unregisterPanelHandle":
@@ -2109,23 +2101,29 @@ export function groupMachine(
           if (guards.shouldNotifyCollapseToggle(event)) {
             actions.notifyCollapseToggle(event);
           } else {
-            transition("togglingCollapse");
-            abortController.abort();
-            animationActor(context, event, send, abortController).then(
-              (output) => {
-                actions.onAnimationEnd(output);
-                transition("idle");
-              }
-            );
+            const panel = getPanelWithId(context, event.panelId);
+
+            if (!panel.collapsed) {
+              transition("togglingCollapse");
+              abortController.abort();
+              animationActor(context, event, send, abortController).then(
+                (output) => {
+                  actions.onAnimationEnd(output);
+                  transition("idle");
+                }
+              );
+            }
           }
           break;
         case "expandPanel":
           if (guards.cannotExpandPanel(event)) {
             break;
+          } else if (guards.shouldNotifyCollapseToggle(event)) {
+            actions.notifyCollapseToggle(event);
           } else {
-            if (guards.shouldNotifyCollapseToggle(event)) {
-              actions.notifyCollapseToggle(event);
-            } else {
+            const panel = getPanelWithId(context, event.panelId);
+
+            if (panel.collapsed) {
               transition("togglingCollapse");
               abortController.abort();
               animationActor(context, event, send, abortController).then(

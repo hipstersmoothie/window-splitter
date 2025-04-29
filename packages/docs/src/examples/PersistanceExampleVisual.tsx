@@ -1,4 +1,4 @@
-import { PanelGroupProps } from "react-window-splitter";
+import { PanelGroupProps } from "@window-splitter/react";
 import {
   ColorfulPanel,
   ColorfulPanelGroup,

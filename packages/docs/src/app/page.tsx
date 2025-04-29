@@ -10,7 +10,7 @@ export default async function Home() {
       <div className="flex flex-col gap-10 items-center py-12 md:py-24 px-6 md:px-10">
         <div className="flex flex-col gap-6 items-center">
           <h1 className="relative group font-black font-mono text-gray-normal text-xl sm:text-2xl md:text-4xl bg-gray-4 dark:bg-graydark-5 rounded-lg px-3 py-1">
-            react-window-splitter
+            @window-splitter/react
             <CopyPackageNameButton />
           </h1>
           <p className="text-gray-normal text-lg md:text-xl">
@@ -35,7 +35,7 @@ export default async function Home() {
           <ButtonLink
             icon={<GitHubLogoIcon />}
             variant="secondary"
-            href="https://github.com/hipstersmoothie/react-window-splitter"
+            href="https://github.com/hipstersmoothie/react-splitter"
             target="_blank"
           >
             View on Github

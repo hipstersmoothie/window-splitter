@@ -6,7 +6,7 @@
   "description": "A state machine for a WAI-ARIA compliant window splitter",
   "homepage": "https://react-window-splitter-six.vercel.app",
   "repository": {
-    "url": "https://github.com/hipstersmoothie/react-window-splitter",
+    "url": "https://github.com/hipstersmoothie/react-splitter",
     "directory": "packages/state"
   },
   "publishConfig": {
@@ -24,7 +24,8 @@
     "dev": "tshy -w",
     "lint": "eslint .",
     "test": "vitest",
-    "test:browser": "vitest"
+    "test:browser": "vitest",
+    "clean": "rm -rf dist .turbo .tshy .tshy-build"
   },
   "license": "MIT",
   "devDependencies": {

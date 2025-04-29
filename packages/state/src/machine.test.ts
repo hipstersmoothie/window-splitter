@@ -17,7 +17,6 @@ import {
   prepareSnapshot,
 } from "./index.js";
 import { spring } from "framer-motion";
-import Big from "big.js";
 import * as Cookies from "tiny-cookie";
 import { Actor, createActor } from "./test-utils.js";
 
@@ -135,7 +134,7 @@ describe("constraints", () => {
       { type: "registerPanel", data: initializePanel({ id: "panel-1" }) },
       {
         type: "registerPanelHandle",
-        data: { id: "resizer-1", size: "10px" },
+        data: initializePanelHandleData({ id: "resizer-1", size: "10px" }),
       },
       { type: "registerPanel", data: initializePanel({ id: "panel-2" }) },
     ]);
@@ -186,8 +185,7 @@ describe("constraints", () => {
       },
       {
         type: "registerPanelHandle",
-        // @ts-expect-error The types were hard and i wanted to keep the public API simple
-        data: { id: "resizer-1", size: { type: "pixel", value: new Big(10) } },
+        data: initializePanelHandleData({ id: "resizer-1", size: "10px" }),
       },
       { type: "registerPanel", data: initializePanel({ id: "panel-2" }) },
     ]);
@@ -231,8 +229,7 @@ describe("constraints", () => {
       },
       {
         type: "registerPanelHandle",
-        // @ts-expect-error The types were hard and i wanted to keep the public API simple
-        data: { id: "resizer-1", size: { type: "pixel", value: new Big(10) } },
+        data: initializePanelHandleData({ id: "resizer-1", size: "10px" }),
       },
       { type: "registerPanel", data: initializePanel({ id: "panel-2" }) },
     ]);
@@ -259,7 +256,7 @@ describe("constraints", () => {
       { type: "registerPanel", data: initializePanel({ id: "panel-1" }) },
       {
         type: "registerPanelHandle",
-        data: { id: "resizer-1", size: "10px" },
+        data: initializePanelHandleData({ id: "resizer-1", size: "10px" }),
       },
       { type: "registerPanel", data: initializePanel({ id: "panel-2" }) },
     ]);
@@ -495,7 +492,7 @@ describe("constraints", () => {
       { type: "registerPanel", data: initializePanel({ id: "panel-1" }) },
       {
         type: "registerPanelHandle",
-        data: { id: "resizer-1", size: "10px" },
+        data: initializePanelHandleData({ id: "resizer-1", size: "10px" }),
       },
       {
         type: "registerPanel",
@@ -526,7 +523,7 @@ describe("constraints", () => {
       { type: "registerPanel", data: initializePanel({ id: "panel-1" }) },
       {
         type: "registerPanelHandle",
-        data: { id: "resizer-1", size: "10px" },
+        data: initializePanelHandleData({ id: "resizer-1", size: "10px" }),
       },
       {
         type: "registerPanel",
@@ -559,7 +556,7 @@ describe("constraints", () => {
       { type: "registerPanel", data: initializePanel({ id: "panel-1" }) },
       {
         type: "registerPanelHandle",
-        data: { id: "resizer-1", size: "10px" },
+        data: initializePanelHandleData({ id: "resizer-1", size: "10px" }),
       },
       {
         type: "registerPanel",
@@ -586,7 +583,7 @@ describe("constraints", () => {
       { type: "registerPanel", data: initializePanel({ id: "panel-1" }) },
       {
         type: "registerPanelHandle",
-        data: { id: "resizer-1", size: "10px" },
+        data: initializePanelHandleData({ id: "resizer-1", size: "10px" }),
       },
       {
         type: "registerPanel",
@@ -598,7 +595,7 @@ describe("constraints", () => {
       },
       {
         type: "registerPanelHandle",
-        data: { id: "resizer-2", size: "10px" },
+        data: initializePanelHandleData({ id: "resizer-2", size: "10px" }),
       },
       {
         type: "registerPanel",
@@ -662,7 +659,7 @@ describe("constraints", () => {
       { type: "registerPanel", data: initializePanel({ id: "panel-1" }) },
       {
         type: "registerPanelHandle",
-        data: { id: "resizer-1", size: "10px" },
+        data: initializePanelHandleData({ id: "resizer-1", size: "10px" }),
       },
       { type: "registerPanel", data: initializePanel({ id: "panel-2" }) },
     ]);
@@ -708,7 +705,7 @@ describe("collapsible panel", () => {
       { type: "registerPanel", data: initializePanel({ id: "panel-1" }) },
       {
         type: "registerPanelHandle",
-        data: { id: "resizer-1", size: "10px" },
+        data: initializePanelHandleData({ id: "resizer-1", size: "10px" }),
       },
       {
         type: "registerPanel",
@@ -785,7 +782,7 @@ describe("collapsible panel", () => {
       { type: "registerPanel", data: initializePanel({ id: "panel-1" }) },
       {
         type: "registerPanelHandle",
-        data: { id: "resizer-1", size: "10px" },
+        data: initializePanelHandleData({ id: "resizer-1", size: "10px" }),
       },
       {
         type: "registerPanel",
@@ -842,7 +839,7 @@ describe("collapsible panel", () => {
       { type: "registerPanel", data: initializePanel({ id: "panel-1" }) },
       {
         type: "registerPanelHandle",
-        data: { id: "resizer-1", size: "10px" },
+        data: initializePanelHandleData({ id: "resizer-1", size: "10px" }),
       },
       {
         type: "registerPanel",
@@ -891,7 +888,7 @@ describe("collapsible panel", () => {
       { type: "registerPanel", data: initializePanel({ id: "panel-1" }) },
       {
         type: "registerPanelHandle",
-        data: { id: "resizer-1", size: "10px" },
+        data: initializePanelHandleData({ id: "resizer-1", size: "10px" }),
       },
       {
         type: "registerPanel",
@@ -932,7 +929,7 @@ describe("collapsible panel", () => {
       },
       {
         type: "registerPanelHandle",
-        data: { id: "resizer-1", size: "10px" },
+        data: initializePanelHandleData({ id: "resizer-1", size: "10px" }),
       },
       { type: "registerPanel", data: initializePanel({ id: "panel-1" }) },
     ]);
@@ -980,7 +977,7 @@ describe("collapsible panel", () => {
       { type: "registerPanel", data: initializePanel({ id: "panel-1" }) },
       {
         type: "registerPanelHandle",
-        data: { id: "resizer-1", size: "10px" },
+        data: initializePanelHandleData({ id: "resizer-1", size: "10px" }),
       },
       {
         type: "registerPanel",
@@ -1033,7 +1030,7 @@ describe("collapsible panel", () => {
       { type: "registerPanel", data: initializePanel({ id: "panel-1" }) },
       {
         type: "registerPanelHandle",
-        data: { id: "resizer-1", size: "10px" },
+        data: initializePanelHandleData({ id: "resizer-1", size: "10px" }),
       },
       {
         type: "registerPanel",
@@ -1107,7 +1104,7 @@ describe("collapsible panel", () => {
       { type: "registerPanel", data: initializePanel({ id: "panel-1" }) },
       {
         type: "registerPanelHandle",
-        data: { id: "resizer-1", size: "10px" },
+        data: initializePanelHandleData({ id: "resizer-1", size: "10px" }),
       },
       {
         type: "registerPanel",
@@ -1150,7 +1147,7 @@ describe("collapsible panel", () => {
     });
   });
 
-  test("panel collapse can be controlled ", async () => {
+  test("panel collapse can be controlled", async () => {
     const actor = createActor({ groupId: "group" });
 
     const spy = vi.fn();
@@ -1159,7 +1156,7 @@ describe("collapsible panel", () => {
       { type: "registerPanel", data: initializePanel({ id: "panel-1" }) },
       {
         type: "registerPanelHandle",
-        data: { id: "resizer-1", size: "10px" },
+        data: initializePanelHandleData({ id: "resizer-1", size: "10px" }),
       },
       {
         type: "registerPanel",
@@ -1271,7 +1268,7 @@ describe("collapsible panel", () => {
       { type: "registerPanel", data: initializePanel({ id: "panel-1" }) },
       {
         type: "registerPanelHandle",
-        data: { id: "resizer-1", size: "10px" },
+        data: initializePanelHandleData({ id: "resizer-1", size: "10px" }),
       },
       {
         type: "registerPanel",
@@ -1354,7 +1351,7 @@ describe("collapsible panel", () => {
         },
         {
           type: "registerPanelHandle",
-          data: { id: "resizer-1", size: "10px" },
+          data: initializePanelHandleData({ id: "resizer-1", size: "10px" }),
         },
         {
           type: "registerPanel",
@@ -1385,7 +1382,7 @@ describe("collapsible panel", () => {
         },
         {
           type: "registerPanelHandle",
-          data: { id: "resizer-1", size: "10px" },
+          data: initializePanelHandleData({ id: "resizer-1", size: "10px" }),
         },
         {
           type: "registerPanel",
@@ -1427,7 +1424,7 @@ describe("collapsible panel", () => {
         },
         {
           type: "registerPanelHandle",
-          data: { id: "resizer-1", size: "10px" },
+          data: initializePanelHandleData({ id: "resizer-1", size: "10px" }),
         },
         {
           type: "registerPanel",
@@ -1471,7 +1468,7 @@ describe("collapsible panel", () => {
         },
         {
           type: "registerPanelHandle",
-          data: { id: "resizer-1", size: "10px" },
+          data: initializePanelHandleData({ id: "resizer-1", size: "10px" }),
         },
         {
           type: "registerPanel",
@@ -1513,7 +1510,7 @@ describe("conditional panel", () => {
       { type: "registerPanel", data: initializePanel({ id: "panel-1" }) },
       {
         type: "registerPanelHandle",
-        data: { id: "resizer-1", size: "10px" },
+        data: initializePanelHandleData({ id: "resizer-1", size: "10px" }),
       },
       { type: "registerPanel", data: initializePanel({ id: "panel-2" }) },
     ]);
@@ -1529,7 +1526,7 @@ describe("conditional panel", () => {
     sendAll(actor, [
       {
         type: "registerPanelHandle",
-        data: { id: "resizer-2", size: "10px" },
+        data: initializePanelHandleData({ id: "resizer-2", size: "10px" }),
       },
       {
         type: "registerDynamicPanel",
@@ -1562,7 +1559,7 @@ describe("conditional panel", () => {
       { type: "registerPanel", data: initializePanel({ id: "panel-1" }) },
       {
         type: "registerPanelHandle",
-        data: { id: "resizer-1", size: "10px" },
+        data: initializePanelHandleData({ id: "resizer-1", size: "10px" }),
       },
       {
         type: "registerPanel",
@@ -1581,7 +1578,7 @@ describe("conditional panel", () => {
     sendAll(actor, [
       {
         type: "registerPanelHandle",
-        data: { id: "resizer-2", size: "10px" },
+        data: initializePanelHandleData({ id: "resizer-2", size: "10px" }),
       },
       {
         type: "registerDynamicPanel",
@@ -1619,7 +1616,7 @@ describe("conditional panel", () => {
       { type: "registerPanel", data: initializePanel({ id: "panel-1" }) },
       {
         type: "registerPanelHandle",
-        data: { id: "resizer-1", size: "10px" },
+        data: initializePanelHandleData({ id: "resizer-1", size: "10px" }),
       },
       {
         type: "registerPanel",
@@ -1638,7 +1635,7 @@ describe("conditional panel", () => {
     sendAll(actor, [
       {
         type: "registerPanelHandle",
-        data: { id: "resizer-2", size: "10px" },
+        data: initializePanelHandleData({ id: "resizer-2", size: "10px" }),
       },
       {
         type: "registerDynamicPanel",
@@ -1674,7 +1671,7 @@ describe("conditional panel", () => {
       { type: "registerPanel", data: initializePanel({ id: "panel-1" }) },
       {
         type: "registerPanelHandle",
-        data: { id: "resizer-1", size: "10px" },
+        data: initializePanelHandleData({ id: "resizer-1", size: "10px" }),
       },
       { type: "registerPanel", data: initializePanel({ id: "panel-2" }) },
     ]);
@@ -1690,7 +1687,11 @@ describe("conditional panel", () => {
     sendAll(actor, [
       {
         type: "registerPanelHandle",
-        data: { id: "resizer-2", size: "10px", order: 1 },
+        data: initializePanelHandleData({
+          id: "resizer-2",
+          size: "10px",
+          order: 1,
+        }),
       },
       {
         type: "registerDynamicPanel",
@@ -1832,7 +1833,7 @@ describe("utils", async () => {
       { type: "registerPanel", data: initializePanel({ id: "panel-1" }) },
       {
         type: "registerPanelHandle",
-        data: { id: "resizer-1", size: "10px" },
+        data: initializePanelHandleData({ id: "resizer-1", size: "10px" }),
       },
       {
         type: "registerPanel",
@@ -1852,7 +1853,7 @@ describe("utils", async () => {
       { type: "registerPanel", data: initializePanel({ id: "panel-1" }) },
       {
         type: "registerPanelHandle",
-        data: { id: "resizer-1", size: "10px" },
+        data: initializePanelHandleData({ id: "resizer-1", size: "10px" }),
       },
       {
         type: "registerPanel",
@@ -1874,7 +1875,7 @@ describe("utils", async () => {
       { type: "registerPanel", data: initializePanel({ id: "panel-1" }) },
       {
         type: "registerPanelHandle",
-        data: { id: "resizer-1", size: "10px" },
+        data: initializePanelHandleData({ id: "resizer-1", size: "10px" }),
       },
       {
         type: "registerPanel",
@@ -1894,7 +1895,7 @@ describe("utils", async () => {
       { type: "registerPanel", data: initializePanel({ id: "panel-1" }) },
       {
         type: "registerPanelHandle",
-        data: { id: "resizer-1", size: "10px" },
+        data: initializePanelHandleData({ id: "resizer-1", size: "10px" }),
       },
       {
         type: "registerPanel",
@@ -1917,7 +1918,7 @@ describe("utils", async () => {
       },
       {
         type: "registerPanelHandle",
-        data: { id: "resizer-1", size: "10px" },
+        data: initializePanelHandleData({ id: "resizer-1", size: "10px" }),
       },
       {
         type: "registerPanel",

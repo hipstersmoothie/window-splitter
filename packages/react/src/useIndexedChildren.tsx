@@ -44,6 +44,7 @@ function flattenChildren(children: React.ReactNode[]): React.ReactNode[] {
     // We then correct the keys for the order of the children
     // eslint-disable-next-line @eslint-react/no-clone-element
     return React.cloneElement(child, {
+      // eslint-disable-next-line @eslint-react/no-array-index-key
       key: `.${index}`,
     });
   });

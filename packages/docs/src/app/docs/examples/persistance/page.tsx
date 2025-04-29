@@ -31,7 +31,7 @@ export default async function Persistance() {
       </div>
 
       <Paragraph>
-        <StyledLink href="https://github.com/hipstersmoothie/react-window-splitter/blob/main/packages/docs/src/app/docs/examples/persistance/PersistanceExample.tsx">
+        <StyledLink href="https://github.com/hipstersmoothie/react-splitter/blob/main/packages/docs/src/app/docs/examples/persistance/PersistanceExample.tsx">
           See the source code
         </StyledLink>
       </Paragraph>
@@ -51,7 +51,7 @@ export default async function Persistance() {
       </Paragraph>
 
       <Paragraph>
-        <StyledLink href="https://github.com/hipstersmoothie/react-window-splitter/blob/main/packages/docs/src/app/docs/examples/persistance/PersistanceCookieExample.tsx">
+        <StyledLink href="https://github.com/hipstersmoothie/react-splitter/blob/main/packages/docs/src/app/docs/examples/persistance/PersistanceCookieExample.tsx">
           See the source code
         </StyledLink>
       </Paragraph>

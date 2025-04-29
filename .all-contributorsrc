@@ -1,11 +1,9 @@
 {
-  "projectName": "react-window-splitter",
+  "projectName": "window-splitter",
   "projectOwner": "hipstersmoothie",
   "repoType": "github",
   "repoHost": "https://github.com",
-  "files": [
-    "README.md"
-  ],
+  "files": ["README.md"],
   "imageSize": 100,
   "commit": false,
   "commitConvention": "none",
@@ -15,31 +13,21 @@
       "name": "Andrew Lisowski",
       "avatar_url": "https://avatars.githubusercontent.com/u/1192452?v=4",
       "profile": "http://hipstersmoothie.com/",
-      "contributions": [
-        "code",
-        "doc",
-        "example",
-        "test",
-        "infra"
-      ]
+      "contributions": ["code", "doc", "example", "test", "infra"]
     },
     {
       "login": "Rel1cx",
       "name": "Eva1ent",
       "avatar_url": "https://avatars.githubusercontent.com/u/24217275?v=4",
       "profile": "https://github.com/Rel1cx",
-      "contributions": [
-        "code"
-      ]
+      "contributions": ["code"]
     },
     {
       "login": "sfc-gh-alisowski",
       "name": "Andrew Lisowski",
       "avatar_url": "https://avatars.githubusercontent.com/u/196691327?v=4",
       "profile": "https://github.com/sfc-gh-alisowski",
-      "contributions": [
-        "code"
-      ]
+      "contributions": ["code"]
     }
   ],
   "contributorsPerLine": 7,

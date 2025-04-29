@@ -7,7 +7,7 @@ import {
   ColorfulPanelResizer,
 } from "@/Components/ColorfulPanels";
 import { useRef } from "react";
-import { PanelGroupHandle } from "react-window-splitter";
+import { PanelGroupHandle } from "@window-splitter/react";
 
 export function ImperativeGroupExample() {
   const panelGroupHandle = useRef<PanelGroupHandle>(null);

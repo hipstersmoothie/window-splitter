@@ -8,7 +8,7 @@ import {
   ColorfulPanelResizer,
 } from "../Components/ColorfulPanels";
 import { Button } from "../Components/Button";
-import { PanelHandle } from "react-window-splitter";
+import { PanelHandle } from "@window-splitter/react";
 
 export function CustomCollapseAnimation() {
   const panelHandle = useRef<PanelHandle>(null);

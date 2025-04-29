@@ -1,4 +1,4 @@
-import { PanelGroup, Panel, PanelResizer } from "react-window-splitter";
+import { PanelGroup, Panel, PanelResizer } from "@window-splitter/react";
 
 export function Example() {
   return (

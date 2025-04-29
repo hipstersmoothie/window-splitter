@@ -4,7 +4,7 @@ import {
   PanelGroup,
   PanelHandle,
   PanelResizer,
-} from "react-window-splitter";
+} from "@window-splitter/react";
 import { Button } from "@/Components/Button";
 
 export function ImperativeGroupExample() {

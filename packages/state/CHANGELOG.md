@@ -14,7 +14,7 @@
 
 #### 🐛 Bug Fix
 
-- bake in invariant [#50](https://github.com/hipstersmoothie/react-window-splitter/pull/50) ([@hipstersmoothie](https://github.com/hipstersmoothie))
+- bake in invariant [#50](https://github.com/hipstersmoothie/react-splitter/pull/50) ([@hipstersmoothie](https://github.com/hipstersmoothie))
 - bake in invariant ([@hipstersmoothie](https://github.com/hipstersmoothie))
 
 #### Authors: 1
@@ -27,7 +27,7 @@
 
 #### 🐛 Bug Fix
 
-- remove tiny-cookie as runtime dep [#49](https://github.com/hipstersmoothie/react-window-splitter/pull/49) ([@hipstersmoothie](https://github.com/hipstersmoothie))
+- remove tiny-cookie as runtime dep [#49](https://github.com/hipstersmoothie/react-splitter/pull/49) ([@hipstersmoothie](https://github.com/hipstersmoothie))
 - remove tiny-cookie as runtime dep ([@hipstersmoothie](https://github.com/hipstersmoothie))
 
 #### ⚠️ Pushed to `main`
@@ -44,11 +44,11 @@
 
 ### Release Notes
 
-#### No xstate ([#47](https://github.com/hipstersmoothie/react-window-splitter/pull/47))
+#### No xstate ([#47](https://github.com/hipstersmoothie/react-splitter/pull/47))
 
 This release is a dramatic reduction to the bundle size. This was done by pruning some unnecessary deps and some that were to large to justify in the headless component.
 
-The biggest change is to `@window-splitter/state` where we refactored the state machine into a function that followed the logic of the state machine, taking careful aim to not give up any of the guarantees we had there. As a result the apis for `snapshot` changed since those were exposing `xstate`'s snapshots. The format is now just the context value, which is also a smaller amount of text than we were storing for snapshots. 
+The biggest change is to `@window-splitter/state` where we refactored the state machine into a function that followed the logic of the state machine, taking careful aim to not give up any of the guarantees we had there. As a result the apis for `snapshot` changed since those were exposing `xstate`'s snapshots. The format is now just the context value, which is also a smaller amount of text than we were storing for snapshots.
 
 That change is breaking. The version has only received a minor bump because we are still <0, where bumping the minor can include breaking changes.
 
@@ -56,7 +56,7 @@ That change is breaking. The version has only received a minor bump because we a
 
 #### 🚀 Enhancement
 
-- No xstate [#47](https://github.com/hipstersmoothie/react-window-splitter/pull/47) ([@hipstersmoothie](https://github.com/hipstersmoothie))
+- No xstate [#47](https://github.com/hipstersmoothie/react-splitter/pull/47) ([@hipstersmoothie](https://github.com/hipstersmoothie))
 
 #### 🐛 Bug Fix
 
@@ -114,7 +114,7 @@ That change is breaking. The version has only received a minor bump because we a
 
 #### 🚀 Enhancement
 
-- Add `data-state=inactive` for drag handles that aren't the active one [#46](https://github.com/hipstersmoothie/react-window-splitter/pull/46) ([@sfc-gh-alisowski](https://github.com/sfc-gh-alisowski))
+- Add `data-state=inactive` for drag handles that aren't the active one [#46](https://github.com/hipstersmoothie/react-splitter/pull/46) ([@sfc-gh-alisowski](https://github.com/sfc-gh-alisowski))
 
 #### 🐛 Bug Fix
 
@@ -131,7 +131,7 @@ That change is breaking. The version has only received a minor bump because we a
 
 #### 🐛 Bug Fix
 
-- update panel settings when props update [#45](https://github.com/hipstersmoothie/react-window-splitter/pull/45) ([@hipstersmoothie](https://github.com/hipstersmoothie))
+- update panel settings when props update [#45](https://github.com/hipstersmoothie/react-splitter/pull/45) ([@hipstersmoothie](https://github.com/hipstersmoothie))
 - update panel settings when props update ([@hipstersmoothie](https://github.com/hipstersmoothie))
 
 #### Authors: 1
@@ -144,7 +144,7 @@ That change is breaking. The version has only received a minor bump because we a
 
 #### 🐛 Bug Fix
 
-- rebind onResize and onCollapseChange to fix restoring from snapshot [#44](https://github.com/hipstersmoothie/react-window-splitter/pull/44) ([@hipstersmoothie](https://github.com/hipstersmoothie))
+- rebind onResize and onCollapseChange to fix restoring from snapshot [#44](https://github.com/hipstersmoothie/react-splitter/pull/44) ([@hipstersmoothie](https://github.com/hipstersmoothie))
 - rebind onResize and onCollapseChange to fix restoring from snapshot (closes #41) ([@hipstersmoothie](https://github.com/hipstersmoothie))
 
 #### Authors: 1
@@ -157,7 +157,7 @@ That change is breaking. The version has only received a minor bump because we a
 
 #### 🐛 Bug Fix
 
-- Responsive Bugs [#38](https://github.com/hipstersmoothie/react-window-splitter/pull/38) ([@hipstersmoothie](https://github.com/hipstersmoothie))
+- Responsive Bugs [#38](https://github.com/hipstersmoothie/react-splitter/pull/38) ([@hipstersmoothie](https://github.com/hipstersmoothie))
 - fix tests ([@hipstersmoothie](https://github.com/hipstersmoothie))
 - move handle overflow logic to recordActualItemSize ([@hipstersmoothie](https://github.com/hipstersmoothie))
 - more ([@hipstersmoothie](https://github.com/hipstersmoothie))
@@ -165,7 +165,7 @@ That change is breaking. The version has only received a minor bump because we a
 - updating tests ([@hipstersmoothie](https://github.com/hipstersmoothie))
 - measure more ([@hipstersmoothie](https://github.com/hipstersmoothie))
 - add fill panel. improves resizing a lot ([@hipstersmoothie](https://github.com/hipstersmoothie))
-- move autosave to state package [#36](https://github.com/hipstersmoothie/react-window-splitter/pull/36) ([@hipstersmoothie](https://github.com/hipstersmoothie))
+- move autosave to state package [#36](https://github.com/hipstersmoothie/react-splitter/pull/36) ([@hipstersmoothie](https://github.com/hipstersmoothie))
 - improve lint ([@hipstersmoothie](https://github.com/hipstersmoothie))
 - move autosave to state ([@hipstersmoothie](https://github.com/hipstersmoothie))
 
@@ -179,8 +179,8 @@ That change is breaking. The version has only received a minor bump because we a
 
 #### 🚀 Enhancement
 
-- Add "isStaticAtRest" prop [#34](https://github.com/hipstersmoothie/react-window-splitter/pull/34) ([@hipstersmoothie](https://github.com/hipstersmoothie))
-- Collapse Validation [#33](https://github.com/hipstersmoothie/react-window-splitter/pull/33) ([@hipstersmoothie](https://github.com/hipstersmoothie))
+- Add "isStaticAtRest" prop [#34](https://github.com/hipstersmoothie/react-splitter/pull/34) ([@hipstersmoothie](https://github.com/hipstersmoothie))
+- Collapse Validation [#33](https://github.com/hipstersmoothie/react-splitter/pull/33) ([@hipstersmoothie](https://github.com/hipstersmoothie))
 
 #### 🐛 Bug Fix
 
@@ -206,9 +206,9 @@ That change is breaking. The version has only received a minor bump because we a
 
 #### 🐛 Bug Fix
 
-- Fix panel not expanding to take up width with a default collapsed panel [#29](https://github.com/hipstersmoothie/react-window-splitter/pull/29) ([@hipstersmoothie](https://github.com/hipstersmoothie))
+- Fix panel not expanding to take up width with a default collapsed panel [#29](https://github.com/hipstersmoothie/react-splitter/pull/29) ([@hipstersmoothie](https://github.com/hipstersmoothie))
 - Fix panel not expanding to take up width with a default collapsed panel ([@hipstersmoothie](https://github.com/hipstersmoothie))
-- Fix bug in onResize callbacks [#30](https://github.com/hipstersmoothie/react-window-splitter/pull/30) ([@hipstersmoothie](https://github.com/hipstersmoothie))
+- Fix bug in onResize callbacks [#30](https://github.com/hipstersmoothie/react-splitter/pull/30) ([@hipstersmoothie](https://github.com/hipstersmoothie))
 - call onResize once the item sizes are known too ([@hipstersmoothie](https://github.com/hipstersmoothie))
 - fix pixel calculation on onResize ([@hipstersmoothie](https://github.com/hipstersmoothie))
 - Fix inconsistent percent value structure ([@hipstersmoothie](https://github.com/hipstersmoothie))
@@ -235,17 +235,17 @@ That change is breaking. The version has only received a minor bump because we a
 
 #### 🚀 Enhancement
 
-- Add `onResize` prop to Panel [#28](https://github.com/hipstersmoothie/react-window-splitter/pull/28) ([@hipstersmoothie](https://github.com/hipstersmoothie))
+- Add `onResize` prop to Panel [#28](https://github.com/hipstersmoothie/react-splitter/pull/28) ([@hipstersmoothie](https://github.com/hipstersmoothie))
 
 #### 🐛 Bug Fix
 
 - Add `onResize` prop to `Panel` ([@hipstersmoothie](https://github.com/hipstersmoothie))
-- 100 [#26](https://github.com/hipstersmoothie/react-window-splitter/pull/26) ([@hipstersmoothie](https://github.com/hipstersmoothie))
+- 100 [#26](https://github.com/hipstersmoothie/react-splitter/pull/26) ([@hipstersmoothie](https://github.com/hipstersmoothie))
 - 100 ([@hipstersmoothie](https://github.com/hipstersmoothie))
-- add coverage for PRs [#25](https://github.com/hipstersmoothie/react-window-splitter/pull/25) ([@hipstersmoothie](https://github.com/hipstersmoothie))
+- add coverage for PRs [#25](https://github.com/hipstersmoothie/react-splitter/pull/25) ([@hipstersmoothie](https://github.com/hipstersmoothie))
 - testing ([@hipstersmoothie](https://github.com/hipstersmoothie))
 - add coverage for PRs ([@hipstersmoothie](https://github.com/hipstersmoothie))
-- Add react tests [#24](https://github.com/hipstersmoothie/react-window-splitter/pull/24) ([@hipstersmoothie](https://github.com/hipstersmoothie))
+- Add react tests [#24](https://github.com/hipstersmoothie/react-splitter/pull/24) ([@hipstersmoothie](https://github.com/hipstersmoothie))
 - add docs for state machine usage ([@hipstersmoothie](https://github.com/hipstersmoothie))
 
 #### ⚠️ Pushed to `main`
@@ -276,9 +276,9 @@ That change is breaking. The version has only received a minor bump because we a
 
 #### 🐛 Bug Fix
 
-- Fix conditional panel rendering [#22](https://github.com/hipstersmoothie/react-window-splitter/pull/22) ([@hipstersmoothie](https://github.com/hipstersmoothie))
+- Fix conditional panel rendering [#22](https://github.com/hipstersmoothie/react-splitter/pull/22) ([@hipstersmoothie](https://github.com/hipstersmoothie))
 - Fix conditional panel rendering ([@hipstersmoothie](https://github.com/hipstersmoothie))
-- Fix default size throwing of responsive sizing [#21](https://github.com/hipstersmoothie/react-window-splitter/pull/21) ([@hipstersmoothie](https://github.com/hipstersmoothie))
+- Fix default size throwing of responsive sizing [#21](https://github.com/hipstersmoothie/react-splitter/pull/21) ([@hipstersmoothie](https://github.com/hipstersmoothie))
 - Fix default size throwing of responsive sizing ([@hipstersmoothie](https://github.com/hipstersmoothie))
 
 #### Authors: 1
@@ -291,7 +291,7 @@ That change is breaking. The version has only received a minor bump because we a
 
 #### 🐛 Bug Fix
 
-- More Tests and Bug Fixes [#18](https://github.com/hipstersmoothie/react-window-splitter/pull/18) ([@hipstersmoothie](https://github.com/hipstersmoothie))
+- More Tests and Bug Fixes [#18](https://github.com/hipstersmoothie/react-splitter/pull/18) ([@hipstersmoothie](https://github.com/hipstersmoothie))
 - fix overshoot math for non-collapsible panels ([@hipstersmoothie](https://github.com/hipstersmoothie))
 - remove unused deps ([@hipstersmoothie](https://github.com/hipstersmoothie))
 - move prepareSnapshot ([@hipstersmoothie](https://github.com/hipstersmoothie))
@@ -312,7 +312,7 @@ That change is breaking. The version has only received a minor bump because we a
 
 #### 🐛 Bug Fix
 
-- Split out @window-splitter/state [#16](https://github.com/hipstersmoothie/react-window-splitter/pull/16) ([@hipstersmoothie](https://github.com/hipstersmoothie))
+- Split out @window-splitter/state [#16](https://github.com/hipstersmoothie/react-splitter/pull/16) ([@hipstersmoothie](https://github.com/hipstersmoothie))
 - make state public ([@hipstersmoothie](https://github.com/hipstersmoothie))
 - split into packages ([@hipstersmoothie](https://github.com/hipstersmoothie))
 
@@ -326,7 +326,7 @@ That change is breaking. The version has only received a minor bump because we a
 
 #### 🐛 Bug Fix
 
-- Add tests, fix a bunch of bugs [#12](https://github.com/hipstersmoothie/react-window-splitter/pull/12) ([@hipstersmoothie](https://github.com/hipstersmoothie))
+- Add tests, fix a bunch of bugs [#12](https://github.com/hipstersmoothie/react-splitter/pull/12) ([@hipstersmoothie](https://github.com/hipstersmoothie))
 - fix lint ([@hipstersmoothie](https://github.com/hipstersmoothie))
 - more tests ([@hipstersmoothie](https://github.com/hipstersmoothie))
 - fix imperative api bugs ([@hipstersmoothie](https://github.com/hipstersmoothie))
@@ -340,7 +340,7 @@ That change is breaking. The version has only received a minor bump because we a
 - fix conditional panel rendering ([@hipstersmoothie](https://github.com/hipstersmoothie))
 - fix commited layout ([@hipstersmoothie](https://github.com/hipstersmoothie))
 - Merge remote-tracking branch 'origin/main' into tests ([@hipstersmoothie](https://github.com/hipstersmoothie))
-- fix react preset in config-eslint package [#11](https://github.com/hipstersmoothie/react-window-splitter/pull/11) ([@Rel1cx](https://github.com/Rel1cx))
+- fix react preset in config-eslint package [#11](https://github.com/hipstersmoothie/react-splitter/pull/11) ([@Rel1cx](https://github.com/Rel1cx))
 - switch to 1fr and fix measurement in tests (closes #3) ([@hipstersmoothie](https://github.com/hipstersmoothie))
 - set initial children sizes ([@hipstersmoothie](https://github.com/hipstersmoothie))
 - fix react preset in config-eslint package ([@Rel1cx](https://github.com/Rel1cx))
@@ -367,7 +367,7 @@ That change is breaking. The version has only received a minor bump because we a
 
 #### 🚀 Enhancement
 
-- Collapse Animation [#10](https://github.com/hipstersmoothie/react-window-splitter/pull/10) ([@hipstersmoothie](https://github.com/hipstersmoothie))
+- Collapse Animation [#10](https://github.com/hipstersmoothie/react-splitter/pull/10) ([@hipstersmoothie](https://github.com/hipstersmoothie))
 
 #### 🐛 Bug Fix
 
@@ -477,7 +477,7 @@ That change is breaking. The version has only received a minor bump because we a
 
 #### 🐛 Bug Fix
 
-- pr workflow [#1](https://github.com/hipstersmoothie/react-window-splitter/pull/1) ([@hipstersmoothie](https://github.com/hipstersmoothie))
+- pr workflow [#1](https://github.com/hipstersmoothie/react-splitter/pull/1) ([@hipstersmoothie](https://github.com/hipstersmoothie))
 - pr workflow ([@hipstersmoothie](https://github.com/hipstersmoothie))
 
 #### ⚠️ Pushed to `main`

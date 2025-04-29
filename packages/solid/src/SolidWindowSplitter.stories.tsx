@@ -1,19 +1,25 @@
-import React, { useMemo } from "react";
+import type { Meta } from "storybook-solidjs";
 import { spring } from "framer-motion";
+
 import {
   PanelGroup,
-  PanelGroupProps,
-  Panel,
-  PanelProps,
   PanelResizer,
-  PanelHandle,
-  PanelGroupHandle,
+  Panel,
+  PanelGroupProps,
+  PanelProps,
   PanelResizerProps,
-} from "./index.js";
+} from "./SolidWIndowSplitter.jsx";
+import { createSignal, Ref, Show, splitProps } from "solid-js";
+import { PanelHandle } from "@window-splitter/interface";
+import { PanelGroupHandle } from "@window-splitter/interface";
+import { GroupMachineContextValue } from "@window-splitter/state";
 
-export default {
-  title: "Components/ResizeableGridPanels",
-};
+const meta = {
+  title: "Components/Solid",
+  component: PanelGroup,
+} satisfies Meta<typeof PanelGroup>;
+
+export default meta;
 
 function StyledPanelGroup(props: PanelGroupProps) {
   return (
@@ -22,35 +28,36 @@ function StyledPanelGroup(props: PanelGroupProps) {
       style={{
         border: "1px solid rgba(0, 0, 0, 0.3)",
         background: "rgba(0, 0, 0, 0.1)",
-        borderRadius: 12,
-        boxSizing: "border-box",
+        "border-radius": "12px",
+        "box-sizing": "border-box",
         ...props.style,
       }}
     />
   );
 }
 
-function StyledPanel({ children, ...props }: PanelProps) {
+function StyledPanel(props: PanelProps) {
+  const [, attrs] = splitProps(props, ["children"]);
   return (
     <Panel
       style={{
         overflow: "hidden",
       }}
-      {...props}
+      {...attrs}
     >
       <div
         style={{
           height: "100%",
           width: "100%",
-          padding: 20,
+          padding: "20px",
           display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
+          "align-items": "center",
+          "justify-content": "center",
           overflow: "hidden",
-          boxSizing: "border-box",
+          "box-sizing": "border-box",
         }}
       >
-        {children}
+        {props.children}
       </div>
     </Panel>
   );
@@ -60,9 +67,9 @@ function StyledResizer(props: PanelResizerProps) {
   return <PanelResizer size="10px" style={{ background: "red" }} {...props} />;
 }
 
-export function Simple({ handle }: { handle?: React.Ref<PanelGroupHandle> }) {
+export function Simple(props: { handle?: Ref<PanelGroupHandle> }) {
   return (
-    <StyledPanelGroup handle={handle} style={{ height: 200 }}>
+    <StyledPanelGroup handle={props.handle} style={{ height: "200px" }}>
       <StyledPanel>Panel 1</StyledPanel>
       <StyledResizer />
       <StyledPanel min="100px">Panel 2</StyledPanel>
@@ -70,9 +77,16 @@ export function Simple({ handle }: { handle?: React.Ref<PanelGroupHandle> }) {
   );
 }
 
-export function Autosave({ handle }: { handle?: React.Ref<PanelGroupHandle> }) {
+export function Autosave(props: {
+  handle?: Ref<PanelGroupHandle>;
+  snapshot?: GroupMachineContextValue;
+}) {
   return (
-    <StyledPanelGroup handle={handle} autosaveId="autosave-example">
+    <StyledPanelGroup
+      autosaveId="autosave-example-solid"
+      handle={props.handle}
+      snapshot={props.snapshot}
+    >
       <StyledPanel id="1">Panel 1</StyledPanel>
       <StyledResizer id="resizer" />
       <StyledPanel id="2">Panel 2</StyledPanel>
@@ -80,21 +94,37 @@ export function Autosave({ handle }: { handle?: React.Ref<PanelGroupHandle> }) {
   );
 }
 
-export function AutosaveCollapsible({
-  handle,
-  onCollapseChange = console.log,
-}: {
-  handle?: React.Ref<PanelGroupHandle>;
-  onCollapseChange?: (c: boolean) => void;
+export function AutosaveCookie(props: {
+  handle?: Ref<PanelGroupHandle>;
+  snapshot?: GroupMachineContextValue;
 }) {
   return (
-    <StyledPanelGroup handle={handle} autosaveId="autosave-example-2">
+    <StyledPanelGroup
+      autosaveId="autosave-cookie-solid"
+      autosaveStrategy="cookie"
+      style={{ height: "200px" }}
+      handle={props.handle}
+      snapshot={props.snapshot}
+    >
+      <StyledPanel id="1">Panel 1</StyledPanel>
+      <StyledResizer id="resizer1" size="10px" style={{ background: "red" }} />
+      <StyledPanel id="2">Panel 2</StyledPanel>
+    </StyledPanelGroup>
+  );
+}
+
+export function AutosaveCollapsible(props: {
+  handle?: Ref<PanelGroupHandle>;
+  onCollapseChange?: (isCollapsed: boolean) => void;
+}) {
+  return (
+    <StyledPanelGroup autosaveId="autosave-example-2" handle={props.handle}>
       <StyledPanel
         id="1"
         collapsible
         collapsedSize="100px"
         min="140px"
-        onCollapseChange={onCollapseChange}
+        onCollapseChange={props.onCollapseChange}
       >
         Collapsible
       </StyledPanel>
@@ -104,20 +134,14 @@ export function AutosaveCollapsible({
   );
 }
 
-export function DynamicConstraints({
-  handle,
-}: {
-  handle?: React.Ref<PanelGroupHandle>;
-}) {
-  const [customOn, setCustomOn] = React.useState(false);
+// TODO: fix this
+export function DynamicConstraints(props: { handle?: Ref<PanelGroupHandle> }) {
+  const [customOn, setCustomOn] = createSignal(false);
 
   return (
     <>
-      <StyledPanelGroup handle={handle}>
-        <StyledPanel
-          default="100px"
-          {...(customOn ? { min: "200px" } : { min: "100px" })}
-        >
+      <StyledPanelGroup handle={props.handle}>
+        <StyledPanel default="100px" min={customOn() ? "200px" : "100px"}>
           <div>Panel 1</div>
         </StyledPanel>
         <StyledResizer />
@@ -126,13 +150,13 @@ export function DynamicConstraints({
         </StyledPanel>
         <StyledResizer />
         <StyledPanel
-          {...(customOn ? { min: "100px" } : { min: "400px" })}
-          {...(customOn ? { max: "300px" } : { max: "700px" })}
+          min={customOn() ? "100px" : "400px"}
+          max={customOn() ? "300px" : "700px"}
         >
           <div>Panel 3</div>
         </StyledPanel>
       </StyledPanelGroup>
-      <button type="button" onClick={() => setCustomOn(!customOn)}>
+      <button type="button" onClick={() => setCustomOn(!customOn())}>
         Toggle Custom
       </button>
     </>
@@ -205,16 +229,12 @@ export function HorizontalLayout() {
   );
 }
 
-export function VerticalLayout({
-  handle,
-}: {
-  handle?: React.Ref<PanelGroupHandle>;
-}) {
+export function VerticalLayout(props: { handle?: Ref<PanelGroupHandle> }) {
   return (
     <StyledPanelGroup
-      handle={handle}
       orientation="vertical"
-      style={{ height: 322 }}
+      style={{ height: "322px" }}
+      handle={props.handle}
     >
       <StyledPanel default="30%" min="20%">
         top
@@ -229,14 +249,9 @@ export function VerticalLayout({
   );
 }
 
-export function VerticalLayout2({
-  handle,
-}: {
-  handle?: React.Ref<PanelGroupHandle>;
-}) {
+export function VerticalLayout2() {
   return (
     <StyledPanelGroup
-      handle={handle}
       orientation="vertical"
       style={{ height: "calc(100vh - 100px)" }}
     >
@@ -262,41 +277,41 @@ export function NestedGroups() {
       orientation="horizontal"
       style={{
         border: "1px solid rgba(0, 0, 0, 0.3)",
-        borderRadius: 12,
-        height: 400,
+        "border-radius": "12px",
+        height: "400px",
       }}
     >
-      <Panel min="10%">left</Panel>
+      <Panel min="10%">1</Panel>
       <StyledResizer />
       <Panel min="10%">
         <PanelGroup orientation="vertical">
-          <Panel min="10%">top</Panel>
+          <Panel min="10%">2-1</Panel>
           <StyledResizer />
           <Panel min="10%">
             <PanelGroup orientation="horizontal">
-              <Panel min="20%">left</Panel>
+              <Panel min="20%">2-2-1</Panel>
               <StyledResizer />
-              <Panel min="20%">right</Panel>
+              <Panel min="20%">2-2-2</Panel>
             </PanelGroup>
           </Panel>
         </PanelGroup>
       </Panel>
       <StyledResizer />
-      <Panel min="10%">right</Panel>
+      <Panel min="10%">3</Panel>
     </PanelGroup>
   );
 }
 
 export function WithOverflow() {
   return (
-    <StyledPanelGroup style={{ height: 400 }}>
+    <StyledPanelGroup style={{ height: "400px" }}>
       <Panel min="200px">
         <div
           style={{
             overflow: "auto",
-            padding: 40,
+            padding: "40px",
             height: "100%",
-            boxSizing: "border-box",
+            "box-sizing": "border-box",
           }}
         >
           <p>
@@ -342,9 +357,9 @@ export function WithOverflow() {
         <div
           style={{
             overflow: "auto",
-            padding: 40,
+            padding: "40px",
             height: "100%",
-            boxSizing: "border-box",
+            "box-sizing": "border-box",
           }}
         >
           <p>
@@ -389,25 +404,21 @@ export function WithOverflow() {
   );
 }
 
-export function Collapsible({
-  leftPanelHandle,
-  rightPanelHandle,
-  handle,
-}: {
-  leftPanelHandle?: React.Ref<PanelHandle>;
-  handle?: React.Ref<PanelGroupHandle>;
-  rightPanelHandle?: React.Ref<PanelHandle>;
+export function Collapsible(props: {
+  handle?: Ref<PanelGroupHandle>;
+  rightPanelHandle?: Ref<PanelHandle>;
+  leftPanelHandle?: Ref<PanelHandle>;
 }) {
-  const [collapsed, setCollapsed] = React.useState(true);
+  const [collapsed, setCollapsed] = createSignal(true);
 
   return (
-    <StyledPanelGroup handle={handle}>
+    <StyledPanelGroup handle={props.handle}>
       <StyledPanel
-        handle={leftPanelHandle}
+        handle={props.leftPanelHandle}
         min="100px"
         collapsible
         collapsedSize="60px"
-        style={{ border: "10px solid green", boxSizing: "border-box" }}
+        style={{ border: "10px solid green", "box-sizing": "border-box" }}
         onCollapseChange={(isCollapsed) => {
           console.log("COLLAPSE PASSIVE", isCollapsed);
         }}
@@ -420,18 +431,14 @@ export function Collapsible({
       </StyledPanel>
       <StyledResizer id="resizer-2" />
       <StyledPanel
-        handle={rightPanelHandle}
+        handle={props.rightPanelHandle}
         min="100px"
         collapsible
         collapsedSize="60px"
-        defaultCollapsed
         collapseAnimation={{ easing: "bounce", duration: 1000 }}
-        style={{ border: "10px solid blue", boxSizing: "border-box" }}
+        style={{ border: "10px solid blue", "box-sizing": "border-box" }}
         collapsed={collapsed}
-        onCollapseChange={(isCollapsed) => {
-          console.log("COLLAPSE CONTROLLED", isCollapsed);
-          setCollapsed(isCollapsed);
-        }}
+        onCollapseChange={setCollapsed}
       >
         <div>3</div>
       </StyledPanel>
@@ -440,15 +447,13 @@ export function Collapsible({
 }
 
 export function CustomCollapseAnimation() {
-  const springFn = useMemo(() => {
-    return spring({
-      keyframes: [0, 1],
-      velocity: 1,
-      stiffness: 100,
-      damping: 10,
-      mass: 1.0,
-    });
-  }, []);
+  const springFn = spring({
+    keyframes: [0, 1],
+    velocity: 1,
+    stiffness: 100,
+    damping: 10,
+    mass: 1.0,
+  });
 
   return (
     <StyledPanelGroup>
@@ -456,7 +461,7 @@ export function CustomCollapseAnimation() {
         min="100px"
         collapsible
         collapsedSize="60px"
-        style={{ border: "10px solid green", boxSizing: "border-box" }}
+        style={{ border: "10px solid green", "box-sizing": "border-box" }}
       >
         1
       </StyledPanel>
@@ -464,7 +469,7 @@ export function CustomCollapseAnimation() {
       <StyledPanel min="100px">2</StyledPanel>
       <StyledResizer />
       <StyledPanel
-        style={{ border: "10px solid blue", boxSizing: "border-box" }}
+        style={{ border: "10px solid blue", "box-sizing": "border-box" }}
         min="100px"
         collapsible
         collapsedSize="60px"
@@ -481,14 +486,14 @@ export function CustomCollapseAnimation() {
 }
 
 export function ImperativePanel() {
-  const groupRef = React.useRef<PanelGroupHandle>(null);
-  const panelRef = React.useRef<PanelHandle>(null);
+  let groupRef: PanelGroupHandle | undefined;
+  let panelRef: PanelHandle | undefined;
 
   return (
     <>
-      <StyledPanelGroup handle={groupRef}>
+      <StyledPanelGroup handle={(v) => (groupRef = v)}>
         <StyledPanel
-          handle={panelRef}
+          handle={(v) => (panelRef = v)}
           min="100px"
           collapsible
           collapsedSize="60px"
@@ -511,28 +516,20 @@ export function ImperativePanel() {
       <div>
         <button
           type="button"
-          onClick={() => alert(`Sizes: ${groupRef.current?.getPixelSizes()}`)}
+          onClick={() => alert(`Sizes: ${groupRef?.getPixelSizes()}`)}
         >
           Get pixel sizes
         </button>
         <button
           type="button"
-          onClick={() =>
-            alert(`Sizes: ${groupRef.current?.getPercentageSizes()}`)
-          }
+          onClick={() => alert(`Sizes: ${groupRef?.getPercentageSizes()}`)}
         >
           Get percent sizes
         </button>
         <button
           type="button"
           onClick={() =>
-            groupRef.current?.setSizes([
-              "200px",
-              "10px",
-              "50%",
-              "10px",
-              "150px",
-            ])
+            groupRef?.setSizes(["200px", "10px", "50%", "10px", "150px"])
           }
         >
           Override sizes
@@ -540,48 +537,43 @@ export function ImperativePanel() {
       </div>
 
       <div>
-        <button type="button" onClick={() => panelRef.current?.collapse()}>
+        <button type="button" onClick={() => panelRef?.collapse()}>
           Collapse
         </button>
         <button
           type="button"
-          onClick={() => alert(`Collapsed: ${panelRef.current?.isCollapsed()}`)}
+          onClick={() => alert(`Collapsed: ${panelRef?.isCollapsed()}`)}
         >
           Is Collapsed?
         </button>
-        <button type="button" onClick={() => panelRef.current?.expand()}>
+        <button type="button" onClick={() => panelRef?.expand()}>
           Expand
         </button>
         <button
           type="button"
-          onClick={() => alert(`Expanded: ${panelRef.current?.isExpanded()}`)}
+          onClick={() => alert(`Expanded: ${panelRef?.isExpanded()}`)}
         >
           Is Expanded?
         </button>
-        <button
-          type="button"
-          onClick={() => alert(`Id: ${panelRef.current?.getId()}`)}
-        >
+        <button type="button" onClick={() => alert(`Id: ${panelRef?.getId()}`)}>
           Get Id
         </button>
         <button
           type="button"
-          onClick={() => alert(`Size: ${panelRef.current?.getPixelSize()}`)}
+          onClick={() => alert(`Size: ${panelRef?.getPixelSize()}`)}
         >
           Get Pixel Size
         </button>
         <button
           type="button"
-          onClick={() =>
-            alert(`Percentage: ${panelRef.current?.getPercentageSize()}`)
-          }
+          onClick={() => alert(`Percentage: ${panelRef?.getPercentageSize()}`)}
         >
           Get Percentage Size
         </button>
-        <button type="button" onClick={() => panelRef.current?.setSize("30px")}>
+        <button type="button" onClick={() => panelRef?.setSize("30px")}>
           Set size to 100px
         </button>
-        <button type="button" onClick={() => panelRef.current?.setSize("50%")}>
+        <button type="button" onClick={() => panelRef?.setSize("50%")}>
           Set size to 50%
         </button>
       </div>
@@ -589,16 +581,12 @@ export function ImperativePanel() {
   );
 }
 
-export function ConditionalPanel({
-  handle,
-}: {
-  handle?: React.Ref<PanelGroupHandle>;
-}) {
-  const [isExpanded, setIsExpanded] = React.useState(false);
+export function ConditionalPanel(props: { handle?: Ref<PanelGroupHandle> }) {
+  const [isExpanded, setIsExpanded] = createSignal(false);
 
   return (
-    <React.StrictMode>
-      <StyledPanelGroup handle={handle}>
+    <>
+      <StyledPanelGroup handle={props.handle}>
         <StyledPanel id="panel-1" min="100px" collapsible collapsedSize="60px">
           <div>1</div>
         </StyledPanel>
@@ -606,7 +594,8 @@ export function ConditionalPanel({
         <StyledPanel id="panel-2" min="100px">
           <div>2</div>
         </StyledPanel>
-        {isExpanded && (
+
+        {isExpanded() && (
           <>
             <StyledResizer id="handle-2" />
             <StyledPanel id="panel-3" min="100px">
@@ -618,18 +607,19 @@ export function ConditionalPanel({
           </>
         )}
       </StyledPanelGroup>
+
       <button type="button" onClick={() => setIsExpanded(true)}>
         Expand
       </button>
-    </React.StrictMode>
+    </>
   );
 }
 
 export function ConditionalPanelComplex() {
-  const [isExpanded, setIsExpanded] = React.useState(false);
+  const [isExpanded, setIsExpanded] = createSignal(false);
 
   return (
-    <React.StrictMode>
+    <>
       <StyledPanelGroup>
         <StyledPanel id="panel-1" min="100px" collapsible collapsedSize="60px">
           <div>1</div>
@@ -642,17 +632,15 @@ export function ConditionalPanelComplex() {
         <StyledPanel id="panel-3" min="100px">
           <div>3</div>
         </StyledPanel>
-        {isExpanded && (
-          <>
-            <StyledResizer id="handle-3" />
-            <StyledPanel id="panel-4" min="100px">
-              expanded
-              <button type="button" onClick={() => setIsExpanded(false)}>
-                Close
-              </button>
-            </StyledPanel>
-          </>
-        )}
+        <Show when={isExpanded()}>
+          <StyledResizer id="handle-3" />
+          <StyledPanel id="panel-4" min="100px">
+            expanded
+            <button type="button" onClick={() => setIsExpanded(false)}>
+              Close
+            </button>
+          </StyledPanel>
+        </Show>
         <StyledResizer id="handle-4" />
         <StyledPanel
           min="200px"
@@ -667,34 +655,28 @@ export function ConditionalPanelComplex() {
       <button type="button" onClick={() => setIsExpanded(true)}>
         Expand
       </button>
-    </React.StrictMode>
+    </>
   );
 }
 
 export function WithDefaultWidth() {
   return (
     <PanelGroup style={{ height: "400px" }}>
-      <Panel id="left" style={{ backgroundColor: "#333366" }} />
-      <PanelResizer id="handle" size="3px" />
-      {/* I expected the right panel to be 100px wide */}
+      <Panel style={{ "background-color": "#333366" }} />
+      <PanelResizer size="3px" />
       <Panel
-        id="right"
         default="100px"
         min="100px"
         max="400px"
-        style={{ backgroundColor: "#ff3366" }}
+        style={{ "background-color": "#ff3366" }}
       />
     </PanelGroup>
   );
 }
 
-export function StaticAtRest({
-  handle,
-}: {
-  handle?: React.Ref<PanelGroupHandle>;
-}) {
+export function StaticAtRest() {
   return (
-    <StyledPanelGroup handle={handle} style={{ height: 200 }}>
+    <StyledPanelGroup style={{ height: "200px" }}>
       <StyledPanel min="100px" max="300px" isStaticAtRest>
         Panel 1
       </StyledPanel>
