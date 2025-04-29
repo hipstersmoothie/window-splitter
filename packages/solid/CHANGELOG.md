@@ -1,3 +1,15 @@
+# v0.8.3 (Tue Apr 29 2025)
+
+#### ⚠️ Pushed to `main`
+
+- fix repo links ([@hipstersmoothie](https://github.com/hipstersmoothie))
+
+#### Authors: 1
+
+- Andrew Lisowski ([@hipstersmoothie](https://github.com/hipstersmoothie))
+
+---
+
 # v0.8.2 (Tue Apr 29 2025)
 
 #### ⚠️ Pushed to `main`
