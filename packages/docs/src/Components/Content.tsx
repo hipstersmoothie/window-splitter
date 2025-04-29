@@ -49,11 +49,16 @@ export function InlineCode({
 
     return (
       <CodeBlock
-        className={{ container: "py-4" }}
+        className={{ container: "py-4 my-4" }}
         value={props.children}
         language={
           language as React.ComponentProps<typeof CodeBlock>["language"]
         }
+        style={{
+          container: {
+            margin: "1rem 0",
+          },
+        }}
       />
     );
   }
@@ -113,6 +118,13 @@ export function UnorderedList({
   return <ul className={`my-6 list-disc pl-6 ${className}`} {...props} />;
 }
 
+export function OrderedList({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLOListElement>) {
+  return <ol className={`my-6 list-decimal pl-6 ${className}`} {...props} />;
+}
+
 export function ListItem({
   className,
   ...props
@@ -145,6 +157,7 @@ export const components: React.ComponentProps<typeof MDXContent>["components"] =
     h3: H3,
     p: Paragraph,
     ul: UnorderedList,
+    ol: OrderedList,
     li: ListItem,
     code: InlineCode,
     a: StyledLink,

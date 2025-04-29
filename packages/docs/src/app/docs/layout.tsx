@@ -62,6 +62,7 @@ async function Sidebar() {
       </SidebarGroup>
       <SidebarGroup title="Thanks">
         <SidebarItem path="/docs/prior-art">Prior Art</SidebarItem>
+        <SidebarItem path="/docs/how-it-works">How it works</SidebarItem>
       </SidebarGroup>
     </div>
   );

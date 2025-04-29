@@ -1,0 +1,100 @@
+# How it works
+
+This library relies on the browser as much as possible to do the layout calculations.
+
+## Requirements
+
+There are a lot of ways you could write a window splitter, but the requirements drive the approach.
+
+For my ideal window splitter I want the following:
+
+- Support for pixel and percentage based constraints on the panels
+- Performant resizing of page
+- Ability to save the layout
+- Ability to restore a layout at a different screen size
+- Support for an arbitrary number of panels
+- Support for nested splits
+- Support for collapsible panels
+- Support for persisting the layout to cookies (SSR)
+
+For what is essentially a line, there is a lot to get right :)
+
+## Approach
+
+### Picking the Display Mode
+
+With CSS we have a few options for how we could do the layout.
+
+#### `display: block`
+
+Here we would have no help from the browser on what size the panels should be.
+We would have to do all the calculations ourselves.
+So no a fit for this library.
+
+#### `display: flex`
+
+Here the browser starts to help us out.
+With flex we can define the size of the panels using percentages.
+This is a large improvement over `display: block` but it's still not enough.
+If we want to be able to support pixel based constraints the library has to do a lot more work.
+
+To make `flex` work with pixel based constraints we would have to:
+
+1. Convert to pixels while resizing both the panels and the page
+2. All the while we would need to calculate the mins/maxes of the panels
+3. After resizing is done we would need to convert back to percentages
+
+This is cumbersome and pretty error prone.
+Conerting back to just a percentage makes it much harder to enforce pixel constraints both when resizing the page and when reloading at a different screen size.
+
+#### `display: grid`
+
+With `grid` we have actually have all we need to implement the library.
+CSS Grids can define the min/max of a column in both percentage and pixels.
+
+Since we can define the layout for the window splitter entirely in CSS we get the following benefits:
+
+- The browser does the initial layout and calculations of all the sizes
+- When the page resizes we don't have to do anything. The browser will handle the layout.
+- The grid template also handles loading at different screen sizes well
+
+The main downside to grid is that it's easier to create and "invalid" layouts that don't fill the area becuase of min/max constraints.
+In a `flex` you can ganuntee the width of the group will be filled, at the cost of accuracy.
+
+### Resizing Panels
+
+The core of the resizing algorithm is built around applying small deltas to panels relative to their
+the resize handles.
+
+As much as possible we try to rely on the browser to do the layout.
+During the initial layout we rely on CSS grid and a group might be
+defined like this:
+
+```css
+grid-template-columns: minmax(100px, 1fr) 1px minmax(100px, 300px);
+```
+
+Once the user starts resizing we start a 3 step process to update the layout.
+
+1. `prepareItems` - The size of the group has been measure and we
+   can convert all the panel sizes into pixels. Converting into pixels
+   makes doing the math for the updates easier.
+
+    ```css
+    grid-template-columns: 500px 1px 300px;
+    ```
+
+2. `updateLayout` - This is where the actual updates are applied.
+   This is where the user's drag interactions are applied. We also
+   use this to collapse/expand panels by simulating a drag interaction.
+
+    ```css
+    grid-template-columns: 490px 1px 310px;
+    ```
+
+3. `commitLayout` - Once the updates have been applied we convert the
+   updated sizes back into a format that allows for the benefits mentioned above.
+
+    ```css
+    grid-template-columns: minmax(100px, min(calc(0.06117 * (100% - 1px)), 100%)) 1px minmax(100px, min(calc(0.0387 * (100% - 1px)), 300px));
+    ```
