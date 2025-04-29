@@ -21,12 +21,14 @@ import {
   createDeferred,
   createEffect,
   createRenderEffect,
+  createRoot,
   createSignal,
   createUniqueId,
   JSX,
   onCleanup,
   onMount,
   Ref,
+  splitProps,
 } from "solid-js";
 import {
   GroupMachineProvider,
@@ -57,46 +59,50 @@ export interface PanelGroupProps
 }
 
 export function PanelGroup(props: PanelGroupProps) {
-  const {
-    orientation = "horizontal",
-    autosaveStrategy = "localStorage",
-    autosaveId,
-    snapshot: snapshotProp,
-  } = props;
+  const [, attrs] = splitProps(props, [
+    "orientation",
+    "autosaveStrategy",
+    "autosaveId",
+    "snapshot",
+  ]);
+  const [intiialValue, send, machineState, groupId] = createRoot(() => {
+    const defaultGroupId = `panel-group-${createUniqueId()}`;
+    const groupIdInit = props.autosaveId || props.id || defaultGroupId;
+    const orientation = props.orientation || "horizontal";
+    const autosaveStrategy = props.autosaveStrategy || "localStorage";
 
-  let snapshot: GroupMachineContextValue | undefined;
+    let snapshot: GroupMachineContextValue | undefined;
 
-  if (snapshotProp) {
-    snapshot = snapshotProp;
-  } else if (
-    typeof window !== "undefined" &&
-    autosaveId &&
-    autosaveStrategy === "localStorage"
-  ) {
-    const localSnapshot = localStorage.getItem(autosaveId);
+    if (props.snapshot) {
+      snapshot = props.snapshot;
+    } else if (
+      typeof window !== "undefined" &&
+      props.autosaveId &&
+      autosaveStrategy === "localStorage"
+    ) {
+      const localSnapshot = localStorage.getItem(props.autosaveId);
 
-    if (localSnapshot) {
-      snapshot = JSON.parse(localSnapshot) as GroupMachineContextValue;
+      if (localSnapshot) {
+        snapshot = JSON.parse(localSnapshot) as GroupMachineContextValue;
+      }
     }
-  }
 
-  const defaultGroupId = `panel-group-${createUniqueId()}`;
-  const groupId = props.autosaveId || props.id || defaultGroupId;
-  const [currentValue, setCurrentValue] = createSignal<
-    GroupMachineContextValue | undefined
-  >();
-
-  const [intiialValue, send, machineState] = groupMachine(
-    {
-      orientation,
-      groupId,
-      autosaveStrategy,
-      ...(snapshot ? prepareSnapshot(snapshot) : undefined),
-    },
-    (value) => {
-      setCurrentValue({ ...value });
-    }
-  );
+    return [
+      ...groupMachine(
+        {
+          orientation,
+          groupId: groupIdInit,
+          autosaveStrategy: autosaveStrategy,
+          ...(snapshot ? prepareSnapshot(snapshot) : undefined),
+        },
+        (value) => {
+          setCurrentValue({ ...value });
+        }
+      ),
+      groupIdInit,
+    ];
+  });
+  const [currentValue, setCurrentValue] = createSignal(intiialValue);
 
   const getContext = () => {
     const context = currentValue?.() || intiialValue;
@@ -204,20 +210,24 @@ export function PanelGroup(props: PanelGroupProps) {
     return tempalte;
   };
 
-  onMount(() => send?.({ type: "unlockGroup" }));
-  onCleanup(() => send?.({ type: "lockGroup" }));
+  onMount(() => send({ type: "unlockGroup" }));
+  onCleanup(() => send({ type: "lockGroup" }));
 
   return (
     <div
       ref={elementRef}
       data-panel-group-wrapper
-      {...props}
+      {...attrs}
       style={{
         display: "grid",
         "grid-template-columns":
-          orientation === "horizontal" ? getTemplate() : undefined,
+          currentValue()?.orientation === "horizontal"
+            ? getTemplate()
+            : undefined,
         "grid-template-rows":
-          orientation === "vertical" ? getTemplate() : undefined,
+          currentValue()?.orientation === "vertical"
+            ? getTemplate()
+            : undefined,
         height: "100%",
         ...props.style,
       }}
