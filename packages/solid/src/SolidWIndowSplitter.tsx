@@ -148,7 +148,7 @@ export function PanelGroup(props: PanelGroupProps) {
       observer.observe(elementRef);
     }
 
-    onCleanup();
+    onCleanup(() => observer.disconnect());
   });
 
   const childIds = createDeferred(() =>
@@ -384,11 +384,7 @@ export function Panel(props: PanelProps) {
       }
 
       if (collapsed) {
-        send?.({
-          type: "collapsePanel",
-          panelId: panelId(),
-          controlled: true,
-        });
+        send?.({ type: "collapsePanel", panelId: panelId(), controlled: true });
       } else {
         send?.({ type: "expandPanel", panelId: panelId(), controlled: true });
       }
@@ -580,16 +576,6 @@ export function PanelResizer(props: PanelResizerProps) {
   const activeDragHandleId = () => state?.()?.activeDragHandleId;
   const isDragging = () => activeDragHandleId() === handleId();
   const panelBeforeHandle = () => state?.()?.items[itemIndex() - 1];
-  const getCollapsiblePanel = () => {
-    const currentState = state?.();
-    if (!currentState) return undefined;
-
-    try {
-      return getCollapsiblePanelForHandleId(currentState, handleId());
-    } catch {
-      return undefined;
-    }
-  };
   const panelAttributes = () => {
     const panelBefore = panelBeforeHandle();
     const currentState = state?.();
@@ -628,14 +614,24 @@ export function PanelResizer(props: PanelResizerProps) {
   };
 
   const onKeyDown = (e: KeyboardEvent) => {
-    const collapsiblePanel = getCollapsiblePanel();
+    const currentState = state?.();
+    if (!currentState) return undefined;
 
-    if (e.key === "Enter" && collapsiblePanel) {
-      if (collapsiblePanel.collapsed) {
-        send?.({ type: "expandPanel", panelId: collapsiblePanel.id });
-      } else {
-        send?.({ type: "collapsePanel", panelId: collapsiblePanel.id });
+    try {
+      const collapsiblePanel = getCollapsiblePanelForHandleId(
+        currentState,
+        handleId()
+      );
+
+      if (e.key === "Enter" && collapsiblePanel) {
+        if (collapsiblePanel.collapsed) {
+          send?.({ type: "expandPanel", panelId: collapsiblePanel.id });
+        } else {
+          send?.({ type: "collapsePanel", panelId: collapsiblePanel.id });
+        }
       }
+    } catch {
+      return undefined;
     }
   };
 
