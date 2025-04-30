@@ -35,7 +35,8 @@
     }
   }
 
-  const id = $props.id();
+  const defaultId = $props.id();
+  const id = autosaveId || defaultId;
   let state = $state();
 
   const [initialState, send, machineState] = groupMachine(
@@ -90,7 +91,8 @@
   let template = $derived(buildTemplate(state));
 
   $effect(() => {
-    console.log("PANEL GROUP", template);
+    send({ type: "unlockGroup" });
+    return () => send({ type: "lockGroup" });
   });
 </script>
 
@@ -105,8 +107,13 @@
   style:grid-template-rows={state.orientation === "vertical"
     ? template
     : undefined}
-  style:height="100%"
   {id}
 >
   {@render children()}
 </div>
+
+<style>
+  :where([data-panel-group-wrapper]) {
+    height: 100%;
+  }
+</style>

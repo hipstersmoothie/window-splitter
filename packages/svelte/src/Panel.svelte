@@ -23,7 +23,8 @@
     ...attrs
   }: Props = $props();
 
-  const id = $props.id();
+  const defaultId = $props.id();
+  const id = _id || defaultId;
   const send = getContext("send");
   const state = getContext("state");
 
@@ -35,21 +36,41 @@
       collapsible,
       collapsed,
       collapsedSize,
-      onCollapseChange,
+      onCollapseChange: { current: onCollapseChange },
       collapseAnimation,
-      onResize,
+      onResize: { current: onResize },
       defaultCollapsed,
       default: defaultSize,
       isStaticAtRest,
     });
-
-  send({ type: "registerPanel", data: initPanel() });
 
   const panelData = () => {
     const item = state?.items.find((i) => i.id === id);
     if (!item || !isPanelData(item)) return undefined;
     return item;
   };
+
+  if (!panelData()) {
+    send({ type: "registerPanel", data: initPanel() });
+  }
+
+  $effect(() => {
+    return () => send({ type: "unregisterPanel", panelId: id });
+  });
+
+  const isControlledCollapse = $derived(panelData()?.collapseIsControlled);
+
+  $effect(() => {
+    if (!isControlledCollapse) return;
+
+    console.log("!!!", collapsed);
+
+    if (collapsed) {
+      send?.({ type: "collapsePanel", panelId: id, controlled: true });
+    } else {
+      send?.({ type: "expandPanel", panelId: id, controlled: true });
+    }
+  });
 
   const domAttributes = () => {
     const currentPanel = panelData();
@@ -63,6 +84,12 @@
   };
 </script>
 
-<div {...attrs} {...domAttributes()}>
+<div
+  {...attrs}
+  {...domAttributes()}
+  style:min-width={0}
+  style:min-height={0}
+  style:overflow="hidden"
+>
   {@render children()}
 </div>
