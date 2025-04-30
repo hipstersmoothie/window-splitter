@@ -1701,6 +1701,7 @@ export function groupMachine(
       context.items = clearLastKnownSize(context.items);
     },
     commit: () => {
+      console.log("commit");
       context.dragOvershoot = new Big(0);
       context.items = commitLayout(context);
     },
@@ -2033,7 +2034,10 @@ export function groupMachine(
 
         if (useLastKnownSize) {
           context.items = withLastKnownSize;
-        } else if (totalSize > getGroupSize(context)) {
+        } else if (
+          totalSize > getGroupSize(context) &&
+          state.current !== "dragging"
+        ) {
           context.items = handleOverflow({
             ...context,
             items: prepareItems({ ...context, items: withLastKnownSize }),

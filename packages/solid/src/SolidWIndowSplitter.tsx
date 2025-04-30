@@ -148,14 +148,14 @@ export function PanelGroup(props: PanelGroupProps) {
       observer.observe(elementRef);
     }
 
-    onCleanup(() => observer.disconnect());
+    onCleanup();
   });
 
-  const childIds = createDeferred(() => {
-    const s = currentValue?.();
-    if (!s) throw new Error("No state");
-    return s.items.map((i) => i.id).join(",");
-  });
+  const childIds = createDeferred(() =>
+    currentValue()
+      .items.map((i) => i.id)
+      .join(",")
+  );
 
   // Measure children size
   createEffect(
@@ -172,19 +172,10 @@ export function PanelGroup(props: PanelGroupProps) {
     () => props.handle,
     () => ({
       getId: () => groupId,
-      getPixelSizes: () => {
-        const s = currentValue?.();
-        if (!s) throw new Error("No state");
-        return getPanelGroupPixelSizes(s);
-      },
-      getPercentageSizes: () => {
-        const s = currentValue?.();
-        if (!s) throw new Error("No state");
-        return getPanelGroupPercentageSizes(s);
-      },
+      getPixelSizes: () => getPanelGroupPixelSizes(currentValue()),
+      getPercentageSizes: () => getPanelGroupPercentageSizes(currentValue()),
       setSizes: (updates) => {
-        const context = currentValue?.();
-        if (!context) throw new Error("No state");
+        const context = currentValue();
 
         for (let index = 0; index < updates.length; index++) {
           const item = context.items[index];
@@ -200,25 +191,21 @@ export function PanelGroup(props: PanelGroupProps) {
         }
       },
       getTemplate: () => {
-        const context = currentValue?.();
-        if (!context) throw new Error("No state");
+        const context = getContext();
         return buildTemplate({ ...context, items: prepareItems(context) });
       },
       getState: () => (machineState.current === "idle" ? "idle" : "dragging"),
     })
   );
 
-  const getTemplate = () => {
-    const context = getContext();
-    const tempalte = buildTemplate(context);
-    return tempalte;
-  };
+  const getTemplate = () => buildTemplate(getContext());
 
   onMount(() => send({ type: "unlockGroup" }));
   onCleanup(() => send({ type: "lockGroup" }));
 
   return (
     <div
+      id={groupId}
       ref={elementRef}
       data-panel-group-wrapper
       {...attrs}
