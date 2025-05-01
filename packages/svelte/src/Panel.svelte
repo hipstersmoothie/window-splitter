@@ -1,8 +1,16 @@
 <script lang="ts">
   import type { SharedPanelProps } from "@window-splitter/interface";
   import { getContext } from "svelte";
-  import { initializePanel, isPanelData } from "@window-splitter/state";
+  import {
+    initializePanel,
+    isPanelData,
+    haveConstraintsChangedForPanel,
+    getPanelPercentageSize,
+    getPanelPixelSize,
+  } from "@window-splitter/state";
   import { getPanelDomAttributes } from "@window-splitter/interface";
+
+  export { PanelHandle } from "@window-splitter/interface";
 
   interface Props extends SharedPanelProps<boolean> {}
 
@@ -70,6 +78,16 @@
     }
   }
 
+  const contraintChanged = $derived(
+    !dynamicPanelIsMounting &&
+      haveConstraintsChangedForPanel(initPanel(), panelData())
+  );
+
+  $effect(() => {
+    if (!contraintChanged) return;
+    send({ type: "updateConstraints", data: initPanel() });
+  });
+
   const dynamicPanelData = initPanel();
 
   $effect(() => {
@@ -116,6 +134,25 @@
       collapsed: currentPanel?.collapsed,
     });
   };
+
+  export const getId = () => id;
+  export const collapse = () => {
+    if (!panelData()?.collapsible) return;
+    send({ type: "collapsePanel", panelId: id, controlled: true });
+  };
+  export const isCollapsed = () =>
+    Boolean(panelData()?.collapsible && panelData()?.collapsed);
+  export const expand = () => {
+    if (!panelData()?.collapsible) return;
+    send({ type: "expandPanel", panelId: id, controlled: true });
+  };
+  export const isExpanded = () =>
+    Boolean(panelData()?.collapsible && !panelData()?.collapsed);
+  export const getPixelSize = () => getPanelPixelSize(state, id);
+  export const setSize = (size: Unit) => {
+    send({ type: "setPanelPixelSize", panelId: id, size });
+  };
+  export const getPercentageSize = () => getPanelPercentageSize(state, id);
 </script>
 
 <div

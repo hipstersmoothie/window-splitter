@@ -5,9 +5,13 @@
     buildTemplate,
     groupMachine,
     prepareSnapshot,
+    getPanelGroupPixelSizes,
+    getPanelGroupPercentageSizes,
   } from "@window-splitter/state";
   import type { ClassValue } from "svelte/elements";
   import { setContext } from "svelte";
+
+  export { PanelGroupHandle } from "@window-splitter/interface";
 
   interface Props extends SharedPanelGroupProps {
     id: string;
@@ -98,6 +102,27 @@
     send({ type: "unlockGroup" });
     return () => send({ type: "lockGroup" });
   });
+
+  export const getId = () => id;
+  export const getPixelSizes = () => getPanelGroupPixelSizes(state);
+  export const getPercentageSizes = () => getPanelGroupPercentageSizes(state);
+  export const getTemplate = () => buildTemplate(state);
+  export const getState = () =>
+    machineState.current === "idle" ? "idle" : "dragging";
+  export const setSizes = (updates: Array<Unit>) => {
+    for (let index = 0; index < updates.length; index++) {
+      const item = state.items[index];
+      const update = updates[index];
+
+      if (item && isPanelData(item) && update) {
+        send({
+          type: "setPanelPixelSize",
+          panelId: item.id,
+          size: update,
+        });
+      }
+    }
+  };
 </script>
 
 <div

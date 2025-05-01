@@ -29,6 +29,14 @@
   const toggleExpanded = () => {
     isExpanded = !isExpanded;
   };
+
+  let dynamicConstraints = $state(false);
+  const toggleDynamicConstraints = () => {
+    dynamicConstraints = !dynamicConstraints;
+  };
+
+  let panel;
+  let group;
 </script>
 
 <Story name="Simple">
@@ -69,7 +77,30 @@
   </PanelGroup>
 </Story>
 
-<!-- TODO: add dynamic constraints -->
+<Story name="DynamicConstraints">
+  <PanelGroup class="panel-group" b>
+    <Panel
+      default="100px"
+      min={dynamicConstraints ? "200px" : "100px"}
+      class="panel"
+    >
+      1
+    </Panel>
+    <PanelResizer class="panel-resizer" size="10px" />
+    <Panel min="100px" class="panel">2</Panel>
+    <PanelResizer class="panel-resizer" size="10px" />
+    <Panel
+      min={dynamicConstraints ? "100px" : "400px"}
+      max={dynamicConstraints ? "300px" : "700px"}
+      class="panel"
+    >
+      3
+    </Panel>
+  </PanelGroup>
+  <button type="button" onclick={toggleDynamicConstraints}>
+    Toggle Dynamic Constraints
+  </button>
+</Story>
 
 <Story name="SimpleMin">
   <PanelGroup class="panel-group">
@@ -316,7 +347,90 @@
   </PanelGroup>
 </Story>
 
-<!-- TODO: add imperative panel -->
+<Story name="ImperativePanel">
+  <PanelGroup class="panel-group" bind:this={group}>
+    <Panel
+      class="panel"
+      bind:this={panel}
+      min="100px"
+      collapsible
+      collapsedSize="60px"
+    >
+      1
+    </Panel>
+    <PanelResizer class="panel-resizer" size="10px" />
+    <Panel class="panel" min="100px">2</Panel>
+    <PanelResizer class="panel-resizer" size="10px" />
+    <Panel
+      class="panel"
+      min="100px"
+      collapsible
+      collapsedSize="60px"
+      defaultCollapsed
+    >
+      3
+    </Panel>
+  </PanelGroup>
+
+  <div>
+    <button
+      type="button"
+      onclick={() => alert(`Sizes: ${group?.getPixelSizes()}`)}
+    >
+      Get pixel sizes
+    </button>
+    <button
+      type="button"
+      onclick={() => alert(`Sizes: ${group?.getPercentageSizes()}`)}
+    >
+      Get percent sizes
+    </button>
+    <button
+      type="button"
+      onclick={() => group?.setSizes(["200px", "10px", "50%", "10px", "150px"])}
+    >
+      Override sizes
+    </button>
+  </div>
+
+  <div>
+    <button type="button" onclick={() => panel?.collapse()}> Collapse </button>
+    <button
+      type="button"
+      onclick={() => alert(`Collapsed: ${panel?.isCollapsed()}`)}
+    >
+      Is Collapsed?
+    </button>
+    <button type="button" onclick={() => panel?.expand()}> Expand </button>
+    <button
+      type="button"
+      onclick={() => alert(`Expanded: ${panel?.isExpanded()}`)}
+    >
+      Is Expanded?
+    </button>
+    <button type="button" onclick={() => alert(`Id: ${panel?.getId()}`)}>
+      Get Id
+    </button>
+    <button
+      type="button"
+      onclick={() => alert(`Size: ${panel?.getPixelSize()}`)}
+    >
+      Get Pixel Size
+    </button>
+    <button
+      type="button"
+      onclick={() => alert(`Percentage: ${panel?.getPercentageSize()}`)}
+    >
+      Get Percentage Size
+    </button>
+    <button type="button" onclick={() => panel?.setSize("30px")}>
+      Set size to 100px
+    </button>
+    <button type="button" onclick={() => panel?.setSize("50%")}>
+      Set size to 50%
+    </button>
+  </div>
+</Story>
 
 <Story name="ConditionalPanel">
   <PanelGroup class="panel-group">

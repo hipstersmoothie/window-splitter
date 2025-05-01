@@ -8,6 +8,7 @@
     isPanelHandle,
     parseUnit,
     getCollapsiblePanelForHandleId,
+    haveConstraintsChangedForPanelHandle,
   } from "@window-splitter/state";
   import type { SharedPanelResizerProps } from "@window-splitter/interface";
   import {
@@ -69,6 +70,16 @@
       data: { ...initHandle(), order },
     });
     dynamicPanelHandleIsMounting = false;
+  });
+
+  const contraintChanged = $derived(
+    !dynamicPanelHandleIsMounting &&
+      haveConstraintsChangedForPanelHandle(initHandle(), handleData())
+  );
+
+  $effect(() => {
+    if (!contraintChanged) return;
+    send({ type: "updateConstraints", data: initHandle() });
   });
 
   $effect(() => () => send({ type: "unregisterPanelHandle", id }));
