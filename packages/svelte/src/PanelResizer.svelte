@@ -6,17 +6,21 @@
     initializePanelHandleData,
     isPanelData,
     isPanelHandle,
-    parseUnit,
     getCollapsiblePanelForHandleId,
     haveConstraintsChangedForPanelHandle,
+    SendFn,
+    GroupMachineContextValue,
   } from "@window-splitter/state";
   import type { SharedPanelResizerProps } from "@window-splitter/interface";
   import {
     getPanelResizerDomAttributes,
     move,
   } from "@window-splitter/interface";
+  import { HTMLAttributes } from "svelte/elements";
 
-  interface Props extends SharedPanelResizerProps {}
+  interface Props
+    extends SharedPanelResizerProps,
+      HTMLAttributes<HTMLDivElement> {}
 
   let {
     size = "0px",
@@ -30,9 +34,9 @@
 
   const defaultId = $props.id();
   const id = _id || defaultId;
-  const send = getContext("send");
-  const state = getContext("state");
-  const isPrerender = getContext("isPrerender");
+  const send = getContext<SendFn>("send");
+  const state = getContext<GroupMachineContextValue>("state");
+  const isPrerender = getContext<{ current: boolean }>("isPrerender");
   const initHandle = () => initializePanelHandleData({ size, id });
   const handleData = () => {
     const item = state?.items.find((i) => i.id === id);
@@ -50,19 +54,16 @@
     }
   }
 
-  const dynamicPanelHandleData = initHandle();
-
   $effect(() => {
     if (!dynamicPanelHandleIsMounting) return;
 
     const groupElement = document.getElementById(state.groupId);
-
     if (!groupElement) return;
 
-    const order = Array.from(groupElement.children).indexOf(
-      document.getElementById(id)
-    );
+    const handleEl = document.getElementById(id);
+    if (!handleEl) return;
 
+    const order = Array.from(groupElement.children).indexOf(handleEl);
     if (typeof order !== "number") return;
 
     send({
@@ -77,9 +78,10 @@
       haveConstraintsChangedForPanelHandle(initHandle(), handleData())
   );
 
+  const dynamicPanelHandleData = initHandle();
   $effect(() => {
     if (!contraintChanged) return;
-    send({ type: "updateConstraints", data: initHandle() });
+    send({ type: "updateConstraints", data: dynamicPanelHandleData });
   });
 
   $effect(() => () => send({ type: "unregisterPanelHandle", id }));
@@ -123,7 +125,7 @@
   };
   const getDimensions = () => {
     const handle = state.items.find((item) => item.id === id);
-    if (!handle) return {};
+    if (!handle || !isPanelHandle(handle)) return {};
     return state.orientation === "horizontal"
       ? { width: `${handle.size.value.toNumber()}px`, height: "100%" }
       : { height: `${handle.size.value.toNumber()}px`, width: "100%" };

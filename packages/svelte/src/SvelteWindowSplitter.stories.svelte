@@ -1,6 +1,5 @@
 <script module>
   import { defineMeta } from "@storybook/addon-svelte-csf";
-  import { fn } from "@storybook/test";
   import PanelGroup from "./PanelGroup.svelte";
   import Panel from "./Panel.svelte";
   import PanelResizer from "./PanelResizer.svelte";

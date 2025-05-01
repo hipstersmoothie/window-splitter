@@ -4,15 +4,22 @@
   import {
     initializePanel,
     isPanelData,
+    PanelData,
     haveConstraintsChangedForPanel,
     getPanelPercentageSize,
     getPanelPixelSize,
+    GroupMachineContextValue,
+    SendFn,
+    Unit,
   } from "@window-splitter/state";
   import { getPanelDomAttributes } from "@window-splitter/interface";
+  import type { HTMLAttributes } from "svelte/elements";
 
   export { PanelHandle } from "@window-splitter/interface";
 
-  interface Props extends SharedPanelProps<boolean> {}
+  interface Props
+    extends SharedPanelProps<boolean>,
+      HTMLAttributes<HTMLDivElement> {}
 
   let {
     children,
@@ -33,8 +40,8 @@
 
   const defaultId = $props.id();
   const id = _id || defaultId;
-  const send = getContext("send");
-  const state = getContext("state");
+  const send = getContext<SendFn>("send");
+  const state = getContext<GroupMachineContextValue>("state");
 
   const initPanel = (): PanelData =>
     initializePanel({
@@ -52,7 +59,7 @@
       isStaticAtRest,
     });
 
-  const isPrerender = getContext("isPrerender");
+  const isPrerender = getContext<{ current: boolean }>("isPrerender");
   const panelData = () => {
     const item = state?.items.find((i) => i.id === id);
     if (!item || !isPanelData(item)) return undefined;
@@ -94,13 +101,12 @@
     if (!dynamicPanelIsMounting) return;
 
     const groupElement = document.getElementById(state.groupId);
-
     if (!groupElement) return;
 
-    const order = Array.from(groupElement.children).indexOf(
-      document.getElementById(id)
-    );
+    const panelElement = document.getElementById(id);
+    if (!panelElement) return;
 
+    const order = Array.from(groupElement.children).indexOf(panelElement);
     if (typeof order !== "number") return;
 
     send({
@@ -162,5 +168,5 @@
   style:min-height={0}
   style:overflow="hidden"
 >
-  {@render children()}
+  {@render children?.()}
 </div>

@@ -530,8 +530,12 @@ function eq(a: ParsedUnit, b: ParsedUnit) {
 
 export function haveConstraintsChangedForPanel(
   a: Omit<PanelData, "id" | "currentValue">,
-  b: Omit<PanelData, "id" | "currentValue">
+  b?: Omit<PanelData, "id" | "currentValue">
 ) {
+  if (!b) {
+    return true;
+  }
+
   if (!eq(a.min, b.min)) {
     return true;
   }
@@ -583,8 +587,12 @@ export function haveConstraintsChangedForPanel(
 
 export function haveConstraintsChangedForPanelHandle(
   a: Omit<PanelHandleData, "id">,
-  b: Omit<PanelHandleData, "id">
+  b?: Omit<PanelHandleData, "id">
 ) {
+  if (!b) {
+    return true;
+  }
+
   if (!eq(a.size, b.size)) {
     return true;
   }
