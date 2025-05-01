@@ -4,11 +4,10 @@ import { GroupMachineContextValue, SendFn } from "@window-splitter/state";
 export const InitialPrerenderContext = createContext<Accessor<boolean>>(
   () => false
 );
-export const MachineActorContext = createContext<SendFn | undefined>();
-export const GroupIdContext = createContext<string | undefined>();
-export const MachineStateContext = createContext<
-  Accessor<GroupMachineContextValue | undefined> | undefined
->();
+export const MachineActorContext = createContext<SendFn>();
+export const GroupIdContext = createContext<string>();
+export const MachineStateContext =
+  createContext<Accessor<GroupMachineContextValue | undefined>>();
 
 export function useInitialPrerenderContext() {
   const context = useContext(InitialPrerenderContext);

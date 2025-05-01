@@ -136,18 +136,12 @@ export function PanelGroup(props: PanelGroupProps) {
   onMount(() => {
     const observer = new ResizeObserver(([entry]) => {
       if (!entry) return;
-      if (entry.contentRect.width > 0 && entry.contentRect.height > 0) {
-        send({
-          type: "setSize",
-          size: entry.contentRect,
-        });
-      }
+      if (!(entry.contentRect.width > 0 && entry.contentRect.height > 0))
+        return;
+      send({ type: "setSize", size: entry.contentRect });
     });
 
-    if (elementRef) {
-      observer.observe(elementRef);
-    }
-
+    if (elementRef) observer.observe(elementRef);
     onCleanup(() => observer.disconnect());
   });
 
@@ -182,11 +176,7 @@ export function PanelGroup(props: PanelGroupProps) {
           const update = updates[index];
 
           if (item && isPanelData(item) && update) {
-            send({
-              type: "setPanelPixelSize",
-              panelId: item.id,
-              size: update,
-            });
+            send({ type: "setPanelPixelSize", panelId: item.id, size: update });
           }
         }
       },
@@ -358,10 +348,7 @@ export function Panel(props: PanelProps) {
 
     if (typeof order !== "number") return;
 
-    send?.({
-      type: "registerDynamicPanel",
-      data: { ...initPanel(), order },
-    });
+    send?.({ type: "registerDynamicPanel", data: { ...initPanel(), order } });
     dynamicPanelIsMounting = false;
   });
 
@@ -376,9 +363,7 @@ export function Panel(props: PanelProps) {
     on(currentCollapsed, () => {
       const collapsed = props.collapsed?.() || false;
 
-      if (!panelData?.()?.collapseIsControlled) {
-        return;
-      }
+      if (!panelData?.()?.collapseIsControlled) return;
 
       if (collapsed) {
         send?.({ type: "collapsePanel", panelId: panelId(), controlled: true });
@@ -518,10 +503,7 @@ export function PanelResizer(props: PanelResizerProps) {
   createEffect(
     on(contraintChanged, () => {
       if (!hasMounted) return;
-      send?.({
-        type: "updateConstraints",
-        data: initHandle(),
-      });
+      send?.({ type: "updateConstraints", data: initHandle() });
     })
   );
 
@@ -544,10 +526,7 @@ export function PanelResizer(props: PanelResizerProps) {
 
     if (typeof order !== "number") return;
 
-    send?.({
-      type: "registerPanelHandle",
-      data: { ...initHandle(), order },
-    });
+    send?.({ type: "registerPanelHandle", data: { ...initHandle(), order } });
     dynamicPanelHandleIsMounting = false;
   });
 
