@@ -60,6 +60,10 @@
   setContext("state", state);
   setContext("id", machineState);
 
+  const isPrerender = $state({ current: true });
+  setContext("isPrerender", isPrerender);
+  $effect(() => (isPrerender.current = false));
+
   let elementRef = $state();
 
   $effect(() => {

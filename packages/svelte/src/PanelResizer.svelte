@@ -31,7 +31,7 @@
   const id = _id || defaultId;
   const send = getContext("send");
   const state = getContext("state");
-
+  const isPrerender = getContext("isPrerender");
   const initHandle = () => initializePanelHandleData({ size, id });
   const handleData = () => {
     const item = state?.items.find((i) => i.id === id);
@@ -39,13 +39,39 @@
     return item;
   };
 
+  let dynamicPanelHandleIsMounting = false;
+
   if (!handleData()) {
-    send({ type: "registerPanelHandle", data: initHandle() });
+    if (isPrerender.current) {
+      send({ type: "registerPanelHandle", data: initHandle() });
+    } else {
+      dynamicPanelHandleIsMounting = true;
+    }
   }
 
+  const dynamicPanelHandleData = initHandle();
+
   $effect(() => {
-    return () => send({ type: "unregisterPanelHandle", handleId: id });
+    if (!dynamicPanelHandleIsMounting) return;
+
+    const groupElement = document.getElementById(state.groupId);
+
+    if (!groupElement) return;
+
+    const order = Array.from(groupElement.children).indexOf(
+      document.getElementById(id)
+    );
+
+    if (typeof order !== "number") return;
+
+    send({
+      type: "registerPanelHandle",
+      data: { ...initHandle(), order },
+    });
+    dynamicPanelHandleIsMounting = false;
   });
+
+  $effect(() => () => send({ type: "unregisterPanelHandle", id }));
 
   const { moveProps } = move({
     onMoveStart: () => {
@@ -97,16 +123,13 @@
 
       if (e.key === "Enter" && collapsiblePanel) {
         if (collapsiblePanel.collapsed) {
-          console.log("expandPanel", collapsiblePanel.id);
           send({ type: "expandPanel", panelId: collapsiblePanel.id });
         } else {
-          console.log("collapsePanel", collapsiblePanel.id);
           send({ type: "collapsePanel", panelId: collapsiblePanel.id });
         }
       }
-    } catch (error) {
-      console.error(error);
-      return undefined;
+    } catch {
+      //
     }
   };
 </script>

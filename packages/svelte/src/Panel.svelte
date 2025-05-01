@@ -44,26 +44,60 @@
       isStaticAtRest,
     });
 
+  const isPrerender = getContext("isPrerender");
   const panelData = () => {
     const item = state?.items.find((i) => i.id === id);
     if (!item || !isPanelData(item)) return undefined;
     return item;
   };
 
-  if (!panelData()) {
-    send({ type: "registerPanel", data: initPanel() });
+  let dynamicPanelIsMounting = false;
+
+  if (panelData()) {
+    send({
+      type: "rebindPanelCallbacks",
+      data: {
+        id,
+        onCollapseChange: { current: onCollapseChange },
+        onResize: { current: onResize },
+      },
+    });
+  } else {
+    if (isPrerender.current) {
+      send({ type: "registerPanel", data: initPanel() });
+    } else {
+      dynamicPanelIsMounting = true;
+    }
   }
 
+  const dynamicPanelData = initPanel();
+
   $effect(() => {
-    return () => send({ type: "unregisterPanel", panelId: id });
+    if (!dynamicPanelIsMounting) return;
+
+    const groupElement = document.getElementById(state.groupId);
+
+    if (!groupElement) return;
+
+    const order = Array.from(groupElement.children).indexOf(
+      document.getElementById(id)
+    );
+
+    if (typeof order !== "number") return;
+
+    send({
+      type: "registerDynamicPanel",
+      data: { ...dynamicPanelData, order },
+    });
+    dynamicPanelIsMounting = false;
   });
+
+  $effect(() => () => send({ type: "unregisterPanel", id }));
 
   const isControlledCollapse = $derived(panelData()?.collapseIsControlled);
 
   $effect(() => {
     if (!isControlledCollapse) return;
-
-    console.log("!!!", collapsed);
 
     if (collapsed) {
       send?.({ type: "collapsePanel", panelId: id, controlled: true });

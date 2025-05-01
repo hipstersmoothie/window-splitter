@@ -4,6 +4,7 @@
   import PanelGroup from "./PanelGroup.svelte";
   import Panel from "./Panel.svelte";
   import PanelResizer from "./PanelResizer.svelte";
+  import { spring } from "framer-motion";
 
   // More on how to set up stories at: https://storybook.js.org/docs/writing-stories
   const { Story } = defineMeta({
@@ -14,6 +15,19 @@
   const onCollapseChange = (newCollapsed) => {
     console.log("onCollapseChange", newCollapsed);
     collapsed = newCollapsed;
+  };
+
+  const springFn = spring({
+    keyframes: [0, 1],
+    velocity: 1,
+    stiffness: 100,
+    damping: 10,
+    mass: 1.0,
+  });
+
+  let isExpanded = $state(false);
+  const toggleExpanded = () => {
+    isExpanded = !isExpanded;
   };
 </script>
 
@@ -35,7 +49,7 @@
 
 <Story name="AutosaveCookie">
   <PanelGroup
-    class="panel-group autosave-cookie-example"
+    class="panel-group h-200"
     autosaveId="autosave-cookie-svelte"
     autosaveStrategy="cookie"
   >
@@ -245,7 +259,7 @@
 <Story name="Collapsible">
   <PanelGroup class="panel-group">
     <Panel
-      class="collapsible-example-panel-1"
+      class="collapsible-example-panel-1 panel"
       min="100px"
       collapsible
       collapsedSize="60px"
@@ -260,7 +274,7 @@
     <Panel min="100px">2</Panel>
     <PanelResizer class="panel-resizer" size="10px" />
     <Panel
-      class="collapsible-example-panel-2"
+      class="collapsible-example-panel-2 panel"
       min="100px"
       collapsible
       collapsedSize="60px"
@@ -270,6 +284,123 @@
     >
       3
     </Panel>
+  </PanelGroup>
+</Story>
+
+<Story name="CustomCollapseAnimation">
+  <PanelGroup class="panel-group">
+    <Panel
+      min="100px"
+      collapsible
+      collapsedSize="60px"
+      class="collapsible-example-panel-1 panel"
+    >
+      1
+    </Panel>
+    <PanelResizer class="panel-resizer" size="10px" />
+    <Panel min="100px">2</Panel>
+    <PanelResizer class="panel-resizer" size="10px" />
+    <Panel
+      min="100px"
+      collapsible
+      collapsedSize="60px"
+      class="collapsible-example-panel-2 panel"
+      defaultCollapsed
+      collapseAnimation={{
+        easing: (t) => springFn.next(t * 1000).value,
+        duration: 1000,
+      }}
+    >
+      3
+    </Panel>
+  </PanelGroup>
+</Story>
+
+<!-- TODO: add imperative panel -->
+
+<Story name="ConditionalPanel">
+  <PanelGroup class="panel-group">
+    <Panel
+      id="panel-1"
+      min="100px"
+      collapsible
+      collapsedSize="60px"
+      class="panel"
+    >
+      1
+    </Panel>
+    <PanelResizer id="handle-1" class="panel-resizer" size="10px" />
+    <Panel id="panel-2" min="100px" class="panel">2</Panel>
+
+    {#if isExpanded}
+      <PanelResizer id="handle-2" class="panel-resizer" size="10px" />
+      <Panel id="panel-3" min="100px" class="panel">
+        3
+        <button type="button" onclick={toggleExpanded}>Close</button>
+      </Panel>
+    {/if}
+  </PanelGroup>
+
+  <button type="button" onclick={toggleExpanded}>Expand</button>
+</Story>
+
+<Story name="ConditionalPanelComplex">
+  <PanelGroup class="panel-group">
+    <Panel
+      class="panel"
+      id="panel-1"
+      min="100px"
+      collapsible
+      collapsedSize="60px"
+    >
+      <div>1</div>
+    </Panel>
+    <PanelResizer id="handle-1" class="panel-resizer" size="10px" />
+    <Panel class="panel" id="panel-2" min="100px">
+      <div>2</div>
+    </Panel>
+    <PanelResizer id="handle-2" class="panel-resizer" size="10px" />
+    <Panel class="panel" id="panel-3" min="100px">
+      <div>3</div>
+    </Panel>
+    {#if isExpanded}
+      <PanelResizer id="handle-3" class="panel-resizer" size="10px" />
+      <Panel class="panel" id="panel-4" min="100px">
+        expanded
+        <button type="button" onclick={toggleExpanded}>Close</button>
+      </Panel>
+    {/if}
+    <PanelResizer id="handle-4" class="panel-resizer" size="10px" />
+    <Panel
+      min="200px"
+      collapsible
+      collapsedSize="60px"
+      defaultCollapsed
+      class="panel"
+      id="panel-5"
+    >
+      <div>4</div>
+    </Panel>
+  </PanelGroup>
+
+  <button type="button" onclick={toggleExpanded}>Expand</button>
+</Story>
+
+<Story name="WithDefaultWidth">
+  <PanelGroup class="panel-group h-200">
+    <Panel class="panel">1</Panel>
+    <PanelResizer class="panel-resizer" size="3px" />
+    <Panel default="100px" min="100px" max="400px" class="panel">2</Panel>
+  </PanelGroup>
+</Story>
+
+<Story name="StaticAtRest">
+  <PanelGroup class="panel-group h-200">
+    <Panel min="100px" max="300px" class="panel" isStaticAtRest>1</Panel>
+    <PanelResizer class="panel-resizer" size="10px" />
+    <Panel min="100px" class="panel">2</Panel>
+    <PanelResizer class="panel-resizer" size="10px" />
+    <Panel min="100px" class="panel">3</Panel>
   </PanelGroup>
 </Story>
 
@@ -296,7 +427,7 @@
     background: red;
   }
 
-  :global(.autosave-cookie-example) {
+  :global(.h-200) {
     height: 200px;
   }
 

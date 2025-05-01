@@ -1712,7 +1712,6 @@ export function groupMachine(
       context.items = clearLastKnownSize(context.items);
     },
     commit: () => {
-      console.log("commit");
       context.dragOvershoot = new Big(0);
       context.items = commitLayout(context);
     },
