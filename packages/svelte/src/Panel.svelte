@@ -4,10 +4,12 @@
   import {
     initializePanel,
     isPanelData,
-    PanelData,
     haveConstraintsChangedForPanel,
     getPanelPercentageSize,
     getPanelPixelSize,
+  } from "@window-splitter/state";
+  import type {
+    PanelData,
     GroupMachineContextValue,
     SendFn,
     Unit,

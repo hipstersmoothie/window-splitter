@@ -8,6 +8,8 @@
     isPanelHandle,
     getCollapsiblePanelForHandleId,
     haveConstraintsChangedForPanelHandle,
+  } from "@window-splitter/state";
+  import type {
     SendFn,
     GroupMachineContextValue,
   } from "@window-splitter/state";
@@ -16,7 +18,7 @@
     getPanelResizerDomAttributes,
     move,
   } from "@window-splitter/interface";
-  import { HTMLAttributes } from "svelte/elements";
+  import type { HTMLAttributes } from "svelte/elements";
 
   interface Props
     extends SharedPanelResizerProps,

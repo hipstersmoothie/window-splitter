@@ -7,12 +7,11 @@
     prepareSnapshot,
     getPanelGroupPixelSizes,
     getPanelGroupPercentageSizes,
-    GroupMachineContextValue,
     isPanelData,
-    Unit,
   } from "@window-splitter/state";
+  import type { GroupMachineContextValue, Unit } from "@window-splitter/state";
   import { setContext } from "svelte";
-  import { HTMLAttributes } from "svelte/elements";
+  import type { HTMLAttributes } from "svelte/elements";
 
   export { PanelGroupHandle } from "@window-splitter/interface";
 
