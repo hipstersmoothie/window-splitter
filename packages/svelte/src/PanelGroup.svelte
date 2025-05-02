@@ -45,7 +45,12 @@
 
   const defaultId = $props.id();
   const id = autosaveId || defaultId;
-  let context = $state<GroupMachineContextValue>();
+  const context = $state<GroupMachineContextValue>({});
+  function updateContext(s: GroupMachineContextValue) {
+    for (const key in s) {
+      (context as any)[key] = (s as any)[key];
+    }
+  }
 
   const [initialState, send, machineState] = groupMachine(
     {
@@ -56,13 +61,11 @@
     },
     (s) => {
       if (!context) return;
-      for (const key in s) {
-        (context as any)[key] = (s as any)[key];
-      }
+      updateContext(s);
     }
   );
 
-  context = initialState;
+  updateContext(initialState);
 
   setContext("send", send);
   setContext("state", context);
