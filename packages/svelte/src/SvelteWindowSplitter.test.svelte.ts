@@ -175,41 +175,6 @@ describe("Autosave", () => {
   });
 });
 
-test("Keyboard interactions with collapsed panels", async () => {
-  render(Collapsible);
-
-  await waitForMeasurement(collapsibleHandle);
-  await expectTemplate(collapsibleHandle, "209px 10px 209px 10px 60px");
-
-  const resizer2 = document.getElementById("resizer-2")!;
-  fireEvent.keyDown(resizer2, { key: "Enter" });
-  await expectTemplate(collapsibleHandle, "209px 10px 169px 10px 100px");
-
-  fireEvent.keyDown(resizer2, { key: "ArrowLeft" });
-  fireEvent.keyDown(resizer2, { key: "ArrowLeft" });
-  fireEvent.keyDown(resizer2, { key: "ArrowLeft" });
-  fireEvent.keyDown(resizer2, { key: "ArrowLeft" });
-  await expectTemplate(collapsibleHandle, "209px 10px 165px 10px 104px");
-
-  fireEvent.keyDown(resizer2, { key: "ArrowLeft", shiftKey: true });
-  await expectTemplate(
-    collapsibleHandle,
-    "209.03125px 10px 149.984375px 10px 118.984375px"
-  );
-
-  fireEvent.keyDown(resizer2, { key: "Enter" });
-  await expectTemplate(
-    collapsibleHandle,
-    "209.03125px 10px 208.96875px 10px 60px"
-  );
-
-  fireEvent.keyDown(resizer2, { key: "Enter" });
-  await expectTemplate(
-    collapsibleHandle,
-    "209.0625px 10px 149.96875px 10px 118.96875px"
-  );
-});
-
 describe("imperative panel API", async () => {
   test("panel group", async () => {
     render(Collapsible);
@@ -280,4 +245,39 @@ describe("imperative panel API", async () => {
     expect(leftHandle.isCollapsed()).toBe(false);
     expect(leftHandle.isExpanded()).toBe(true);
   });
+});
+
+test("Keyboard interactions with collapsed panels", async () => {
+  render(Collapsible);
+
+  await waitForMeasurement(collapsibleHandle);
+  await expectTemplate(collapsibleHandle, "209px 10px 209px 10px 60px");
+
+  const resizer2 = document.getElementById("resizer-2")!;
+  fireEvent.keyDown(resizer2, { key: "Enter" });
+  await expectTemplate(collapsibleHandle, "209px 10px 169px 10px 100px");
+
+  fireEvent.keyDown(resizer2, { key: "ArrowLeft" });
+  fireEvent.keyDown(resizer2, { key: "ArrowLeft" });
+  fireEvent.keyDown(resizer2, { key: "ArrowLeft" });
+  fireEvent.keyDown(resizer2, { key: "ArrowLeft" });
+  await expectTemplate(collapsibleHandle, "209px 10px 165px 10px 104px");
+
+  fireEvent.keyDown(resizer2, { key: "ArrowLeft", shiftKey: true });
+  await expectTemplate(
+    collapsibleHandle,
+    "209.03125px 10px 149.984375px 10px 118.984375px"
+  );
+
+  fireEvent.keyDown(resizer2, { key: "Enter" });
+  await expectTemplate(
+    collapsibleHandle,
+    "209.03125px 10px 208.96875px 10px 60px"
+  );
+
+  fireEvent.keyDown(resizer2, { key: "Enter" });
+  await expectTemplate(
+    collapsibleHandle,
+    "209.0625px 10px 149.96875px 10px 118.96875px"
+  );
 });
