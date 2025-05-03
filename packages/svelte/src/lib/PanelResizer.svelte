@@ -87,9 +87,7 @@
   });
 
   $effect(() => () => {
-    requestAnimationFrame(() => {
-      send({ type: "unregisterPanelHandle", id });
-    });
+    requestAnimationFrame(() => send({ type: "unregisterPanelHandle", id }));
   });
 
   const { moveProps } = move({

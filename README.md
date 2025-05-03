@@ -15,6 +15,7 @@ A full featured window splitter component.
 
 - [React](./packages/react/)
 - [Solid](./packages/solid/)
+- [Svelte](./packages/svelte/)
 
 ## Contributors ✨
 

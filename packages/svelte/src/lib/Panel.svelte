@@ -119,9 +119,7 @@
   });
 
   $effect(() => () => {
-    requestAnimationFrame(() => {
-      send({ type: "unregisterPanel", id });
-    });
+    requestAnimationFrame(() => send({ type: "unregisterPanel", id }));
   });
 
   const isControlledCollapse = $derived(panelData()?.collapseIsControlled);

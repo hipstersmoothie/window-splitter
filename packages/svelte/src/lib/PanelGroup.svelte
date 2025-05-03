@@ -54,10 +54,7 @@
       autosaveStrategy,
       ...(snapshot ? prepareSnapshot(snapshot) : undefined),
     },
-    (s) => {
-      if (!context) return;
-      updateContext(s);
-    }
+    (s) => updateContext(s)
   );
 
   const context = $state<GroupMachineContextValue>(initialState);
