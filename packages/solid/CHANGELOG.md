@@ -1,3 +1,20 @@
+# v0.8.4 (Sat May 03 2025)
+
+#### 🐛 Bug Fix
+
+- Svelte Adapter [#55](https://github.com/hipstersmoothie/window-splitter/pull/55) ([@hipstersmoothie](https://github.com/hipstersmoothie))
+- builds ([@hipstersmoothie](https://github.com/hipstersmoothie))
+- tighten up spacing ([@hipstersmoothie](https://github.com/hipstersmoothie))
+- constraints and imperative api ([@hipstersmoothie](https://github.com/hipstersmoothie))
+- simplify solid code ([@hipstersmoothie](https://github.com/hipstersmoothie))
+- working ([@hipstersmoothie](https://github.com/hipstersmoothie))
+
+#### Authors: 1
+
+- Andrew Lisowski ([@hipstersmoothie](https://github.com/hipstersmoothie))
+
+---
+
 # v0.8.3 (Tue Apr 29 2025)
 
 #### ⚠️ Pushed to `main`
