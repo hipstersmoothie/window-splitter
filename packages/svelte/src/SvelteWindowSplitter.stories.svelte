@@ -4,17 +4,18 @@
   import Panel from "./Panel.svelte";
   import PanelResizer from "./PanelResizer.svelte";
   import { spring } from "framer-motion";
-
+  import SimpleStory from "./stories/Simple.svelte";
+  import VerticalLayoutStory from "./stories/VerticalLayout.svelte";
+  import ConditionalStory from "./stories/Conditional.svelte";
+  import DynamicConstraintsStory from "./stories/DynamicConstraints.svelte";
+  import AutosaveStory from "./stories/Autosave.svelte";
+  import AutosaveCollapsibleStory from "./stories/AutosaveCollapsible.svelte";
+  import AutosaveCookieStory from "./stories/AutosaveCookie.svelte";
+  import CollapsibleStory from "./stories/Collapsible.svelte";
   // More on how to set up stories at: https://storybook.js.org/docs/writing-stories
   const { Story } = defineMeta({
     title: "WindowSplitter/Svelte",
   });
-
-  let collapsed = $state(false);
-  const onCollapseChange = (newCollapsed) => {
-    console.log("onCollapseChange", newCollapsed);
-    collapsed = newCollapsed;
-  };
 
   const springFn = spring({
     keyframes: [0, 1],
@@ -29,76 +30,28 @@
     isExpanded = !isExpanded;
   };
 
-  let dynamicConstraints = $state(false);
-  const toggleDynamicConstraints = () => {
-    dynamicConstraints = !dynamicConstraints;
-  };
-
   let panel;
   let group;
 </script>
 
 <Story name="Simple">
-  <PanelGroup class="panel-group">
-    <Panel class="panel">1</Panel>
-    <PanelResizer class="panel-resizer" size="10px" />
-    <Panel class="panel">2</Panel>
-  </PanelGroup>
+  <SimpleStory />
 </Story>
 
 <Story name="Autosave">
-  <PanelGroup class="panel-group" autosaveId="autosave-example-svelte">
-    <Panel id="1" class="panel">1</Panel>
-    <PanelResizer id="resizer" class="panel-resizer" size="10px" />
-    <Panel id="2" class="panel">2</Panel>
-  </PanelGroup>
+  <AutosaveStory />
 </Story>
 
 <Story name="AutosaveCookie">
-  <PanelGroup
-    class="panel-group h-200"
-    autosaveId="autosave-cookie-svelte"
-    autosaveStrategy="cookie"
-  >
-    <Panel id="1" class="panel">1</Panel>
-    <PanelResizer id="resizer" class="panel-resizer" size="10px" />
-    <Panel id="2" class="panel">2</Panel>
-  </PanelGroup>
+  <AutosaveCookieStory />
 </Story>
 
 <Story name="AutosaveCollapsible">
-  <PanelGroup class="panel-group" autosaveId="autosave-collapsible-svelte">
-    <Panel id="1" collapsible collapsedSize="100px" min="140px" class="panel">
-      1
-    </Panel>
-    <PanelResizer id="resizer" class="panel-resizer" size="10px" />
-    <Panel id="2" class="panel">2</Panel>
-  </PanelGroup>
+  <AutosaveCollapsibleStory />
 </Story>
 
 <Story name="DynamicConstraints">
-  <PanelGroup class="panel-group" b>
-    <Panel
-      default="100px"
-      min={dynamicConstraints ? "200px" : "100px"}
-      class="panel"
-    >
-      1
-    </Panel>
-    <PanelResizer class="panel-resizer" size="10px" />
-    <Panel min="100px" class="panel">2</Panel>
-    <PanelResizer class="panel-resizer" size="10px" />
-    <Panel
-      min={dynamicConstraints ? "100px" : "400px"}
-      max={dynamicConstraints ? "300px" : "700px"}
-      class="panel"
-    >
-      3
-    </Panel>
-  </PanelGroup>
-  <button type="button" onclick={toggleDynamicConstraints}>
-    Toggle Dynamic Constraints
-  </button>
+  <DynamicConstraintsStory />
 </Story>
 
 <Story name="SimpleMin">
@@ -140,13 +93,7 @@
 </Story>
 
 <Story name="VerticalLayout">
-  <PanelGroup orientation="vertical" class="panel-group vertical-example">
-    <Panel default="30%" min="20%" class="panel">top</Panel>
-    <PanelResizer class="panel-resizer" size="10px" />
-    <Panel min="20%" class="panel">middle</Panel>
-    <PanelResizer class="panel-resizer" size="10px" />
-    <Panel default="30%" min="20%" class="panel">bottom</Panel>
-  </PanelGroup>
+  <VerticalLayoutStory />
 </Story>
 
 <Story name="VerticalLayout2">
@@ -287,34 +234,7 @@
 </Story>
 
 <Story name="Collapsible">
-  <PanelGroup class="panel-group">
-    <Panel
-      class="collapsible-example-panel-1 panel"
-      min="100px"
-      collapsible
-      collapsedSize="60px"
-      collapseAnimation={{ easing: "bounce", duration: 1000 }}
-      onCollapseChange={(isCollapsed) => {
-        console.log("COLLAPSE PASSIVE", isCollapsed);
-      }}
-    >
-      1
-    </Panel>
-    <PanelResizer class="panel-resizer" size="10px" />
-    <Panel min="100px">2</Panel>
-    <PanelResizer class="panel-resizer" size="10px" />
-    <Panel
-      class="collapsible-example-panel-2 panel"
-      min="100px"
-      collapsible
-      collapsedSize="60px"
-      collapseAnimation={{ easing: "bounce", duration: 1000 }}
-      {collapsed}
-      {onCollapseChange}
-    >
-      3
-    </Panel>
-  </PanelGroup>
+  <CollapsibleStory />
 </Story>
 
 <Story name="CustomCollapseAnimation">
@@ -432,29 +352,7 @@
 </Story>
 
 <Story name="ConditionalPanel">
-  <PanelGroup class="panel-group">
-    <Panel
-      id="panel-1"
-      min="100px"
-      collapsible
-      collapsedSize="60px"
-      class="panel"
-    >
-      1
-    </Panel>
-    <PanelResizer id="handle-1" class="panel-resizer" size="10px" />
-    <Panel id="panel-2" min="100px" class="panel">2</Panel>
-
-    {#if isExpanded}
-      <PanelResizer id="handle-2" class="panel-resizer" size="10px" />
-      <Panel id="panel-3" min="100px" class="panel">
-        3
-        <button type="button" onclick={toggleExpanded}>Close</button>
-      </Panel>
-    {/if}
-  </PanelGroup>
-
-  <button type="button" onclick={toggleExpanded}>Expand</button>
+  <Conditional />
 </Story>
 
 <Story name="ConditionalPanelComplex">
@@ -542,10 +440,6 @@
 
   :global(.h-200) {
     height: 200px;
-  }
-
-  :global(.vertical-example) {
-    height: 322px;
   }
 
   :global(.vertical-example-2) {

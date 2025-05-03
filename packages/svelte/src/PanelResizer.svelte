@@ -86,7 +86,11 @@
     send({ type: "updateConstraints", data: dynamicPanelHandleData });
   });
 
-  $effect(() => () => send({ type: "unregisterPanelHandle", id }));
+  $effect(() => () => {
+    requestAnimationFrame(() => {
+      send({ type: "unregisterPanelHandle", id });
+    });
+  });
 
   const { moveProps } = move({
     onMoveStart: () => {

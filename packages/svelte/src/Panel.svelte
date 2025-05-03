@@ -118,7 +118,11 @@
     dynamicPanelIsMounting = false;
   });
 
-  $effect(() => () => send({ type: "unregisterPanel", id }));
+  $effect(() => () => {
+    requestAnimationFrame(() => {
+      send({ type: "unregisterPanel", id });
+    });
+  });
 
   const isControlledCollapse = $derived(panelData()?.collapseIsControlled);
 

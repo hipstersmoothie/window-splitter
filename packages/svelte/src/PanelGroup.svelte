@@ -5,6 +5,7 @@
     buildTemplate,
     groupMachine,
     prepareSnapshot,
+    prepareItems,
     getPanelGroupPixelSizes,
     getPanelGroupPercentageSizes,
     isPanelData,
@@ -114,7 +115,8 @@
   export const getId = () => id;
   export const getPixelSizes = () => getPanelGroupPixelSizes(context);
   export const getPercentageSizes = () => getPanelGroupPercentageSizes(context);
-  export const getTemplate = () => buildTemplate(context);
+  export const getTemplate = () =>
+    buildTemplate({ ...context, items: prepareItems(context) });
   export const getState = () =>
     machineState.current === "idle" ? "idle" : "dragging";
   export const setSizes = (updates: Array<Unit>) => {
