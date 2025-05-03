@@ -405,7 +405,7 @@ export function Panel(props: PanelProps) {
 
   onCleanup(() => {
     // We wait a frame because in Solid children unmount before their parent
-    // and we want to only unregister if just the panel ifs being removed, not
+    // and we want to only unregister if just the panel is being removed, not
     // the whole group. This frame allows for the parent to lock the machine.
     requestAnimationFrame(() => {
       send?.({ type: "unregisterPanel", id: panelId() });

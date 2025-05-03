@@ -1,7 +1,7 @@
 <script>
-  import PanelGroup from "../PanelGroup.svelte";
-  import Panel from "../Panel.svelte";
-  import PanelResizer from "../PanelResizer.svelte";
+  import PanelGroup from "../lib/PanelGroup.svelte";
+  import Panel from "../lib/Panel.svelte";
+  import PanelResizer from "../lib/PanelResizer.svelte";
 
   const { snapshot, handle } = $props();
 

@@ -19,14 +19,14 @@
     "access": "public"
   },
   "scripts": {
-    "build": "tshy",
+    "build": "svelte-package",
     "test": "CI=true vitest",
-    "dev": "tshy -w",
+    "dev": "svelte-package -w",
     "lint": "eslint .",
     "stats": "rsbuild --mode production build",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "clean": "rm -rf dist .turbo .tshy .tshy-build"
+    "clean": "rm -rf dist .turbo"
   },
   "license": "MIT",
   "devDependencies": {
@@ -40,6 +40,7 @@
     "@storybook/svelte": "^8.6.12",
     "@storybook/svelte-vite": "^8.6.12",
     "@storybook/test": "^8.6.12",
+    "@sveltejs/package": "^2.3.11",
     "@sveltejs/vite-plugin-svelte": "^5.0.3",
     "@testing-library/jest-dom": "^6.4.8",
     "@testing-library/svelte": "^5.2.7",
@@ -55,7 +56,6 @@
     "storybook": "^8.6.12",
     "svelte": "^5.28.2",
     "tiny-cookie": "^2.5.1",
-    "tshy": "^3.0.2",
     "typescript": "^5.5.4",
     "vite": "^6.3.3",
     "vitest": "^3.1.2"
@@ -67,26 +67,14 @@
     "@window-splitter/interface": "workspace:*",
     "@window-splitter/state": "workspace:*"
   },
-  "tshy": {
-    "exclude": [
-      "node_modules",
-      "src/**/*.test.ts",
-      "**/*stories.*"
-    ],
-    "exports": {
-      ".": "./src/index.ts"
-    }
-  },
   "type": "module",
   "exports": {
     ".": {
-      "import": {
-        "types": "./dist/esm/index.d.ts",
-        "default": "./dist/esm/index.js"
-      }
+      "types": "./dist/index.d.ts",
+      "svelte": "./dist/index.js"
     }
   },
-  "module": "./dist/esm/index.js",
+  "module": "./dist/index.js",
   "keywords": [
     "svelte",
     "panel",

@@ -46,12 +46,12 @@ jobs:
         run: pnpm stats
 
       # Send bundle stats and build information to RelativeCI
-      - name: Send bundle stats to RelativeCI
-        uses: relative-ci/agent-action@v2
-        with:
-          webpackStatsFile: packages/react/dist/stats.json
-          key: ${{ secrets.RELATIVE_CI_KEY }}
-          token: ${{ secrets.GITHUB_TOKEN }}
+      # - name: Send bundle stats to RelativeCI
+      #   uses: relative-ci/agent-action@v2
+      #   with:
+      #     webpackStatsFile: packages/react/dist/stats.json
+      #     key: ${{ secrets.RELATIVE_CI_KEY }}
+      #     token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Cache Playwright browsers
         id: playwright-cache

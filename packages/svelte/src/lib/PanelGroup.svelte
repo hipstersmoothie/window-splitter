@@ -46,12 +46,6 @@
 
   const defaultId = $props.id();
   const id = autosaveId || defaultId;
-  const context = $state<GroupMachineContextValue>({});
-  function updateContext(s: GroupMachineContextValue) {
-    for (const key in s) {
-      (context as any)[key] = (s as any)[key];
-    }
-  }
 
   const [initialState, send, machineState] = groupMachine(
     {
@@ -66,7 +60,13 @@
     }
   );
 
-  updateContext(initialState);
+  const context = $state<GroupMachineContextValue>(initialState);
+  function updateContext(s: GroupMachineContextValue) {
+    for (const key in s) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (context as any)[key] = (s as any)[key];
+    }
+  }
 
   setContext("send", send);
   setContext("state", context);
@@ -99,6 +99,7 @@
 
   $effect(() => {
     // re-render when the childIds change
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     childIds;
     measureGroupChildren(id, (childrenSizes) => {
       send({ type: "setActualItemsSize", childrenSizes });

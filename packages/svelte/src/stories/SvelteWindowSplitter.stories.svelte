@@ -1,17 +1,17 @@
 <script module>
   import { defineMeta } from "@storybook/addon-svelte-csf";
-  import PanelGroup from "./PanelGroup.svelte";
-  import Panel from "./Panel.svelte";
-  import PanelResizer from "./PanelResizer.svelte";
+  import PanelGroup from "../lib/PanelGroup.svelte";
+  import Panel from "../lib/Panel.svelte";
+  import PanelResizer from "../lib/PanelResizer.svelte";
   import { spring } from "framer-motion";
-  import SimpleStory from "./stories/Simple.svelte";
-  import VerticalLayoutStory from "./stories/VerticalLayout.svelte";
-  import ConditionalStory from "./stories/Conditional.svelte";
-  import DynamicConstraintsStory from "./stories/DynamicConstraints.svelte";
-  import AutosaveStory from "./stories/Autosave.svelte";
-  import AutosaveCollapsibleStory from "./stories/AutosaveCollapsible.svelte";
-  import AutosaveCookieStory from "./stories/AutosaveCookie.svelte";
-  import CollapsibleStory from "./stories/Collapsible.svelte";
+  import SimpleStory from "./Simple.svelte";
+  import VerticalLayoutStory from "./VerticalLayout.svelte";
+  import ConditionalStory from "./Conditional.svelte";
+  import DynamicConstraintsStory from "./DynamicConstraints.svelte";
+  import AutosaveStory from "./Autosave.svelte";
+  import AutosaveCollapsibleStory from "./AutosaveCollapsible.svelte";
+  import AutosaveCookieStory from "./AutosaveCookie.svelte";
+  import CollapsibleStory from "./Collapsible.svelte";
   // More on how to set up stories at: https://storybook.js.org/docs/writing-stories
   const { Story } = defineMeta({
     title: "WindowSplitter/Svelte",
@@ -352,7 +352,7 @@
 </Story>
 
 <Story name="ConditionalPanel">
-  <Conditional />
+  <ConditionalStory />
 </Story>
 
 <Story name="ConditionalPanelComplex">

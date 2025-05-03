@@ -1433,7 +1433,7 @@ function iterativelyUpdateLayout({
   controlled?: boolean;
   disregardCollapseBuffer?: boolean;
   /**
-   * Whether this is jsut a calculation and not intended to be commmited to layour
+   * Whether this is just a calculation and not intended to be commmited to layout
    * no on* callbacks will be called
    */
   isVirtual?: boolean;

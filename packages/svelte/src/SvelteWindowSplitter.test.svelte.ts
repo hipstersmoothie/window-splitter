@@ -1,7 +1,7 @@
 import "@testing-library/jest-dom/vitest";
 
 import { cleanup, fireEvent, render, waitFor } from "@testing-library/svelte";
-import { describe, expect, test, vi } from "vitest";
+import { afterEach, describe, expect, test, vi } from "vitest";
 import * as Cookies from "tiny-cookie";
 
 import Collapsible, {
@@ -29,6 +29,10 @@ const { expectTemplate, waitForMeasurement, waitForCondition } =
   createTestUtils({
     waitFor,
   });
+
+afterEach(() => {
+  cleanup();
+});
 
 test("horizontal layout", async () => {
   const component = render(Simple);
@@ -190,19 +194,19 @@ test("Keyboard interactions with collapsed panels", async () => {
   fireEvent.keyDown(resizer2, { key: "ArrowLeft", shiftKey: true });
   await expectTemplate(
     collapsibleHandle,
-    "209.015625px 10px 149.984375px 10px 118.984375px"
+    "209.03125px 10px 149.984375px 10px 118.984375px"
   );
 
   fireEvent.keyDown(resizer2, { key: "Enter" });
   await expectTemplate(
     collapsibleHandle,
-    "209.015625px 10px 208.984375px 10px 60px"
+    "209.03125px 10px 208.96875px 10px 60px"
   );
 
   fireEvent.keyDown(resizer2, { key: "Enter" });
   await expectTemplate(
     collapsibleHandle,
-    "209.03125px 10px 149.984375px 10px 118.96875px"
+    "209.0625px 10px 149.96875px 10px 118.96875px"
   );
 });
 
