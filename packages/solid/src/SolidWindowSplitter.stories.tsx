@@ -134,7 +134,6 @@ export function AutosaveCollapsible(props: {
   );
 }
 
-// TODO: fix this
 export function DynamicConstraints(props: { handle?: Ref<PanelGroupHandle> }) {
   const [customOn, setCustomOn] = createSignal(false);
 

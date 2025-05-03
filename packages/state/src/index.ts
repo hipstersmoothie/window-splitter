@@ -530,8 +530,12 @@ function eq(a: ParsedUnit, b: ParsedUnit) {
 
 export function haveConstraintsChangedForPanel(
   a: Omit<PanelData, "id" | "currentValue">,
-  b: Omit<PanelData, "id" | "currentValue">
+  b?: Omit<PanelData, "id" | "currentValue">
 ) {
+  if (!b) {
+    return true;
+  }
+
   if (!eq(a.min, b.min)) {
     return true;
   }
@@ -583,8 +587,12 @@ export function haveConstraintsChangedForPanel(
 
 export function haveConstraintsChangedForPanelHandle(
   a: Omit<PanelHandleData, "id">,
-  b: Omit<PanelHandleData, "id">
+  b?: Omit<PanelHandleData, "id">
 ) {
+  if (!b) {
+    return true;
+  }
+
   if (!eq(a.size, b.size)) {
     return true;
   }
@@ -1090,6 +1098,7 @@ function updateLayout(
     | (DragHandleEvent & {
         controlled?: boolean;
         disregardCollapseBuffer?: never;
+        isVirtual?: boolean;
       })
     | {
         type: "collapsePanel";
@@ -1097,6 +1106,7 @@ function updateLayout(
         handleId: string;
         controlled?: boolean;
         disregardCollapseBuffer?: boolean;
+        isVirtual?: boolean;
       }
 ): Partial<GroupMachineContextValue> {
   const handleIndex = getPanelHandleIndex(context, dragEvent.handleId);
@@ -1281,7 +1291,8 @@ function updateLayout(
     if (
       panelAfter.onCollapseChange?.current &&
       !panelAfter.collapseIsControlled &&
-      !dragEvent.controlled
+      !dragEvent.controlled &&
+      !dragEvent.isVirtual
     ) {
       panelAfter.onCollapseChange.current(false);
     }
@@ -1317,7 +1328,8 @@ function updateLayout(
     if (
       panelBefore.onCollapseChange?.current &&
       !panelBefore.collapseIsControlled &&
-      !dragEvent.controlled
+      !dragEvent.controlled &&
+      !dragEvent.isVirtual
     ) {
       panelBefore.onCollapseChange.current(true);
     }
@@ -1412,6 +1424,7 @@ function iterativelyUpdateLayout({
   direction,
   controlled,
   disregardCollapseBuffer,
+  isVirtual,
 }: {
   context: GroupMachineContextValue;
   handleId: string;
@@ -1419,6 +1432,11 @@ function iterativelyUpdateLayout({
   direction: -1 | 1;
   controlled?: boolean;
   disregardCollapseBuffer?: boolean;
+  /**
+   * Whether this is just a calculation and not intended to be commmited to layout
+   * no on* callbacks will be called
+   */
+  isVirtual?: boolean;
 }) {
   let newContext: Partial<GroupMachineContextValue> = context;
 
@@ -1433,6 +1451,7 @@ function iterativelyUpdateLayout({
         type: "collapsePanel",
         controlled,
         disregardCollapseBuffer,
+        isVirtual,
         value: dragHandlePayload({
           delta: direction,
           orientation: context.orientation,
@@ -1799,6 +1818,10 @@ export function groupMachine(
         panel.currentValue = panel.collapsedSize;
       }
 
+      if (!panel.collapseIsControlled) {
+        panel.onCollapseChange?.current?.(panel.collapsed);
+      }
+
       actions.commit();
     },
   };
@@ -1831,6 +1854,7 @@ export function groupMachine(
           controlled: event.controlled,
           delta: delta,
           direction: handle.direction,
+          isVirtual: true,
         }),
       };
       const updatedPanel = interimContext.items.find(
@@ -2033,7 +2057,10 @@ export function groupMachine(
 
         if (useLastKnownSize) {
           context.items = withLastKnownSize;
-        } else if (totalSize > getGroupSize(context)) {
+        } else if (
+          totalSize > getGroupSize(context) &&
+          state.current !== "dragging"
+        ) {
           context.items = handleOverflow({
             ...context,
             items: prepareItems({ ...context, items: withLastKnownSize }),

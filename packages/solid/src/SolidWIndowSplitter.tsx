@@ -136,26 +136,20 @@ export function PanelGroup(props: PanelGroupProps) {
   onMount(() => {
     const observer = new ResizeObserver(([entry]) => {
       if (!entry) return;
-      if (entry.contentRect.width > 0 && entry.contentRect.height > 0) {
-        send({
-          type: "setSize",
-          size: entry.contentRect,
-        });
-      }
+      if (!(entry.contentRect.width > 0 && entry.contentRect.height > 0))
+        return;
+      send({ type: "setSize", size: entry.contentRect });
     });
 
-    if (elementRef) {
-      observer.observe(elementRef);
-    }
-
+    if (elementRef) observer.observe(elementRef);
     onCleanup(() => observer.disconnect());
   });
 
-  const childIds = createDeferred(() => {
-    const s = currentValue?.();
-    if (!s) throw new Error("No state");
-    return s.items.map((i) => i.id).join(",");
-  });
+  const childIds = createDeferred(() =>
+    currentValue()
+      .items.map((i) => i.id)
+      .join(",")
+  );
 
   // Measure children size
   createEffect(
@@ -172,53 +166,36 @@ export function PanelGroup(props: PanelGroupProps) {
     () => props.handle,
     () => ({
       getId: () => groupId,
-      getPixelSizes: () => {
-        const s = currentValue?.();
-        if (!s) throw new Error("No state");
-        return getPanelGroupPixelSizes(s);
-      },
-      getPercentageSizes: () => {
-        const s = currentValue?.();
-        if (!s) throw new Error("No state");
-        return getPanelGroupPercentageSizes(s);
-      },
+      getPixelSizes: () => getPanelGroupPixelSizes(currentValue()),
+      getPercentageSizes: () => getPanelGroupPercentageSizes(currentValue()),
       setSizes: (updates) => {
-        const context = currentValue?.();
-        if (!context) throw new Error("No state");
+        const context = currentValue();
 
         for (let index = 0; index < updates.length; index++) {
           const item = context.items[index];
           const update = updates[index];
 
           if (item && isPanelData(item) && update) {
-            send({
-              type: "setPanelPixelSize",
-              panelId: item.id,
-              size: update,
-            });
+            send({ type: "setPanelPixelSize", panelId: item.id, size: update });
           }
         }
       },
       getTemplate: () => {
-        const context = currentValue?.();
-        if (!context) throw new Error("No state");
+        const context = getContext();
         return buildTemplate({ ...context, items: prepareItems(context) });
       },
       getState: () => (machineState.current === "idle" ? "idle" : "dragging"),
     })
   );
 
-  const getTemplate = () => {
-    const context = getContext();
-    const tempalte = buildTemplate(context);
-    return tempalte;
-  };
+  const getTemplate = () => buildTemplate(getContext());
 
   onMount(() => send({ type: "unlockGroup" }));
   onCleanup(() => send({ type: "lockGroup" }));
 
   return (
     <div
+      id={groupId}
       ref={elementRef}
       data-panel-group-wrapper
       {...attrs}
@@ -348,10 +325,7 @@ export function Panel(props: PanelProps) {
   createEffect(
     on(contraintChanged, () => {
       if (!hasMounted) return;
-      send?.({
-        type: "updateConstraints",
-        data: initPanel(),
-      });
+      send?.({ type: "updateConstraints", data: initPanel() });
     })
   );
 
@@ -374,10 +348,7 @@ export function Panel(props: PanelProps) {
 
     if (typeof order !== "number") return;
 
-    send?.({
-      type: "registerDynamicPanel",
-      data: { ...initPanel(), order },
-    });
+    send?.({ type: "registerDynamicPanel", data: { ...initPanel(), order } });
     dynamicPanelIsMounting = false;
   });
 
@@ -392,16 +363,10 @@ export function Panel(props: PanelProps) {
     on(currentCollapsed, () => {
       const collapsed = props.collapsed?.() || false;
 
-      if (!panelData?.()?.collapseIsControlled) {
-        return;
-      }
+      if (!panelData?.()?.collapseIsControlled) return;
 
       if (collapsed) {
-        send?.({
-          type: "collapsePanel",
-          panelId: panelId(),
-          controlled: true,
-        });
+        send?.({ type: "collapsePanel", panelId: panelId(), controlled: true });
       } else {
         send?.({ type: "expandPanel", panelId: panelId(), controlled: true });
       }
@@ -538,10 +503,7 @@ export function PanelResizer(props: PanelResizerProps) {
   createEffect(
     on(contraintChanged, () => {
       if (!hasMounted) return;
-      send?.({
-        type: "updateConstraints",
-        data: initHandle(),
-      });
+      send?.({ type: "updateConstraints", data: initHandle() });
     })
   );
 
@@ -564,10 +526,7 @@ export function PanelResizer(props: PanelResizerProps) {
 
     if (typeof order !== "number") return;
 
-    send?.({
-      type: "registerPanelHandle",
-      data: { ...initHandle(), order },
-    });
+    send?.({ type: "registerPanelHandle", data: { ...initHandle(), order } });
     dynamicPanelHandleIsMounting = false;
   });
 
@@ -593,16 +552,6 @@ export function PanelResizer(props: PanelResizerProps) {
   const activeDragHandleId = () => state?.()?.activeDragHandleId;
   const isDragging = () => activeDragHandleId() === handleId();
   const panelBeforeHandle = () => state?.()?.items[itemIndex() - 1];
-  const getCollapsiblePanel = () => {
-    const currentState = state?.();
-    if (!currentState) return undefined;
-
-    try {
-      return getCollapsiblePanelForHandleId(currentState, handleId());
-    } catch {
-      return undefined;
-    }
-  };
   const panelAttributes = () => {
     const panelBefore = panelBeforeHandle();
     const currentState = state?.();
@@ -641,14 +590,24 @@ export function PanelResizer(props: PanelResizerProps) {
   };
 
   const onKeyDown = (e: KeyboardEvent) => {
-    const collapsiblePanel = getCollapsiblePanel();
+    const currentState = state?.();
+    if (!currentState) return undefined;
 
-    if (e.key === "Enter" && collapsiblePanel) {
-      if (collapsiblePanel.collapsed) {
-        send?.({ type: "expandPanel", panelId: collapsiblePanel.id });
-      } else {
-        send?.({ type: "collapsePanel", panelId: collapsiblePanel.id });
+    try {
+      const collapsiblePanel = getCollapsiblePanelForHandleId(
+        currentState,
+        handleId()
+      );
+
+      if (e.key === "Enter" && collapsiblePanel) {
+        if (collapsiblePanel.collapsed) {
+          send?.({ type: "expandPanel", panelId: collapsiblePanel.id });
+        } else {
+          send?.({ type: "collapsePanel", panelId: collapsiblePanel.id });
+        }
       }
+    } catch {
+      return undefined;
     }
   };
 

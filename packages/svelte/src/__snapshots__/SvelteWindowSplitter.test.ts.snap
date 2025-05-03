@@ -1,0 +1,54 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Autosave > localStorage 1`] = `
+[
+  {
+    "collapseIsControlled": false,
+    "collapsedSize": {
+      "type": "pixel",
+      "value": "0",
+    },
+    "currentValue": {
+      "type": "percent",
+      "value": "0.70081967213114754098",
+    },
+    "id": "1",
+    "max": "1fr",
+    "min": {
+      "type": "pixel",
+      "value": "0",
+    },
+    "onCollapseChange": {},
+    "onResize": {},
+    "type": "panel",
+  },
+  {
+    "id": "resizer",
+    "size": {
+      "type": "pixel",
+      "value": "10",
+    },
+    "type": "handle",
+  },
+  {
+    "collapseIsControlled": false,
+    "collapsedSize": {
+      "type": "pixel",
+      "value": "0",
+    },
+    "currentValue": {
+      "type": "percent",
+      "value": "0.29918032786885245902",
+    },
+    "id": "2",
+    "max": "1fr",
+    "min": {
+      "type": "pixel",
+      "value": "0",
+    },
+    "onCollapseChange": {},
+    "onResize": {},
+    "type": "panel",
+  },
+]
+`;
