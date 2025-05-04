@@ -88,7 +88,38 @@ export const AutosaveCollapsible: Story = {
   }),
 };
 
-// Dynamic constraints
+export const DynamicConstraints: Story = {
+  render: () => ({
+    components: { PanelGroup, Panel, PanelResizer },
+    setup() {
+      const customOn = ref(false);
+      return { customOn };
+    },
+    template: dedent/*html*/ `
+      <PanelGroup class="panel-group">
+        <Panel default="100px" :min="customOn ? '200px' : '100px'" class="panel">
+          <div>Panel 1</div>
+        </Panel>
+        <PanelResizer class="panel-resizer" size="10px" />
+        <Panel min="100px" class="panel">
+          <div>Panel 2</div>
+        </Panel>
+        <PanelResizer class="panel-resizer" size="10px" />
+        <Panel
+          class="panel"
+          :min="customOn ? '100px' : '400px'"
+          :max="customOn ? '300px' : '700px'"
+        >
+          <div>Panel 3</div>
+        </Panel>
+      </PanelGroup>
+
+      <button type="button" @click="() => customOn = !customOn">
+        Toggle Custom
+      </button>
+    `,
+  }),
+};
 
 export const SimpleMin: Story = {
   render: () => ({
@@ -365,10 +396,7 @@ export const Collapsible: Story = {
     components: { PanelGroup, Panel, PanelResizer },
     setup() {
       const collapsed = ref(true);
-      const onCollapseChange = (isCollapsed: boolean) => {
-        collapsed.value = isCollapsed;
-      };
-      return { collapsed, onCollapseChange };
+      return { collapsed };
     },
     template: dedent/*html*/ `
       <PanelGroup class="panel-group">
@@ -392,7 +420,7 @@ export const Collapsible: Story = {
           :collapseAnimation="{ easing: 'bounce', duration: 1000 }"
           :style="{ border: '10px solid blue', 'box-sizing': 'border-box' }"
           :collapsed="collapsed"
-          @collapse-change="onCollapseChange"
+          @collapse-change="collapsed = !collapsed"
         >
           <div>3</div>
         </Panel>

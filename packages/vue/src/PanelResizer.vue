@@ -9,6 +9,7 @@ import {
   getCursor,
   getGroupSize,
   GroupMachineContextValue,
+  haveConstraintsChangedForPanelHandle,
   initializePanelHandleData,
   isPanelData,
   isPanelHandle,
@@ -23,6 +24,7 @@ import {
   onUnmounted,
   Ref,
   useId,
+  watchEffect,
 } from "vue";
 
 type PanelResizerProps = SharedPanelResizerProps & {
@@ -47,15 +49,15 @@ const state = inject<Ref<GroupMachineContextValue>>("state");
 const isPrerender = inject<Ref<boolean>>("isPrerender");
 
 const initHandle = () => initializePanelHandleData({ size, id });
-const handleData = () => {
+const handleData = computed(() => {
   const item = state?.value?.items.find((i) => i.id === id);
   if (!item || !isPanelHandle(item)) return undefined;
   return item;
-};
+});
 
 let dynamicPanelHandleIsMounting = false;
 
-if (!handleData()) {
+if (!handleData.value) {
   if (isPrerender?.value) {
     send?.({ type: "registerPanelHandle", data: initHandle() });
   } else {
@@ -81,6 +83,17 @@ onMounted(() => {
     data: { ...initHandle(), order },
   });
   dynamicPanelHandleIsMounting = false;
+});
+
+const contraintChanged = computed(
+  () =>
+    !dynamicPanelHandleIsMounting &&
+    haveConstraintsChangedForPanelHandle(initHandle(), handleData.value)
+);
+
+watchEffect(() => {
+  if (!contraintChanged.value) return;
+  send?.({ type: "updateConstraints", data: initHandle() });
 });
 
 onUnmounted(() => {

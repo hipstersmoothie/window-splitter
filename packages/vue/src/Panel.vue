@@ -8,6 +8,7 @@ import {
   getPanelPercentageSize,
   getPanelPixelSize,
   GroupMachineContextValue,
+  haveConstraintsChangedForPanel,
   initializePanel,
   isPanelData,
   PanelData,
@@ -24,7 +25,7 @@ import {
   watchEffect,
 } from "vue";
 
-type PanelProps = SharedPanelProps<Ref<boolean>> & {
+type PanelProps = SharedPanelProps<boolean> & {
   id?: string;
 } & /* @vue-ignore */ HTMLAttributes;
 const {
@@ -54,7 +55,7 @@ const initPanel = (): PanelData => {
     min,
     max,
     collapsible,
-    collapsed: collapsed as unknown as boolean,
+    collapsed: collapsed ,
     collapsedSize,
     onCollapseChange: onCollapseChange
       ? { current: onCollapseChange }
@@ -76,7 +77,14 @@ const panelData = computed(() => {
 let dynamicPanelIsMounting = false;
 
 if (panelData.value) {
-  // TODO
+  send?.({
+    type: "rebindPanelCallbacks",
+    data: {
+      id: panelId,
+      onCollapseChange: onCollapseChange ? { current: onCollapseChange } : undefined,
+      onResize: onResize ? { current: onResize } : undefined,
+    },
+  });
 } else {
   if (isPrerender?.value) {
     send?.({ type: "registerPanel", data: initPanel() });
@@ -103,6 +111,17 @@ onMounted(() => {
     data: { ...initPanel(), order },
   });
   dynamicPanelIsMounting = false;
+});
+
+const contraintChanged = computed(
+  () =>
+    !dynamicPanelIsMounting &&
+    haveConstraintsChangedForPanel(initPanel(), panelData.value)
+);
+
+watchEffect(() => {
+  if (!contraintChanged.value) return;
+  send?.({ type: "updateConstraints", data: initPanel() });
 });
 
 onUnmounted(() => {
