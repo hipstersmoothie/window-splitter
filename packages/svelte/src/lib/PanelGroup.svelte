@@ -98,7 +98,8 @@
     // re-render when the childIds change
     // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     childIds;
-    measureGroupChildren(id, (childrenSizes) => {
+
+    return measureGroupChildren(id, (childrenSizes) => {
       send({ type: "setActualItemsSize", childrenSizes });
     });
   });
