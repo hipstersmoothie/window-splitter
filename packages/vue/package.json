@@ -1,6 +1,13 @@
 {
+  "$schema": "https://json.schemastore.org/package.json",
   "name": "@window-splitter/vue",
-  "version": "1.0.0",
+  "version": "0.8.4",
+  "sideEffects": false,
+  "homepage": "https://react-window-splitter-six.vercel.app",
+  "repository": {
+    "url": "https://github.com/hipstersmoothie/window-splitter",
+    "directory": "packages/vue"
+  },
   "main": "./dist/index.js",
   "scripts": {
     "build": "vite build",
@@ -11,10 +18,25 @@
     "build-storybook": "storybook build",
     "clean": "rm -rf dist .turbo .tshy .tshy-build"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "keywords": [
+    "vue",
+    "panel",
+    "splitter",
+    "resizable",
+    "window"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "author": {
+    "name": "Andrew Lisowski",
+    "email": "lisowski54@gmail.com"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "license": "MIT",
+  "description": "A WAI-ARIA compliant window splitter for Vue.",
   "devDependencies": {
     "@internal/eslint-config": "workspace:*",
     "@storybook/vue3": "^8.6.12",
