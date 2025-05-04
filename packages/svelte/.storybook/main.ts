@@ -15,16 +15,7 @@ const config: StorybookConfig = {
     "../src/**/*.stories.@(js|ts|svelte)",
     "../stories/**/*.stories.@(js|ts|svelte)",
   ],
-  addons: [
-    {
-      name: getAbsolutePath("@storybook/addon-essentials"),
-      options: {
-        docs: false,
-      },
-    },
-    getAbsolutePath("@storybook/addon-svelte-csf"),
-    getAbsolutePath("@storybook/addon-interactions"),
-  ],
+  addons: [getAbsolutePath("@storybook/addon-svelte-csf")],
   framework: {
     name: getAbsolutePath("@storybook/svelte-vite"),
     options: {},

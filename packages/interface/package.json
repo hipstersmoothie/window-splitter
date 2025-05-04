@@ -28,11 +28,11 @@
   "license": "MIT",
   "devDependencies": {
     "@internal/eslint-config": "workspace:*",
-    "@testing-library/jest-dom": "^6.4.8",
-    "eslint": "^9.9.0",
-    "tshy": "^3.0.2",
-    "typescript": "^5.5.4",
-    "vitest": "^3.1.2"
+    "@testing-library/jest-dom": "catalog:",
+    "eslint": "catalog:",
+    "tshy": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   },
   "dependencies": {
     "@window-splitter/state": "workspace:*"

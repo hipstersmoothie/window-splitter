@@ -31,7 +31,7 @@
     "@types/find-package-json": "^1.2.6",
     "all-contributors-cli": "^6.26.1",
     "auto": "^11.2.0",
-    "eslint": "^9.9.0",
+    "eslint": "catalog:",
     "fast-glob": "^3.3.2",
     "find-package-json": "^1.2.0",
     "flatten-directory": "^1.0.8",
@@ -40,7 +40,7 @@
     "nyc": "^17.0.0",
     "prettier": "^3.3.3",
     "turbo": "^2.0.14",
-    "typescript": "^5.5.4"
+    "typescript": "catalog:"
   },
   "auto": {
     "plugins": [
