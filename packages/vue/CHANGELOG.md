@@ -1,3 +1,15 @@
+# v0.8.6 (Sun May 04 2025)
+
+#### ⚠️ Pushed to `main`
+
+- add readme ([@hipstersmoothie](https://github.com/hipstersmoothie))
+
+#### Authors: 1
+
+- Andrew Lisowski ([@hipstersmoothie](https://github.com/hipstersmoothie))
+
+---
+
 # v0.8.5 (Sun May 04 2025)
 
 #### 🐛 Bug Fix
