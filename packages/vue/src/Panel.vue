@@ -43,7 +43,7 @@ const {
   isStaticAtRest,
   collapsed: _collapsed,
   ...attrs
-} = props
+} = props;
 
 const panelId = id || useId();
 const send = inject<SendFn>("send");
@@ -158,8 +158,8 @@ const isControlledCollapse = computed(
 watchEffect(() => {
   // Subscribe to the collapsed prop (doesn't work in rAF)
   // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-  props.collapsed
-  
+  props.collapsed;
+
   requestAnimationFrame(() => {
     if (!isControlledCollapse.value) return;
 
