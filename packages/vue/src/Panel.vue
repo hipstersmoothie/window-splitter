@@ -16,7 +16,6 @@ import {
 } from "@window-splitter/state";
 import {
   computed,
-  HTMLAttributes,
   inject,
   onMounted,
   onUnmounted,
@@ -25,22 +24,24 @@ import {
   watchEffect,
 } from "vue";
 
-type PanelProps = SharedPanelProps<boolean> & HTMLAttributes;
+type PanelProps = SharedPanelProps<boolean> & { id?: string };
+const props = withDefaults(defineProps<PanelProps>(), { collapsed: undefined });
+
 const {
-  min,
-  max,
+  min: _min,
+  max: _max,
   id,
-  collapsible,
-  collapsedSize,
-  onCollapseChange,
-  collapseAnimation,
-  onResize,
+  collapsible: _collapsible,
+  collapsedSize: _collapsedSize,
+  onCollapseChange: _onCollapseChange,
+  collapseAnimation: _collapseAnimation,
+  onResize: _onResize,
   defaultCollapsed,
   default: defaultSize,
   isStaticAtRest,
-  collapsed,
+  collapsed: _collapsed,
   ...attrs
-} = defineProps<PanelProps>();
+} = props
 
 const panelId = id || useId();
 const send = inject<SendFn>("send");
@@ -50,16 +51,16 @@ const isPrerender = inject<Ref<boolean>>("isPrerender");
 const initPanel = (): PanelData => {
   return initializePanel({
     id: panelId,
-    min,
-    max,
-    collapsible,
-    collapsed: collapsed,
-    collapsedSize,
-    onCollapseChange: onCollapseChange
-      ? { current: onCollapseChange }
+    min: props.min,
+    max: props.max,
+    collapsible: props.collapsible,
+    collapsed: props.collapsed,
+    collapsedSize: props.collapsedSize,
+    onCollapseChange: props.onCollapseChange
+      ? { current: props.onCollapseChange }
       : undefined,
-    collapseAnimation,
-    onResize: onResize ? { current: onResize } : undefined,
+    collapseAnimation: props.collapseAnimation,
+    onResize: props.onResize ? { current: props.onResize } : undefined,
     defaultCollapsed,
     default: defaultSize,
     isStaticAtRest,
@@ -79,10 +80,10 @@ if (panelData.value) {
     type: "rebindPanelCallbacks",
     data: {
       id: panelId,
-      onCollapseChange: onCollapseChange
-        ? { current: onCollapseChange }
+      onCollapseChange: props.onCollapseChange
+        ? { current: props.onCollapseChange }
         : undefined,
-      onResize: onResize ? { current: onResize } : undefined,
+      onResize: props.onResize ? { current: props.onResize } : undefined,
     },
   });
 } else {
@@ -153,13 +154,18 @@ const isControlledCollapse = computed(
 );
 
 watchEffect(() => {
-  if (!isControlledCollapse.value) return;
+  // Subscribe to the collapsed prop (doesn't work in rAF)
+  props.collapsed
+  
+  requestAnimationFrame(() => {
+    if (!isControlledCollapse.value) return;
 
-  if (collapsed) {
-    send?.({ type: "collapsePanel", panelId: panelId, controlled: true });
-  } else {
-    send?.({ type: "expandPanel", panelId: panelId, controlled: true });
-  }
+    if (props.collapsed) {
+      send?.({ type: "collapsePanel", panelId: panelId, controlled: true });
+    } else {
+      send?.({ type: "expandPanel", panelId: panelId, controlled: true });
+    }
+  });
 });
 
 const computedProps = computed(() => {

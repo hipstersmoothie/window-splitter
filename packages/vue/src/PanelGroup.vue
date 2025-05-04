@@ -11,19 +11,12 @@ import {
   groupMachine,
   GroupMachineContextValue,
   isPanelData,
+  prepareItems,
   prepareSnapshot,
 } from "@window-splitter/state";
-import {
-  useId,
-  type HTMLAttributes,
-  provide,
-  ref,
-  computed,
-  onMounted,
-  watchEffect,
-} from "vue";
+import { useId, provide, ref, computed, onMounted, watchEffect } from "vue";
 
-type PanelGroupProps = SharedPanelGroupProps & /* @vue-ignore */ HTMLAttributes;
+type PanelGroupProps = SharedPanelGroupProps & { id?: string   };
 
 const {
   orientation = "horizontal",
@@ -124,7 +117,11 @@ defineExpose<PanelGroupHandle>({
   getId: () => groupId,
   getPixelSizes: () => getPanelGroupPixelSizes(context.value),
   getPercentageSizes: () => getPanelGroupPercentageSizes(context.value),
-  getTemplate: () => buildTemplate(context.value),
+  getTemplate: () =>
+    buildTemplate({
+      ...context.value,
+      items: prepareItems(context.value),
+    }),
   getState: () => (machineState.current === "idle" ? "idle" : "dragging"),
   setSizes: (updates) => {
     for (let index = 0; index < updates.length; index++) {

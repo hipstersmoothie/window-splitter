@@ -18,7 +18,6 @@ import {
 } from "@window-splitter/state";
 import {
   computed,
-  HTMLAttributes,
   inject,
   onMounted,
   onUnmounted,
@@ -27,7 +26,7 @@ import {
   watchEffect,
 } from "vue";
 
-type PanelResizerProps = SharedPanelResizerProps & HTMLAttributes;
+type PanelResizerProps = SharedPanelResizerProps & { id?: string };
 
 const {
   size = "0px",
@@ -117,15 +116,19 @@ const { moveProps } = move({
 });
 
 const onKeyDown = (e: KeyboardEvent) => {
+  console.log("onKeyDown", e.key);
   if (!state?.value) return;
+
 
   try {
     const collapsiblePanel = getCollapsiblePanelForHandleId(state?.value, id);
 
     if (e.key === "Enter" && collapsiblePanel) {
       if (collapsiblePanel.collapsed) {
+        console.log("expandPanel", collapsiblePanel.id);
         send?.({ type: "expandPanel", panelId: collapsiblePanel.id });
       } else {
+        console.log("collapsePanel", collapsiblePanel.id);
         send?.({ type: "collapsePanel", panelId: collapsiblePanel.id });
       }
     }

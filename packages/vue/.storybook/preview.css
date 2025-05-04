@@ -3,6 +3,7 @@
   background: rgba(0, 0, 0, 0.1);
   border-radius: 12px;
   box-sizing: border-box;
+  min-width: 500px;
 }
 
 .panel {

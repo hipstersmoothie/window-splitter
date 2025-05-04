@@ -20,21 +20,26 @@
     "@internal/eslint-config": "workspace:*",
     "@storybook/vue3": "^8.6.12",
     "@storybook/vue3-vite": "^8.6.12",
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/jest-dom": "catalog:",
+    "@testing-library/vue": "^8.1.0",
     "@vitejs/plugin-vue": "^5.2.3",
     "eslint": "catalog:",
     "eslint-plugin-vue": "^10.1.0",
     "framer-motion": "^11.3.28",
     "storybook": "^8.6.12",
+    "tiny-cookie": "^2.5.1",
+    "ts-dedent": "^2.2.0",
     "tshy": "catalog:",
     "typescript": "catalog:",
     "typescript-eslint": "^8.1.0",
     "vite": "^6.3.3",
+    "vitest": "^3.1.2",
     "vue": "^3.5.13"
   },
   "dependencies": {
     "@window-splitter/interface": "workspace:*",
-    "@window-splitter/state": "workspace:*",
-    "ts-dedent": "^2.2.0"
+    "@window-splitter/state": "workspace:*"
   },
   "peerDependencies": {
     "vue": ">=3.x"

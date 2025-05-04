@@ -3,9 +3,10 @@ import { dedent } from "ts-dedent";
 import PanelGroup from "./PanelGroup.vue";
 import Panel from "./Panel.vue";
 import PanelResizer from "./PanelResizer.vue";
-import { ref, useTemplateRef } from "vue";
+import { onMounted, ref, useTemplateRef } from "vue";
 import { spring } from "framer-motion";
 import { PanelGroupHandle, PanelHandle } from "@window-splitter/interface";
+import { GroupMachineContextValue } from "@window-splitter/state";
 
 const meta: Meta<typeof PanelGroup> = {
   title: "WindowSplitter/Vue",
@@ -20,13 +21,23 @@ export default meta;
 type Story = StoryObj<typeof PanelGroup>;
 
 // More on writing stories with args: https://storybook.js.org/docs/writing-stories/args
-export const Simple: Story = {
-  render: () => ({
+export const Simple = {
+  render: (args: { handle: { value: PanelGroupHandle | null } }) => ({
     components: { PanelGroup, Panel, PanelResizer },
+    setup() {
+      const handle = useTemplateRef<PanelGroupHandle>("handle");
+      onMounted(() => {
+        if (args.handle) {
+          args.handle.value = handle.value;
+        }
+      });
+      return { handle };
+    },
     template: dedent/*html*/ `
       <PanelGroup 
         class="panel-group" 
         :style="{ height: '200px' }"
+        ref="handle"
       >
         <Panel class="panel">Panel 1</Panel>
         <PanelResizer class="panel-resizer" size="10px" />
@@ -36,67 +47,117 @@ export const Simple: Story = {
   }),
 };
 
-export const Autosave: Story = {
-  render: () => ({
+export const Autosave = {
+  render: (args: { handle: { value: PanelGroupHandle | null } }) => ({
     components: { PanelGroup, Panel, PanelResizer },
+    setup() {
+      const handle = useTemplateRef<PanelGroupHandle>("handle");
+      onMounted(() => {
+        if (args.handle) {
+          args.handle.value = handle.value;
+        }
+      });
+      return { handle };
+    },
     template: dedent/*html*/ `
       <PanelGroup 
         class="panel-group"
-        autosaveId="autosave-example-solid"
+        ref="handle"
+        autosaveId="autosave-example-vue"
       >
-        <Panel class="panel" id="1">Panel 1</Panel>
-        <PanelResizer class="panel-resizer" :id="resizer" size="10px" />
-        <Panel class="panel" :id="2">Panel 2</Panel>
+        <Panel class="panel" id="panel-1">Panel 1</Panel>
+        <PanelResizer class="panel-resizer" id="resizer" size="10px" />
+        <Panel class="panel" id="panel-2">Panel 2</Panel>
       </PanelGroup>
     `,
   }),
 };
 
-export const AutosaveCookie: Story = {
-  render: () => ({
+export const AutosaveCookie = {
+  render: (args: {
+    handle: { value: PanelGroupHandle | null };
+    snapshot: GroupMachineContextValue;
+  }) => ({
     components: { PanelGroup, Panel, PanelResizer },
+    setup() {
+      const handle = useTemplateRef<PanelGroupHandle>("handle");
+      onMounted(() => {
+        if (args.handle) {
+          args.handle.value = handle.value;
+        }
+      });
+      return { handle, snapshot: args.snapshot };
+    },
     template: dedent/*html*/ `
       <PanelGroup
+        ref="handle"
         autosaveId="autosave-cookie-vue"
         autosaveStrategy="cookie"
-        :style="{ height: '200px' }"
+        :style="{ height: '200px', width: '502px' }"
         class="panel-group"
+        :snapshot="snapshot"
       >
-        <Panel class="panel" id="1">Panel 1</Panel>
+        <Panel class="panel" id="panel-1">Panel 1</Panel>
         <PanelResizer class="panel-resizer" id="resizer1" size="10px" />
-        <Panel class="panel" id="2">Panel 2</Panel>
+        <Panel class="panel" id="panel-2">Panel 2</Panel>
       </PanelGroup>
     `,
   }),
 };
 
-export const AutosaveCollapsible: Story = {
-  render: () => ({
+export const AutosaveCollapsible = {
+  render: (args: {
+    handle: { value: PanelGroupHandle | null };
+    onCollapseChange: (collapsed: boolean) => void;
+  }) => ({
     components: { PanelGroup, Panel, PanelResizer },
+    setup() {
+      const handle = useTemplateRef<PanelGroupHandle>("handle");
+      onMounted(() => {
+        if (args.handle) {
+          args.handle.value = handle.value;
+        }
+      });
+      return { handle, onCollapseChange: args.onCollapseChange };
+    },
     template: dedent/*html*/ `
       <PanelGroup 
+        ref="handle"
         class="panel-group"
         autosaveId="autosave-example-2"
       >
-        <Panel class="panel" id="1" collapsible collapsedSize="100px" min="140px">
+        <Panel 
+          class="panel"
+          id="panel-1"
+          collapsible
+          collapsedSize="100px" 
+          min="140px"
+          @collapse-change="onCollapseChange"
+        >
           Collapsible
         </Panel>
         <PanelResizer class="panel-resizer" id="resizer" size="10px" />
-        <Panel class="panel" id="2">Panel 2</Panel>
+        <Panel class="panel" id="panel-2">Panel 2</Panel>
       </PanelGroup>
     `,
   }),
 };
 
-export const DynamicConstraints: Story = {
-  render: () => ({
+export const DynamicConstraints = {
+  render: (args: { handle: { value: PanelGroupHandle | null } }) => ({
     components: { PanelGroup, Panel, PanelResizer },
     setup() {
       const customOn = ref(false);
-      return { customOn };
+      const handle = useTemplateRef<PanelGroupHandle>("handle");
+      onMounted(() => {
+        if (args.handle) {
+          args.handle.value = handle.value;
+        }
+      });
+      return { customOn, handle };
     },
     template: dedent/*html*/ `
-      <PanelGroup class="panel-group">
+      <PanelGroup class="panel-group" ref="handle" :style="{ width: '1000px' }"> 
         <Panel default="100px" :min="customOn ? '200px' : '100px'" class="panel">
           <div>Panel 1</div>
         </Panel>
@@ -199,11 +260,21 @@ export const HorizontalLayout: Story = {
   }),
 };
 
-export const VerticalLayout: Story = {
-  render: () => ({
+export const VerticalLayout = {
+  render: (args: { handle: { value: PanelGroupHandle | null } }) => ({
     components: { PanelGroup, Panel, PanelResizer },
+    setup() {
+      const handle = useTemplateRef<PanelGroupHandle>("handle");
+      onMounted(() => {
+        if (args.handle) {
+          args.handle.value = handle.value;
+        }
+      });
+      return { handle };
+    },
     template: dedent/*html*/ `
       <PanelGroup
+        ref="handle"
         orientation="vertical"
         :style="{ height: '322px' }"
         class="panel-group"
@@ -391,17 +462,36 @@ export const WithOverflow: Story = {
   }),
 };
 
-export const Collapsible: Story = {
-  render: () => ({
+export const Collapsible = {
+  render: (args: {
+    handle: { value: PanelGroupHandle | null };
+    leftHandle?: { value: PanelHandle | null };
+    rightHandle?: { value: PanelHandle | null };
+  }) => ({
     components: { PanelGroup, Panel, PanelResizer },
     setup() {
       const collapsed = ref(true);
-      return { collapsed };
+      const handle = useTemplateRef<PanelGroupHandle>("handle");
+      const leftHandle = useTemplateRef<PanelHandle>("leftHandle");
+      const rightHandle = useTemplateRef<PanelHandle>("rightHandle");
+      onMounted(() => {
+        if (args.handle) {
+          args.handle.value = handle.value;
+        }
+        if (args.leftHandle) {
+          args.leftHandle.value = leftHandle.value;
+        }
+        if (args.rightHandle) {
+          args.rightHandle.value = rightHandle.value;
+        }
+      });
+      return { collapsed, handle, leftHandle, rightHandle };
     },
     template: dedent/*html*/ `
-      <PanelGroup class="panel-group">
+      <PanelGroup class="panel-group" ref="handle">
         <Panel
           min="100px"
+          ref="leftHandle"
           collapsible
           collapsedSize="60px"
           :style="{ border: '10px solid green', 'box-sizing': 'border-box' }"
@@ -416,6 +506,7 @@ export const Collapsible: Story = {
         <Panel
           min="100px"
           collapsible
+          ref="rightHandle"
           collapsedSize="60px"
           :collapseAnimation="{ easing: 'bounce', duration: 1000 }"
           :style="{ border: '10px solid blue', 'box-sizing': 'border-box' }"
@@ -580,15 +671,21 @@ export const ImperativePanel: Story = {
   }),
 };
 
-export const ConditionalPanel: Story = {
-  render: () => ({
+export const ConditionalPanel = {
+  render: (args: { handle: { value: PanelGroupHandle | null } }) => ({
     components: { PanelGroup, Panel, PanelResizer },
     setup() {
+      const handle = useTemplateRef<PanelGroupHandle>("handle");
       const isExpanded = ref(false);
-      return { isExpanded };
+      onMounted(() => {
+        if (args.handle) {
+          args.handle.value = handle.value;
+        }
+      });
+      return { handle, isExpanded };
     },
     template: dedent/*html*/ `
-      <PanelGroup class="panel-group">
+      <PanelGroup class="panel-group" ref="handle">
         <Panel id="panel-1" min="100px" collapsible collapsedSize="60px" class="panel">
           <div>1</div>
         </Panel>
