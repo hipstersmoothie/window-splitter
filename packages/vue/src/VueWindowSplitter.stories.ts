@@ -3,8 +3,9 @@ import dedent from "dedent";
 import PanelGroup from "./PanelGroup.vue";
 import Panel from "./Panel.vue";
 import PanelResizer from "./PanelResizer.vue";
-import { ref } from "vue";
+import { ref, useTemplateRef } from "vue";
 import { spring } from "framer-motion";
+import { PanelGroupHandle, PanelHandle } from "@window-splitter/interface";
 
 const meta: Meta<typeof PanelGroup> = {
   title: "WindowSplitter/Vue",
@@ -447,7 +448,109 @@ export const CustomCollapseAnimation: Story = {
   }),
 };
 
-// Imperative
+export const ImperativePanel: Story = {
+  render: () => ({
+    components: { PanelGroup, Panel, PanelResizer },
+    setup() {
+      const groupRef = useTemplateRef<PanelGroupHandle>("groupRef");
+      const panelRef = useTemplateRef<PanelHandle>("panelRef");
+
+      return {
+        groupRef,
+        panelRef,
+        alert: (...args: any[]) => alert(args.join(", ")),
+      };
+    },
+    template: dedent/*html*/ `
+      <PanelGroup class="panel-group" ref="groupRef">
+        <Panel
+          ref="panelRef"
+          min="100px"
+          class="panel"
+          collapsible
+          collapsedSize="60px"
+        >
+          1
+        </Panel>
+        <PanelResizer class="panel-resizer" size="10px" />
+        <Panel min="100px" class="panel">2</Panel>
+        <PanelResizer class="panel-resizer" size="10px" />
+        <Panel
+          min="100px"
+          collapsible
+          collapsedSize="60px"
+          defaultCollapsed
+          class="panel"
+        >
+          3
+        </Panel>
+      </PanelGroup>
+
+      <div>
+        <button
+          type="button"
+          @click="() => alert('Sizes:', groupRef?.getPixelSizes())"
+        >
+          Get pixel sizes
+        </button>
+        <button
+          type="button"
+          @click="() => alert('Sizes:', groupRef?.getPercentageSizes())"
+        >
+          Get percentage sizes
+        </button>
+        <button
+          type="button"
+          @click="() => groupRef?.setSizes(['200px', '10px', '50%', '10px', '150px'])"
+        >
+          Override sizes
+        </button>
+      </div>
+
+      <div>
+        <button type="button" @click="() => panelRef?.collapse()">
+          Collapse
+        </button>
+        <button
+          type="button"
+          @click="() => alert('Collapsed: ' + panelRef?.isCollapsed())"
+        >
+          Is Collapsed?
+        </button>
+        <button type="button" @click="() => panelRef?.expand()">
+          Expand
+        </button>
+        <button
+          type="button"
+          @click="() => alert('Expanded: ' + panelRef?.isExpanded())"
+        >
+          Is Expanded?
+        </button>
+        <button type="button" @click="() => alert('Id: ' + panelRef?.getId())">
+          Get Id
+        </button>
+        <button
+          type="button"
+          @click="() => alert('Size: ' + panelRef?.getPixelSize())"
+        >
+          Get Pixel Size
+        </button>
+        <button
+          type="button"
+          @click="() => alert('Percentage: ' + panelRef?.getPercentageSize())"
+        >
+          Get Percentage Size
+        </button>
+        <button type="button" @click="() => panelRef?.setSize('30px')">
+          Set size to 100px
+        </button>
+        <button type="button" @click="() => panelRef?.setSize('50%')">
+          Set size to 50%
+        </button>
+      </div>
+    `,
+  }),
+};
 
 export const ConditionalPanel: Story = {
   render: () => ({

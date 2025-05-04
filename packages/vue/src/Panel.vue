@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import {
   getPanelDomAttributes,
+  PanelHandle,
   SharedPanelProps,
 } from "@window-splitter/interface";
 import {
+  getPanelPercentageSize,
+  getPanelPixelSize,
   GroupMachineContextValue,
   initializePanel,
   isPanelData,
@@ -104,6 +107,26 @@ onMounted(() => {
 
 onUnmounted(() => {
   requestAnimationFrame(() => send?.({ type: "unregisterPanel", id: panelId }));
+});
+
+defineExpose<PanelHandle>({
+  getId: () => panelId,
+  collapse: () => {
+    if (!panelData.value?.collapsible) return;
+    send?.({ type: "collapsePanel", panelId: panelId, controlled: true });
+  },
+  isCollapsed: () =>
+    Boolean(panelData.value?.collapsible && panelData.value?.collapsed),
+  expand: () => {
+    if (!panelData.value?.collapsible) return;
+    send?.({ type: "expandPanel", panelId: panelId, controlled: true });
+  },
+  isExpanded: () =>
+    Boolean(panelData.value?.collapsible && !panelData.value?.collapsed),
+  getPixelSize: () => getPanelPixelSize(state!.value, panelId),
+  getPercentageSize: () => getPanelPercentageSize(state!.value, panelId),
+  setSize: (size) =>
+    send?.({ type: "setPanelPixelSize", panelId: panelId, size }),
 });
 
 const isControlledCollapse = computed(

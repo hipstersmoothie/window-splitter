@@ -15,7 +15,15 @@ import {
   PanelHandleData,
   SendFn,
 } from "@window-splitter/state";
-import { computed, HTMLAttributes, inject, onMounted, onUnmounted, Ref, useId } from "vue";
+import {
+  computed,
+  HTMLAttributes,
+  inject,
+  onMounted,
+  onUnmounted,
+  Ref,
+  useId,
+} from "vue";
 
 type PanelResizerProps = SharedPanelResizerProps & {
   id?: string;

@@ -1,13 +1,18 @@
 <script setup lang="ts">
 import {
   measureGroupChildren,
+  PanelGroupHandle,
   SharedPanelGroupProps,
 } from "@window-splitter/interface";
 import {
   buildTemplate,
+  getPanelGroupPercentageSizes,
+  getPanelGroupPixelSizes,
   groupMachine,
   GroupMachineContextValue,
+  isPanelData,
   prepareSnapshot,
+  Unit,
 } from "@window-splitter/state";
 import {
   useId,
@@ -15,7 +20,6 @@ import {
   provide,
   ref,
   computed,
-  reactive,
   onMounted,
   watchEffect,
 } from "vue";
@@ -116,11 +120,33 @@ onMounted(() => {
   send({ type: "unlockGroup" });
   return () => send({ type: "lockGroup" });
 });
+
+defineExpose<PanelGroupHandle>({
+  getId: () => groupId,
+  getPixelSizes: () => getPanelGroupPixelSizes(context.value),
+  getPercentageSizes: () => getPanelGroupPercentageSizes(context.value),
+  getTemplate: () => buildTemplate(context.value),
+  getState: () => (machineState.current === "idle" ? "idle" : "dragging"),
+  setSizes: (updates) => {
+    for (let index = 0; index < updates.length; index++) {
+      const item = context.value?.items[index];
+      const update = updates[index];
+
+      if (item && isPanelData(item) && update) {
+        send({
+          type: "setPanelPixelSize",
+          panelId: item.id,
+          size: update,
+        });
+      }
+    }
+  },
+});
 </script>
 
 <template>
   <div
-    v-bind="$attrs"
+    v-bind="attrs"
     ref="elementRef"
     data-panel-group-wrapper
     :id="groupId"
