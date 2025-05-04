@@ -1,3 +1,16 @@
+# v0.8.5 (Sun May 04 2025)
+
+#### 🐛 Bug Fix
+
+- Vue Adapter [#56](https://github.com/hipstersmoothie/window-splitter/pull/56) ([@hipstersmoothie](https://github.com/hipstersmoothie))
+- catalogs ([@hipstersmoothie](https://github.com/hipstersmoothie))
+
+#### Authors: 1
+
+- Andrew Lisowski ([@hipstersmoothie](https://github.com/hipstersmoothie))
+
+---
+
 # v0.8.3 (Tue Apr 29 2025)
 
 #### ⚠️ Pushed to `main`

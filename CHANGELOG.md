@@ -1,3 +1,23 @@
+# v0.8.5 (Sun May 04 2025)
+
+#### 🐛 Bug Fix
+
+- `@window-splitter/interface`, `@window-splitter/react`, `@window-splitter/solid`, `@window-splitter/state`, `@window-splitter/svelte`, `@window-splitter/vue`
+  - Vue Adapter [#56](https://github.com/hipstersmoothie/window-splitter/pull/56) ([@hipstersmoothie](https://github.com/hipstersmoothie))
+
+#### ⚠️ Pushed to `main`
+
+- `@window-splitter/vue`
+  - add publish info ([@hipstersmoothie](https://github.com/hipstersmoothie))
+- `@window-splitter/svelte`
+  - add link ([@hipstersmoothie](https://github.com/hipstersmoothie))
+
+#### Authors: 1
+
+- Andrew Lisowski ([@hipstersmoothie](https://github.com/hipstersmoothie))
+
+---
+
 # v0.8.4 (Sat May 03 2025)
 
 #### 🐛 Bug Fix
