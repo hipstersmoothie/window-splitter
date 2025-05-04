@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/vue3";
-import dedent from "dedent";
+import { dedent } from "ts-dedent";
 import PanelGroup from "./PanelGroup.vue";
 import Panel from "./Panel.vue";
 import PanelResizer from "./PanelResizer.vue";
@@ -486,7 +486,7 @@ export const ImperativePanel: Story = {
       return {
         groupRef,
         panelRef,
-        alert: (...args: any[]) => alert(args.join(", ")),
+        alert: (...args: string[]) => alert(args.join(", ")),
       };
     },
     template: dedent/*html*/ `

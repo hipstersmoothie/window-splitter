@@ -12,7 +12,6 @@ import {
   GroupMachineContextValue,
   isPanelData,
   prepareSnapshot,
-  Unit,
 } from "@window-splitter/state";
 import {
   useId,
@@ -147,11 +146,11 @@ defineExpose<PanelGroupHandle>({
 <template>
   <div
     v-bind="attrs"
+    :id="groupId"
     ref="elementRef"
     data-panel-group-wrapper
-    :id="groupId"
     :style="gridStyle"
   >
-    <slot></slot>
+    <slot />
   </div>
 </template>

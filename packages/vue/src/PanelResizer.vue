@@ -27,9 +27,7 @@ import {
   watchEffect,
 } from "vue";
 
-type PanelResizerProps = SharedPanelResizerProps & {
-  id?: string;
-} & /* @vue-ignore */ HTMLAttributes;
+type PanelResizerProps = SharedPanelResizerProps & HTMLAttributes;
 
 const {
   size = "0px",
@@ -88,7 +86,7 @@ onMounted(() => {
 const contraintChanged = computed(
   () =>
     !dynamicPanelHandleIsMounting &&
-    haveConstraintsChangedForPanelHandle(initHandle(), handleData.value)
+    haveConstraintsChangedForPanelHandle(initHandle(), handleData.value),
 );
 
 watchEffect(() => {
@@ -184,7 +182,11 @@ const combinedProps = computed(() => {
 </script>
 
 <template>
-  <div v-bind="combinedProps" data-panel-resizer :tabindex="disabled ? -1 : 0">
-    <slot></slot>
+  <div 
+    v-bind="combinedProps"
+    data-panel-resizer
+    :tabindex="disabled ? -1 : 0"
+  >
+    <slot />
   </div>
 </template>

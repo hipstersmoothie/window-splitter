@@ -25,9 +25,7 @@ import {
   watchEffect,
 } from "vue";
 
-type PanelProps = SharedPanelProps<boolean> & {
-  id?: string;
-} & /* @vue-ignore */ HTMLAttributes;
+type PanelProps = SharedPanelProps<boolean> & HTMLAttributes;
 const {
   min,
   max,
@@ -55,7 +53,7 @@ const initPanel = (): PanelData => {
     min,
     max,
     collapsible,
-    collapsed: collapsed ,
+    collapsed: collapsed,
     collapsedSize,
     onCollapseChange: onCollapseChange
       ? { current: onCollapseChange }
@@ -81,7 +79,9 @@ if (panelData.value) {
     type: "rebindPanelCallbacks",
     data: {
       id: panelId,
-      onCollapseChange: onCollapseChange ? { current: onCollapseChange } : undefined,
+      onCollapseChange: onCollapseChange
+        ? { current: onCollapseChange }
+        : undefined,
       onResize: onResize ? { current: onResize } : undefined,
     },
   });
@@ -116,7 +116,7 @@ onMounted(() => {
 const contraintChanged = computed(
   () =>
     !dynamicPanelIsMounting &&
-    haveConstraintsChangedForPanel(initPanel(), panelData.value)
+    haveConstraintsChangedForPanel(initPanel(), panelData.value),
 );
 
 watchEffect(() => {
@@ -183,5 +183,7 @@ const computedProps = computed(() => {
 </script>
 
 <template>
-  <div v-bind="computedProps"><slot></slot></div>
+  <div v-bind="computedProps">
+    <slot />
+  </div>
 </template>
