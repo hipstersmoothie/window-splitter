@@ -5,6 +5,7 @@ import {
   SharedPanelResizerProps,
 } from "@window-splitter/interface";
 import {
+  getCollapsiblePanelForHandleId,
   getCursor,
   getGroupSize,
   GroupMachineContextValue,
@@ -16,8 +17,9 @@ import {
 } from "@window-splitter/state";
 import { computed, HTMLAttributes, inject, Ref, useId } from "vue";
 
-type PanelResizerProps = SharedPanelResizerProps &
-  /* @vue-ignore */ HTMLAttributes;
+type PanelResizerProps = SharedPanelResizerProps & {
+  id?: string;
+} & /* @vue-ignore */ HTMLAttributes;
 
 const {
   size = "0px",
@@ -66,10 +68,26 @@ const { moveProps } = move({
   },
 });
 
+const onKeyDown = (e: KeyboardEvent) => {
+  if (!state?.value) return;
+
+  try {
+    const collapsiblePanel = getCollapsiblePanelForHandleId(state?.value, id);
+
+    if (e.key === "Enter" && collapsiblePanel) {
+      if (collapsiblePanel.collapsed) {
+        send?.({ type: "expandPanel", panelId: collapsiblePanel.id });
+      } else {
+        send?.({ type: "collapsePanel", panelId: collapsiblePanel.id });
+      }
+    }
+  } catch {
+    //
+  }
+};
+
 const combinedProps = computed(() => {
-  const handleIndex = state?.value?.items.findIndex(
-    (item) => item.id === id,
-  );
+  const handleIndex = state?.value?.items.findIndex((item) => item.id === id);
 
   if (!handleIndex) return { id };
 
@@ -94,7 +112,12 @@ const combinedProps = computed(() => {
       groupSize: getGroupSize(state.value),
     }),
     onpointerdown: disabled ? undefined : moveProps.onPointerDown,
-    onkeydown: disabled ? undefined : moveProps.onKeyDown,
+    onkeydown: disabled
+      ? undefined
+      : (e: KeyboardEvent) => {
+          moveProps.onKeyDown(e);
+          onKeyDown(e);
+        },
     style: {
       cursor: state?.value ? getCursor(state.value) : undefined,
       width:

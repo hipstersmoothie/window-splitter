@@ -25,11 +25,26 @@ type PanelGroupProps = SharedPanelGroupProps & /* @vue-ignore */ HTMLAttributes;
 const {
   orientation = "horizontal",
   autosaveStrategy = "localStorage",
-  snapshot,
+  snapshot: snapshotProp,
   autosaveId,
   id,
   ...attrs
 } = defineProps<PanelGroupProps>();
+
+let snapshot = snapshotProp;
+
+if (
+  !snapshot &&
+  typeof window !== "undefined" &&
+  autosaveId &&
+  autosaveStrategy === "localStorage"
+) {
+  const localSnapshot = localStorage.getItem(autosaveId);
+
+  if (localSnapshot) {
+    snapshot = JSON.parse(localSnapshot) as GroupMachineContextValue;
+  }
+}
 
 const groupId = autosaveId || id || useId();
 const [initialState, send, machineState] = groupMachine(
@@ -83,10 +98,10 @@ const childIds = computed(() =>
 watchEffect(() => {
   // re-render when the childIds change
   // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-  childIds.value
+  childIds.value;
 
-  return measureGroupChildren(groupId, (childrenSizes) => 
-    send({ type: "setActualItemsSize", childrenSizes })
+  return measureGroupChildren(groupId, (childrenSizes) =>
+    send({ type: "setActualItemsSize", childrenSizes }),
   );
 });
 </script>

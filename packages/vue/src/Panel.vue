@@ -12,7 +12,9 @@ import {
 } from "@window-splitter/state";
 import { computed, HTMLAttributes, inject, Ref, useId } from "vue";
 
-type PanelProps = SharedPanelProps<boolean> & /* @vue-ignore */ HTMLAttributes;
+type PanelProps = SharedPanelProps<boolean> & {
+  id?: string;
+} & /* @vue-ignore */ HTMLAttributes;
 const {
   min,
   max,
@@ -27,7 +29,7 @@ const {
   default: defaultSize,
   isStaticAtRest,
   ...attrs
-} = defineProps<PanelProps>();
+} = withDefaults(defineProps<PanelProps>(), { collapsed: undefined });
 
 const panelId = id || useId();
 const send = inject<SendFn>("send");
@@ -41,9 +43,11 @@ const initPanel = (): PanelData =>
     collapsible,
     collapsed,
     collapsedSize,
-    onCollapseChange: { current: onCollapseChange },
+    onCollapseChange: onCollapseChange
+      ? { current: onCollapseChange }
+      : undefined,
     collapseAnimation,
-    onResize: { current: onResize },
+    onResize: onResize ? { current: onResize } : undefined,
     defaultCollapsed,
     default: defaultSize,
     isStaticAtRest,
