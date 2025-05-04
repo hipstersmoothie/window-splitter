@@ -107,8 +107,8 @@
     },
   });
 
-  const itemIndex = 1;
   const panelAttributes = () => {
+    const itemIndex = state.items.findIndex((item) => item.id === id);
     const panelBeforeHandle = state?.items[itemIndex - 1];
 
     if (!panelBeforeHandle || !isPanelData(panelBeforeHandle)) return { id };
