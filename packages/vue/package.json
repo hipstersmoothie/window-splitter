@@ -3,9 +3,8 @@
   "version": "1.0.0",
   "main": "./dist/commonjs/index.js",
   "scripts": {
-    "build": "tshy",
+    "build": "vite build",
     "test": "CI=true vitest",
-    "dev": "tshy -w",
     "lint": "eslint .",
     "stats": "rsbuild --mode production build",
     "storybook": "storybook dev -p 6006",
@@ -30,7 +29,6 @@
     "storybook": "^8.6.12",
     "tiny-cookie": "^2.5.1",
     "ts-dedent": "^2.2.0",
-    "tshy": "catalog:",
     "typescript": "catalog:",
     "typescript-eslint": "^8.1.0",
     "vite": "^6.3.3",

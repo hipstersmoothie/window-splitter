@@ -25,7 +25,8 @@ import {
 } from "vue";
 
 // eslint-disable-next-line vue/require-default-prop
-type PanelProps = SharedPanelProps<boolean> & { id?: string };
+export type PanelProps = SharedPanelProps<boolean> & { id?: string };
+export { PanelHandle } from "@window-splitter/interface";
 const props = withDefaults(defineProps<PanelProps>(), { collapsed: undefined });
 
 const {

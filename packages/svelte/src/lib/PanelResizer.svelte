@@ -20,7 +20,7 @@
   } from "@window-splitter/interface";
   import type { HTMLAttributes } from "svelte/elements";
 
-  interface Props
+  export interface PanelResizerProps
     extends SharedPanelResizerProps,
       HTMLAttributes<HTMLDivElement> {}
 
@@ -32,7 +32,7 @@
     onDragEnd,
     disabled,
     ...attrs
-  }: Props = $props();
+  }: PanelResizerProps = $props();
 
   const defaultId = $props.id();
   const id = _id || defaultId;

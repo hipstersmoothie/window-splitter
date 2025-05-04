@@ -17,7 +17,8 @@ import {
 import { useId, provide, ref, computed, onMounted, watchEffect } from "vue";
 
 // eslint-disable-next-line vue/require-default-prop
-type PanelGroupProps = SharedPanelGroupProps & { id?: string   };
+export type PanelGroupProps = SharedPanelGroupProps & { id?: string };
+export { PanelGroupHandle } from "@window-splitter/interface";
 
 const {
   orientation = "horizontal",

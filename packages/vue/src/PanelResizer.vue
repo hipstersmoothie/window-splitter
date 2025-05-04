@@ -27,7 +27,7 @@ import {
 } from "vue";
 
 // eslint-disable-next-line vue/require-default-prop
-type PanelResizerProps = SharedPanelResizerProps & { id?: string };
+export type PanelResizerProps = SharedPanelResizerProps & { id?: string };
 
 const {
   size = "0px",
