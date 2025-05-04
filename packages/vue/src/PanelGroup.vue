@@ -14,7 +14,15 @@ import {
   prepareItems,
   prepareSnapshot,
 } from "@window-splitter/state";
-import { useId, provide, ref, computed, onMounted, watchEffect } from "vue";
+import {
+  useId,
+  provide,
+  ref,
+  computed,
+  onMounted,
+  watchEffect,
+  onWatcherCleanup,
+} from "vue";
 
 // eslint-disable-next-line vue/require-default-prop
 type PanelGroupProps = SharedPanelGroupProps & { id?: string };
@@ -99,14 +107,18 @@ const childIds = computed(() =>
   context.value?.items.map((i) => i.id).join(","),
 );
 
-watchEffect(() => {
-  // re-render when the childIds change
-  // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-  childIds.value;
+onMounted(() => {
+  watchEffect(() => {
+    // re-render when the childIds change
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+    childIds.value
 
-  return measureGroupChildren(groupId, (childrenSizes) =>
-    send({ type: "setActualItemsSize", childrenSizes }),
-  );
+    const cleanup = measureGroupChildren(groupId, (childrenSizes) => {
+      send({ type: "setActualItemsSize", childrenSizes });
+    });
+
+    onWatcherCleanup(cleanup);
+  });
 });
 
 onMounted(() => {
