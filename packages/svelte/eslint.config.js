@@ -6,6 +6,7 @@ import svelteConfig from "./svelte.config.js";
 
 export default [
   ...base,
+  { ignores: [".svelte-kit/**"] },
   ...svelte.configs["flat/recommended"],
   {
     files: ["**/*.svelte", "**/*.svelte.ts", "**/*.svelte.js"],

@@ -32,16 +32,16 @@
     "@internal/eslint-config": "workspace:*",
     "@testing-library/react": "^16.0.0",
     "@types/big.js": "^6.2.2",
-    "@vitest/browser": "^3.1.2",
-    "@vitest/coverage-istanbul": "^3.1.2",
-    "eslint": "^9.9.0",
+    "@vitest/browser": "catalog:",
+    "@vitest/coverage-istanbul": "catalog:",
+    "eslint": "catalog:",
     "framer-motion": "^11.3.28",
     "jsdom": "^24.1.1",
-    "playwright": "^1.46.0",
+    "playwright": "catalog:",
     "tiny-cookie": "^2.5.1",
-    "tshy": "^3.0.2",
-    "typescript": "^5.5.4",
-    "vitest": "^3.1.2"
+    "tshy": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   },
   "dependencies": {
     "big.js": "^6.2.1"

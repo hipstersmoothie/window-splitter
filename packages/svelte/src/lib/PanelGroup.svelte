@@ -16,7 +16,7 @@
 
   export { PanelGroupHandle } from "@window-splitter/interface";
 
-  interface Props
+  export interface PanelGroupProps
     extends SharedPanelGroupProps,
       HTMLAttributes<HTMLDivElement> {
     id: string;
@@ -29,7 +29,7 @@
     autosaveId,
     snapshot,
     ...attrs
-  }: Props = $props();
+  }: PanelGroupProps = $props();
 
   if (
     !snapshot &&
@@ -98,7 +98,8 @@
     // re-render when the childIds change
     // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     childIds;
-    measureGroupChildren(id, (childrenSizes) => {
+
+    return measureGroupChildren(id, (childrenSizes) => {
       send({ type: "setActualItemsSize", childrenSizes });
     });
   });

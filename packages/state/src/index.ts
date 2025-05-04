@@ -1249,7 +1249,8 @@ function updateLayout(
     if (
       panelAfter.onCollapseChange?.current &&
       panelAfter.collapseIsControlled &&
-      !dragEvent.controlled
+      !dragEvent.controlled &&
+      !dragEvent.isVirtual
     ) {
       panelAfter.onCollapseChange.current(false);
       return { dragOvershoot: newDragOvershoot };
@@ -1311,7 +1312,8 @@ function updateLayout(
     if (
       panelBefore.onCollapseChange?.current &&
       panelBefore.collapseIsControlled &&
-      !dragEvent.controlled
+      !dragEvent.controlled &&
+      !dragEvent.isVirtual
     ) {
       panelBefore.onCollapseChange.current(true);
       return { dragOvershoot: newDragOvershoot };

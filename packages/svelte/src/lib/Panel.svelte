@@ -19,7 +19,7 @@
 
   export { PanelHandle } from "@window-splitter/interface";
 
-  interface Props
+  export interface PanelProps
     extends SharedPanelProps<boolean>,
       HTMLAttributes<HTMLDivElement> {}
 
@@ -38,7 +38,7 @@
     default: defaultSize,
     isStaticAtRest,
     ...attrs
-  }: Props = $props();
+  }: PanelProps = $props();
 
   const defaultId = $props.id();
   const id = _id || defaultId;
