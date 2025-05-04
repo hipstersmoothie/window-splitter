@@ -1,0 +1,34 @@
+{
+  "name": "vue",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@storybook/addon-essentials": "^8.6.12",
+    "@storybook/addon-interactions": "^8.6.12",
+    "@storybook/addon-onboarding": "^8.6.12",
+    "@storybook/blocks": "^8.6.12",
+    "@storybook/test": "^8.6.12",
+    "@storybook/vue3": "^8.6.12",
+    "@storybook/vue3-vite": "^8.6.12",
+    "@vitejs/plugin-vue": "^5.2.3",
+    "storybook": "^8.6.12",
+    "vite": "^6.3.3",
+    "vue": "^3.5.13"
+  },
+  "dependencies": {
+    "@window-splitter/interface": "workspace:*",
+    "@window-splitter/state": "workspace:*"
+  },
+  "peerDependencies": {
+    "vue": ">=3.x"
+  }
+}
