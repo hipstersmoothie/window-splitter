@@ -111,7 +111,7 @@ onMounted(() => {
   watchEffect(() => {
     // re-render when the childIds change
     // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-    childIds.value
+    childIds.value;
 
     const cleanup = measureGroupChildren(groupId, (childrenSizes) => {
       send({ type: "setActualItemsSize", childrenSizes });

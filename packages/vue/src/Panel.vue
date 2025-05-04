@@ -28,7 +28,6 @@ import {
 type PanelProps = SharedPanelProps<boolean> & { id?: string };
 
 const props = withDefaults(defineProps<PanelProps>(), { collapsed: undefined });
-
 const {
   min: _min,
   max: _max,
@@ -50,8 +49,8 @@ const send = inject<SendFn>("send");
 const state = inject<Ref<GroupMachineContextValue>>("state");
 const isPrerender = inject<Ref<boolean>>("isPrerender");
 
-const initPanel = (): PanelData => {
-  return initializePanel({
+const initPanel = (): PanelData =>
+  initializePanel({
     id: panelId,
     min: props.min,
     max: props.max,
@@ -67,7 +66,6 @@ const initPanel = (): PanelData => {
     default: defaultSize,
     isStaticAtRest,
   });
-};
 
 const panelData = computed(() => {
   const item = state?.value?.items.find((i) => i.id === panelId);
@@ -162,7 +160,6 @@ watchEffect(() => {
 
   requestAnimationFrame(() => {
     if (!isControlledCollapse.value) return;
-
     if (props.collapsed) {
       send?.({ type: "collapsePanel", panelId: panelId, controlled: true });
     } else {

@@ -21,5 +21,5 @@ export default typescriptEslint.config(
       "vue/multi-word-component-names": "off",
       "vue/max-attributes-per-line": "off",
     },
-  }
+  },
 );
