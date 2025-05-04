@@ -1,25 +1,18 @@
 import vue from "@vitejs/plugin-vue";
+import dts from "vite-plugin-dts";
+import { defineConfig } from "vite";
 
-export default {
-  plugins: [vue()],
+export default defineConfig({
+  plugins: [vue(), dts()],
   build: {
-    outDir: "es",
-    minify: false,
-    rollupOptions: {
-      external: ["vue"],
-      input: ["./src/index.ts"],
-      output: {
-        globals: {
-          vue: "Vue",
-        },
-        dir: "dist",
-      },
-    },
+    sourcemap: true,
     lib: {
       entry: "./src/index.ts",
-      name: "window-splitter-vue",
-      fileName: "window-splitter-vue",
-      formats: ["es", "umd", "cjs"],
+      formats: ["es", "cjs"],
+      fileName: "index",
+    },
+    rollupOptions: {
+      external: ["vue"],
     },
   },
-};
+});
