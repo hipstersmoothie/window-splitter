@@ -15,7 +15,7 @@ import {
   PanelHandleData,
   SendFn,
 } from "@window-splitter/state";
-import { computed, HTMLAttributes, inject, Ref, useId } from "vue";
+import { computed, HTMLAttributes, inject, onMounted, onUnmounted, Ref, useId } from "vue";
 
 type PanelResizerProps = SharedPanelResizerProps & {
   id?: string;
@@ -36,6 +36,7 @@ const id = defaultId;
 
 const send = inject<SendFn>("send");
 const state = inject<Ref<GroupMachineContextValue>>("state");
+const isPrerender = inject<Ref<boolean>>("isPrerender");
 
 const initHandle = () => initializePanelHandleData({ size, id });
 const handleData = () => {
@@ -44,11 +45,39 @@ const handleData = () => {
   return item;
 };
 
-if (handleData()) {
-  // TODO
-} else {
-  send?.({ type: "registerPanelHandle", data: initHandle() });
+let dynamicPanelHandleIsMounting = false;
+
+if (!handleData()) {
+  if (isPrerender?.value) {
+    send?.({ type: "registerPanelHandle", data: initHandle() });
+  } else {
+    dynamicPanelHandleIsMounting = true;
+  }
 }
+
+onMounted(() => {
+  const groupId = state?.value?.groupId;
+  if (!groupId || !dynamicPanelHandleIsMounting) return;
+
+  const groupElement = document.getElementById(state?.value?.groupId);
+  if (!groupElement) return;
+
+  const handleEl = document.getElementById(id);
+  if (!handleEl) return;
+
+  const order = Array.from(groupElement.children).indexOf(handleEl);
+  if (typeof order !== "number") return;
+
+  send?.({
+    type: "registerPanelHandle",
+    data: { ...initHandle(), order },
+  });
+  dynamicPanelHandleIsMounting = false;
+});
+
+onUnmounted(() => {
+  requestAnimationFrame(() => send?.({ type: "unregisterPanelHandle", id }));
+});
 
 const { moveProps } = move({
   onMoveStart: () => {

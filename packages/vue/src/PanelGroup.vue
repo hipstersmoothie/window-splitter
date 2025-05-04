@@ -46,6 +46,9 @@ if (
   }
 }
 
+const isPrerender = ref(true);
+provide("isPrerender", isPrerender);
+
 const groupId = autosaveId || id || useId();
 const [initialState, send, machineState] = groupMachine(
   {
@@ -58,6 +61,10 @@ const [initialState, send, machineState] = groupMachine(
     context.value = { ...s };
   },
 );
+
+onMounted(() => {
+  isPrerender.value = false;
+});
 
 const context = ref(initialState);
 const gridStyle = computed(() => {
@@ -103,6 +110,11 @@ watchEffect(() => {
   return measureGroupChildren(groupId, (childrenSizes) =>
     send({ type: "setActualItemsSize", childrenSizes }),
   );
+});
+
+onMounted(() => {
+  send({ type: "unlockGroup" });
+  return () => send({ type: "lockGroup" });
 });
 </script>
 

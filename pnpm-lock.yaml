@@ -558,6 +558,9 @@ importers:
       dedent:
         specifier: ^1.6.0
         version: 1.6.0
+      framer-motion:
+        specifier: ^11.3.28
+        version: 11.3.28(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       storybook:
         specifier: ^8.6.12
         version: 8.6.12(prettier@3.3.3)
