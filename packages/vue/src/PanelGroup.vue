@@ -16,6 +16,7 @@ import {
 } from "@window-splitter/state";
 import { useId, provide, ref, computed, onMounted, watchEffect } from "vue";
 
+// eslint-disable-next-line vue/require-default-prop
 type PanelGroupProps = SharedPanelGroupProps & { id?: string   };
 
 const {

@@ -1,7 +1,7 @@
 import "../.storybook/preview.css";
 
 import { test, expect, describe, vi } from "vitest";
-import { cleanup, getByText, render, waitFor } from "@testing-library/vue";
+import { cleanup, getByText, waitFor } from "@testing-library/vue";
 import { fireEvent } from "@testing-library/dom";
 import { composeStories } from "@storybook/vue3";
 import { createTestUtils, dragHandle } from "@window-splitter/interface/test";

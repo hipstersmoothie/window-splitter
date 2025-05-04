@@ -26,6 +26,7 @@ import {
   watchEffect,
 } from "vue";
 
+// eslint-disable-next-line vue/require-default-prop
 type PanelResizerProps = SharedPanelResizerProps & { id?: string };
 
 const {
@@ -116,19 +117,15 @@ const { moveProps } = move({
 });
 
 const onKeyDown = (e: KeyboardEvent) => {
-  console.log("onKeyDown", e.key);
   if (!state?.value) return;
-
 
   try {
     const collapsiblePanel = getCollapsiblePanelForHandleId(state?.value, id);
 
     if (e.key === "Enter" && collapsiblePanel) {
       if (collapsiblePanel.collapsed) {
-        console.log("expandPanel", collapsiblePanel.id);
         send?.({ type: "expandPanel", panelId: collapsiblePanel.id });
       } else {
-        console.log("collapsePanel", collapsiblePanel.id);
         send?.({ type: "collapsePanel", panelId: collapsiblePanel.id });
       }
     }

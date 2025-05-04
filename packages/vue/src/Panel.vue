@@ -24,6 +24,7 @@ import {
   watchEffect,
 } from "vue";
 
+// eslint-disable-next-line vue/require-default-prop
 type PanelProps = SharedPanelProps<boolean> & { id?: string };
 const props = withDefaults(defineProps<PanelProps>(), { collapsed: undefined });
 
@@ -155,6 +156,7 @@ const isControlledCollapse = computed(
 
 watchEffect(() => {
   // Subscribe to the collapsed prop (doesn't work in rAF)
+  // eslint-disable-next-line @typescript-eslint/no-unused-expressions
   props.collapsed
   
   requestAnimationFrame(() => {
