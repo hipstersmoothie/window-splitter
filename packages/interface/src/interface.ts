@@ -103,13 +103,18 @@ export function getPanelDomAttributes({
   collapsible: boolean | undefined;
   collapsed: boolean | undefined;
 }) {
-  return {
+  const attrs: Record<string, string | boolean | undefined> = {
     id: id,
     "data-splitter-group-id": groupId,
     "data-splitter-type": "panel",
     "data-splitter-id": id,
-    "data-collapsed": collapsible ? collapsed : undefined,
   };
+
+  if (collapsible) {
+    attrs["data-collapsed"] = collapsed;
+  }
+
+  return attrs;
 }
 
 export interface SharedPanelResizerProps

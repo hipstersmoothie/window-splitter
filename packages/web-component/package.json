@@ -1,0 +1,28 @@
+{
+  "name": "web-component",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@storybook/addon-essentials": "^8.6.12",
+    "@storybook/blocks": "^8.6.12",
+    "@storybook/test": "^8.6.12",
+    "@storybook/web-components": "^8.6.12",
+    "@storybook/web-components-vite": "^8.6.12",
+    "lit": "^3.3.0",
+    "storybook": "^8.6.12"
+  },
+  "dependencies": {
+    "@window-splitter/interface": "workspace:*",
+    "@window-splitter/state": "workspace:*",
+    "wc-context": "^1.0.0"
+  }
+}
