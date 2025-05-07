@@ -18,18 +18,16 @@ import {
   OnResizeCallback,
 } from "@window-splitter/state";
 import { html, LitElement, PropertyValues } from "lit";
-import { property, state } from "lit/decorators.js";
-
+import { property } from "lit/decorators.js";
 import {
   getPanelDomAttributes,
   getPanelResizerDomAttributes,
-  measureGroupChildren,
   move,
-  SharedPanelGroupProps,
   SharedPanelProps,
 } from "@window-splitter/interface";
 import { consume, createContext, provide } from "@lit/context";
 
+const isPrerenderContext = createContext<boolean>("isPrerender");
 const sendContext = createContext<SendFn>("send");
 const contextContext = createContext<GroupMachineContextValue>("context");
 
@@ -63,15 +61,7 @@ function isBooleanPropValue(value: string | undefined) {
   return undefined;
 }
 
-createContext("send");
-createContext("context");
-
 export class WindowSplitter extends LitElement {
-  static properties = {
-    send: { type: Function, providedContext: "send" },
-    context: { type: Object, providedContext: "context" },
-  };
-
   private observer: ResizeObserver;
   private cleanupChildrenObserver: () => void;
   private groupId: string;
@@ -80,6 +70,8 @@ export class WindowSplitter extends LitElement {
   private context: GroupMachineContextValue;
   @provide({ context: sendContext })
   private send: SendFn;
+  @provide({ context: isPrerenderContext })
+  private isPrerender = true;
 
   constructor() {
     super();
@@ -137,8 +129,8 @@ export class WindowSplitter extends LitElement {
       if (!entry) return;
       if (entry.contentRect.width > 0 && entry.contentRect.height > 0) {
         this.send({ type: "setSize", size: entry.contentRect });
-        console.log("setSize", entry.contentRect);
         this.measureChildren();
+        this.isPrerender = false;
       }
     });
 
@@ -179,6 +171,8 @@ export class WindowSplitter extends LitElement {
   }
 
   firstUpdated() {
+    this.send({ type: "unlockGroup" });
+
     if (this.observer) {
       this.observer.disconnect();
     }
@@ -191,6 +185,7 @@ export class WindowSplitter extends LitElement {
   disconnectedCallback() {
     this.observer?.disconnect();
     this.cleanupChildrenObserver?.();
+    this.send({ type: "lockGroup" });
   }
 
   render() {
@@ -225,6 +220,10 @@ export class Panel extends LitElement {
   @consume({ context: sendContext })
   @property({ attribute: false })
   public send: SendFn;
+
+  @consume({ context: isPrerenderContext })
+  @property({ attribute: false })
+  public isPrerender = true;
 
   id: string;
 
@@ -286,25 +285,28 @@ export class Panel extends LitElement {
     updateAttributes(this, this.getAttributes());
 
     if (this.getPanelData()) {
-      const groupId = this.context?.groupId;
-      if (!groupId) return;
-
-      const groupElement = document.getElementById(groupId);
-      if (!groupElement) return;
-
-      const panelElement = document.getElementById(this.id);
-      if (!panelElement) return;
-
-      const order = Array.from(groupElement.children).indexOf(panelElement);
-      if (typeof order !== "number") return;
-
-      this.send({
-        type: "registerDynamicPanel",
-        data: { ...this.initPanel(), order },
-      });
     } else {
-      this.send({ type: "registerPanel", data: this.initPanel() });
+      if (this.isPrerender) {
+        this.send({ type: "registerPanel", data: this.initPanel() });
+      } else {
+        const groupElement = this.closest("window-splitter");
+        if (!groupElement) return;
+
+        const order = Array.from(groupElement.children).indexOf(this);
+        if (typeof order !== "number") return;
+
+        this.send({
+          type: "registerDynamicPanel",
+          data: { ...this.initPanel(), order },
+        });
+      }
     }
+  }
+
+  disconnectedCallback(): void {
+    requestAnimationFrame(() =>
+      this.send({ type: "unregisterPanel", id: this.id })
+    );
   }
 
   updated(changedProperties: PropertyValues) {
@@ -345,6 +347,9 @@ export class PanelResizer extends LitElement {
   @consume({ context: sendContext })
   @property({ attribute: false })
   public send: SendFn;
+  @consume({ context: isPrerenderContext })
+  @property({ attribute: false })
+  public isPrerender = true;
 
   id: string;
 
@@ -368,7 +373,6 @@ export class PanelResizer extends LitElement {
   }
 
   private getAttributes() {
-    console.log("getAttributes", this.context);
     const handleIndex = this.context?.items.findIndex(
       (item) => item.id === this.id
     );
@@ -460,25 +464,31 @@ export class PanelResizer extends LitElement {
     updateAttributes(this, this.getAttributes());
 
     if (this.getHandleData()) {
-      const groupId = this.context?.groupId;
-      if (!groupId) return;
-
-      const groupElement = document.getElementById(groupId);
-      if (!groupElement) return;
-
-      const handleEl = document.getElementById(this.id);
-      if (!handleEl) return;
-
-      const order = Array.from(groupElement.children).indexOf(handleEl);
-      if (typeof order !== "number") return;
-
-      this.send({
-        type: "registerPanelHandle",
-        data: { ...this.initPanelResizer(), order },
-      });
     } else {
-      this.send({ type: "registerPanelHandle", data: this.initPanelResizer() });
+      if (this.isPrerender) {
+        this.send({
+          type: "registerPanelHandle",
+          data: this.initPanelResizer(),
+        });
+      } else {
+        const groupElement = this.closest("window-splitter");
+        if (!groupElement) return;
+
+        const order = Array.from(groupElement.children).indexOf(this);
+        if (typeof order !== "number") return;
+
+        this.send({
+          type: "registerPanelHandle",
+          data: { ...this.initPanelResizer(), order },
+        });
+      }
     }
+  }
+
+  disconnectedCallback(): void {
+    requestAnimationFrame(() =>
+      this.send({ type: "unregisterPanelHandle", id: this.id })
+    );
   }
 
   render() {

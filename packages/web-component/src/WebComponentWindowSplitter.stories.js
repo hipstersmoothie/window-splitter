@@ -514,7 +514,100 @@ export const ConditionalPanel = {
   render: () => html`<conditional-panel></conditional-panel>`,
 };
 
-// complex conditional
+class ConditionalPanelComplexElement extends LitElement {
+  static properties = {
+    isExpanded: { type: Boolean },
+  };
+
+  // pass through class styles
+  static styles = css`
+    window-splitter {
+      border: 1px solid rgba(0, 0, 0, 0.3);
+      background: rgba(0, 0, 0, 0.1);
+      border-radius: 12px;
+      box-sizing: border-box;
+      min-width: 500px;
+      display: block;
+    }
+
+    window-panel {
+      height: 100%;
+      width: 100%;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+
+    window-panel-resizer {
+      background: red;
+    }
+  `;
+  render() {
+    return html`
+      <window-splitter class="panel-group">
+        <window-panel
+          id="panel-1"
+          min="100px"
+          collapsible
+          collapsedSize="60px"
+          class="panel"
+        >
+          1
+        </window-panel>
+        <window-panel-resizer
+          id="handle-1"
+          size="10px"
+          class="panel-resizer"
+        ></window-panel-resizer>
+        <window-panel id="panel-2" min="100px" class="panel">2</window-panel>
+        <window-panel-resizer
+          id="handle-2"
+          size="10px"
+          class="panel-resizer"
+        ></window-panel-resizer>
+        <window-panel id="panel-3" min="100px" class="panel">3</window-panel>
+        ${when(
+          this.isExpanded,
+          () => html`
+            <window-panel-resizer
+              id="handle-3"
+              size="10px"
+              class="panel-resizer"
+            ></window-panel-resizer>
+            <window-panel id="panel-4" min="100px" class="panel">
+              expanded
+              <button type="button" @click=${() => (this.isExpanded = false)}>
+                Close
+              </button>
+            </window-panel>
+          `
+        )}
+        <window-panel-resizer
+          id="handle-4"
+          size="10px"
+          class="panel-resizer"
+        ></window-panel-resizer>
+        <window-panel id="panel-5" min="100px" class="panel">4</window-panel>
+      </window-splitter>
+
+      <button type="button" @click=${() => (this.isExpanded = true)}>
+        Expand
+      </button>
+    `;
+  }
+}
+
+customElements.define(
+  "conditional-panel-complex",
+  ConditionalPanelComplexElement
+);
+
+export const ConditionalPanelComplex = {
+  render: () => html`<conditional-panel-complex></conditional-panel-complex>`,
+};
 
 export const WithDefaultWidth = {
   render: () => html`
