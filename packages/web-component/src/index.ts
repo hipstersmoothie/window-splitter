@@ -143,11 +143,36 @@ export class WindowSplitter extends withContext(LitElement) {
   }
 
   private measureChildren() {
-    this.cleanupChildrenObserver = measureGroupChildren(
-      this.groupId,
-      (childrenSizes) =>
-        this.send({ type: "setActualItemsSize", childrenSizes })
-    );
+    const childrenObserver = new ResizeObserver((childrenEntries) => {
+      const childrenSizes: Record<string, { width: number; height: number }> =
+        {};
+
+      for (const childEntry of childrenEntries) {
+        const child = childEntry.target as HTMLElement;
+        const childId = child.getAttribute("data-splitter-id");
+        const childSize = childEntry.borderBoxSize[0];
+
+        if (childId && childSize) {
+          childrenSizes[childId] = {
+            width: childSize.inlineSize,
+            height: childSize.blockSize,
+          };
+        }
+      }
+
+      this.send({ type: "setActualItemsSize", childrenSizes });
+    });
+
+    const slot = this.shadowRoot.querySelector("slot");
+    const elements = slot.assignedElements();
+
+    for (const child of elements) {
+      childrenObserver.observe(child);
+    }
+
+    this.cleanupChildrenObserver = () => {
+      childrenObserver.disconnect();
+    };
   }
 
   firstUpdated() {
