@@ -1,6 +1,8 @@
-import { html } from "lit";
+import { css, html, LitElement } from "lit";
 import { spring } from "framer-motion";
 import { Panel, WindowSplitter, PanelResizer } from ".";
+import { property } from "lit/decorators.js";
+import { when } from "lit/directives/when.js";
 
 // More on how to set up stories at: https://storybook.js.org/docs/writing-stories
 export default {
@@ -431,7 +433,86 @@ export const CustomCollapseAnimation = {
 
 // imperative
 
-// conditional
+class ConditionalPanelElement extends LitElement {
+  static properties = {
+    isExpanded: { type: Boolean },
+  };
+
+  // pass through class styles
+  static styles = css`
+    window-splitter {
+      border: 1px solid rgba(0, 0, 0, 0.3);
+      background: rgba(0, 0, 0, 0.1);
+      border-radius: 12px;
+      box-sizing: border-box;
+      min-width: 500px;
+      display: block;
+    }
+
+    window-panel {
+      height: 100%;
+      width: 100%;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+
+    window-panel-resizer {
+      background: red;
+    }
+  `;
+  render() {
+    return html`
+      <window-splitter class="panel-group">
+        <window-panel
+          id="panel-1"
+          min="100px"
+          collapsible
+          collapsedSize="60px"
+          class="panel"
+        >
+          1
+        </window-panel>
+        <window-panel-resizer
+          id="handle-1"
+          size="10px"
+          class="panel-resizer"
+        ></window-panel-resizer>
+        <window-panel id="panel-2" min="100px" class="panel">2</window-panel>
+
+        ${when(
+          this.isExpanded,
+          () => `
+            <window-panel-resizer
+              id="handle-2"
+              size="10px"
+              class="panel-resizer"
+            ></window-panel-resizer>
+            <window-panel id="panel-3" min="100px" class="panel">
+              3
+              <button type="button" @click=${() => (this.isExpanded = false)}>
+                Close
+              </button>
+            </window-panel>
+          `
+        )}
+      </window-splitter>
+
+      <button type="button" @click=${() => (this.isExpanded = true)}>
+        Expand
+      </button>
+    `;
+  }
+}
+
+customElements.define("conditional-panel", ConditionalPanelElement);
+
+export const ConditionalPanel = {
+  render: () => html`<conditional-panel></conditional-panel>`,
+};
 
 // complex conditional
 

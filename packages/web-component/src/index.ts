@@ -21,7 +21,7 @@ import { createContext } from "wc-context";
 import { withContext } from "wc-context/lit.js";
 import { html, LitElement, PropertyValues } from "lit";
 import { ContextConsumer } from "wc-context/controllers.js";
-import { property } from "lit/decorators.js";
+import { property, state } from "lit/decorators.js";
 
 import "wc-context/context-provider.js";
 
@@ -135,6 +135,7 @@ export class WindowSplitter extends withContext(LitElement) {
       if (!entry) return;
       if (entry.contentRect.width > 0 && entry.contentRect.height > 0) {
         this.send({ type: "setSize", size: entry.contentRect });
+        console.log("setSize", entry.contentRect);
         this.measureChildren();
       }
     });
@@ -294,7 +295,24 @@ export class Panel extends withContext(LitElement) {
   protected firstUpdated(_changedProperties: PropertyValues): void {
     updateAttributes(this, this.getAttributes());
 
-    if (!this.getPanelData()) {
+    if (this.getPanelData()) {
+      const groupId = this.contextConsumer.value.groupId;
+      if (!groupId) return;
+
+      const groupElement = document.getElementById(groupId);
+      if (!groupElement) return;
+
+      const panelElement = document.getElementById(this.id);
+      if (!panelElement) return;
+
+      const order = Array.from(groupElement.children).indexOf(panelElement);
+      if (typeof order !== "number") return;
+
+      this.send({
+        type: "registerDynamicPanel",
+        data: { ...this.initPanel(), order },
+      });
+    } else {
       this.send({ type: "registerPanel", data: this.initPanel() });
     }
   }
@@ -361,6 +379,7 @@ export class PanelResizer extends withContext(LitElement) {
   }
 
   private getAttributes() {
+    console.log("getAttributes", this.contextConsumer.value);
     const handleIndex = this.contextConsumer.value.items.findIndex(
       (item) => item.id === this.id
     );
@@ -445,8 +464,6 @@ export class PanelResizer extends withContext(LitElement) {
         this.id
       );
 
-      console.log("collapsiblePanel", collapsiblePanel, e);
-
       if (e.key === "Enter" && collapsiblePanel) {
         if (collapsiblePanel.collapsed) {
           console.log("expandPanel", collapsiblePanel.id);
@@ -460,7 +477,24 @@ export class PanelResizer extends withContext(LitElement) {
 
     updateAttributes(this, this.getAttributes());
 
-    if (!this.getHandleData()) {
+    if (this.getHandleData()) {
+      const groupId = this.contextConsumer.value.groupId;
+      if (!groupId) return;
+
+      const groupElement = document.getElementById(groupId);
+      if (!groupElement) return;
+
+      const handleEl = document.getElementById(this.id);
+      if (!handleEl) return;
+
+      const order = Array.from(groupElement.children).indexOf(handleEl);
+      if (typeof order !== "number") return;
+
+      this.send({
+        type: "registerPanelHandle",
+        data: { ...this.initPanelResizer(), order },
+      });
+    } else {
       this.send({ type: "registerPanelHandle", data: this.initPanelResizer() });
     }
   }
