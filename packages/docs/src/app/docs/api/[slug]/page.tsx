@@ -15,7 +15,7 @@ import {
 
 const splitterPackage = path.join(__dirname, "../../../../../../../react");
 const tsConfig = path.join(splitterPackage, "tsconfig.json");
-const targetFile = path.join(splitterPackage, "src/index.tsx");
+const targetFile = path.join(splitterPackage, "src/index.ts");
 
 const parser = docgen.withCustomConfig(tsConfig, {
   propFilter: (prop) => {
