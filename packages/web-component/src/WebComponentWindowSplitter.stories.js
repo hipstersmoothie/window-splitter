@@ -69,7 +69,7 @@ export const AutosaveCollapsible = {
         collapsible
         collapsedSize="100px"
         min="140px"
-        onCollapseChange=${(e) => console.log(e)}
+        .onCollapseChange=${(e) => console.log(e)}
       >
         Panel 1
       </window-panel>

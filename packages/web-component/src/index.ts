@@ -23,6 +23,7 @@ import {
   getPanelDomAttributes,
   getPanelResizerDomAttributes,
   move,
+  MoveEvents,
   SharedPanelProps,
 } from "@window-splitter/interface";
 import { consume, createContext, provide } from "@lit/context";
@@ -210,6 +211,7 @@ export class Panel extends LitElement {
   public onCollapseChange?: (newCollapsed: boolean, el: Panel) => void;
   public onResize?: OnResizeCallback;
   public collapseAnimation?: SharedPanelProps<boolean>["collapseAnimation"];
+
   @property({ type: Boolean, reflect: true })
   collapsed?: boolean;
 
@@ -341,6 +343,10 @@ customElements.define("window-panel", Panel);
 export class PanelResizer extends LitElement {
   static observedContexts = ["send"];
 
+  public onDragStart?: () => void;
+  public onDrag?: (e: Parameters<MoveEvents["onMove"]>[0]) => void;
+  public onDragEnd?: () => void;
+
   @consume({ context: contextContext })
   @property({ attribute: false })
   public context?: GroupMachineContextValue;
@@ -420,7 +426,7 @@ export class PanelResizer extends LitElement {
           type: "dragHandleStart",
           handleId: this.getHandleData().id,
         });
-        // onDragStart?.();
+        this.onDragStart?.();
         document.body.style.cursor = getCursor(this.context) || "auto";
       },
       onMove: (e) => {
@@ -429,11 +435,11 @@ export class PanelResizer extends LitElement {
           handleId: this.getHandleData().id,
           value: e,
         });
-        // onDrag?.();
+        this.onDrag?.(e);
       },
       onMoveEnd: () => {
         this.send({ type: "dragHandleEnd", handleId: this.getHandleData().id });
-        // onDragEnd?.();
+        this.onDragEnd?.();
         document.body.style.cursor = "auto";
       },
     });
