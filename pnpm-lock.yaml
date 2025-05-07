@@ -613,6 +613,9 @@ importers:
       '@storybook/web-components-vite':
         specifier: ^8.6.12
         version: 8.6.12(lit@3.3.0)(storybook@8.6.12(prettier@3.3.3))(vite@6.3.3(@types/node@22.2.0)(jiti@2.4.2)(terser@5.31.5)(yaml@2.5.0))
+      framer-motion:
+        specifier: ^11.3.28
+        version: 11.3.28(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       lit:
         specifier: ^3.3.0
         version: 3.3.0
