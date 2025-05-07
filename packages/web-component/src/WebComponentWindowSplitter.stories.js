@@ -485,7 +485,7 @@ class ConditionalPanelElement extends LitElement {
 
         ${when(
           this.isExpanded,
-          () => `
+          () => html`
             <window-panel-resizer
               id="handle-2"
               size="10px"

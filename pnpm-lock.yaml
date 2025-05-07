@@ -588,15 +588,15 @@ importers:
 
   packages/web-component:
     dependencies:
+      '@lit/context':
+        specifier: ^1.1.5
+        version: 1.1.5
       '@window-splitter/interface':
         specifier: workspace:*
         version: link:../interface
       '@window-splitter/state':
         specifier: workspace:*
         version: link:../state
-      wc-context:
-        specifier: ^1.0.0
-        version: 1.0.0
     devDependencies:
       '@storybook/addon-essentials':
         specifier: ^8.6.12
@@ -1838,6 +1838,9 @@ packages:
 
   '@lit-labs/ssr-dom-shim@1.3.0':
     resolution: {integrity: sha512-nQIWonJ6eFAvUUrSlwyHDm/aE8PBDu5kRpL0vHMg6K8fK3Diq1xdPjTnsJSwxABhaZ+5eBi1btQB5ShUTKo4nQ==}
+
+  '@lit/context@1.1.5':
+    resolution: {integrity: sha512-57KyQD9of4RlBXkOIF1N40/BLY1j+1wLB5wRmB207+VtwNIRfXbanLsB6BsnFYXrycOUIp2d8gqTNGwuW1lE9Q==}
 
   '@lit/reactive-element@2.1.0':
     resolution: {integrity: sha512-L2qyoZSQClcBmq0qajBVbhYEcG6iK0XfLn66ifLe/RfC0/ihpc+pl0Wdn8bJ8o+hj38cG0fGXRgSS20MuXn7qA==}
@@ -10052,9 +10055,6 @@ packages:
     resolution: {integrity: sha512-8wrBCMtVhqcXP2Sup1ctSkga6uc2Bx0IIvKyT7yTFier5AXHooSI+QyQQAtTb7+E0IUCCKyTFmXqdqgum2XWGg==}
     engines: {node: '>=10.13.0'}
 
-  wc-context@1.0.0:
-    resolution: {integrity: sha512-1K78a/7FR2IVwtVzCTm9b8BRhIj9L/c0gF25VN5C5yPgyazeV//gvulhH0Jpc49hj0sNfFhJiSscdqDJS1j72w==}
-
   wcwidth@1.0.1:
     resolution: {integrity: sha512-XHPEwS0q6TaxcvG85+8EYkbiCux2XtWG2mkc47Ng2A77BQu9+DqIOJldST4HgPkuea7dvKSj5VgX3P1d4rW8Tg==}
 
@@ -11938,6 +11938,10 @@ snapshots:
       - typescript
 
   '@lit-labs/ssr-dom-shim@1.3.0': {}
+
+  '@lit/context@1.1.5':
+    dependencies:
+      '@lit/reactive-element': 2.1.0
 
   '@lit/reactive-element@2.1.0':
     dependencies:
@@ -23130,8 +23134,6 @@ snapshots:
     dependencies:
       glob-to-regexp: 0.4.1
       graceful-fs: 4.2.11
-
-  wc-context@1.0.0: {}
 
   wcwidth@1.0.1:
     dependencies:

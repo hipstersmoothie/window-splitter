@@ -22,8 +22,8 @@
     "storybook": "^8.6.12"
   },
   "dependencies": {
+    "@lit/context": "^1.1.5",
     "@window-splitter/interface": "workspace:*",
-    "@window-splitter/state": "workspace:*",
-    "wc-context": "^1.0.0"
+    "@window-splitter/state": "workspace:*"
   }
 }
