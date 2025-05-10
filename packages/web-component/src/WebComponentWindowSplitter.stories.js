@@ -431,8 +431,114 @@ export const CustomCollapseAnimation = {
   `,
 };
 
-// imperative
+export const ImperativePanel = {
+  render: () => html`
+    <window-splitter class="panel-group" id="panel-group">
+      <window-panel
+        id="panel-1"
+        min="100px"
+        collapsible
+        collapsedSize="60px"
+        class="panel"
+      >
+        1
+      </window-panel>
+      <window-panel-resizer
+        size="10px"
+        class="panel-resizer"
+      ></window-panel-resizer>
+      <window-panel min="100px" class="panel">2</window-panel>
+      <window-panel-resizer
+        size="10px"
+        class="panel-resizer"
+      ></window-panel-resizer>
+      <window-panel
+        min="100px"
+        class="panel"
+        collapsible
+        collapsedSize="60px"
+        defaultCollapsed
+      >
+        3
+      </window-panel>
+    </window-splitter>
 
+    <div>
+      <button
+        type="button"
+        @click=${() => alert(`Sizes: ${window["panel-group"].getPixelSizes()}`)}
+      >
+        Get pixel sizes
+      </button>
+      <button
+        type="button"
+        @click=${() =>
+          alert(`Sizes: ${window["panel-group"].getPercentageSizes()}`)}
+      >
+        Get percent sizes
+      </button>
+      <button
+        type="button"
+        @click=${() =>
+          window["panel-group"].setSizes([
+            "200px",
+            "10px",
+            "50%",
+            "10px",
+            "150px",
+          ])}
+      >
+        Override sizes
+      </button>
+    </div>
+
+    <div>
+      <button type="button" @click=${() => window["panel-1"].collapse()}>
+        Collapse
+      </button>
+      <button
+        type="button"
+        @click=${() => alert(`Collapsed: ${window["panel-1"].isCollapsed()}`)}
+      >
+        Is Collapsed?
+      </button>
+      <button type="button" @click=${() => window["panel-1"].expand()}>
+        Expand
+      </button>
+      <button
+        type="button"
+        @click=${() => alert(`Expanded: ${window["panel-1"].isExpanded()}`)}
+      >
+        Is Expanded?
+      </button>
+      <button
+        type="button"
+        @click=${() => alert(`Id: ${window["panel-1"].getId()}`)}
+      >
+        Get Id
+      </button>
+      <button
+        type="button"
+        @click=${() => alert(`Size: ${window["panel-1"].getPixelSize()}`)}
+      >
+        Get Pixel Size
+      </button>
+      <button
+        type="button"
+        @click=${() =>
+          alert(`Percentage: ${window["panel-1"].getPercentageSize()}`)}
+      >
+        Get Percentage Size
+      </button>
+      <button type="button" @click=${() => window["panel-1"].setSize("30px")}>
+        Set size to 100px
+      </button>
+      <button type="button" @click=${() => window["panel-1"].setSize("50%")}>
+        Set size to 50%
+      </button>
+    </div>
+  `,
+};
 class ConditionalPanelElement extends LitElement {
   static properties = {
     isExpanded: { type: Boolean },

@@ -16,6 +16,12 @@ import {
   prepareSnapshot,
   getCollapsiblePanelForHandleId,
   OnResizeCallback,
+  getPanelPixelSize,
+  getPanelPercentageSize,
+  getPanelGroupPixelSizes,
+  getPanelGroupPercentageSizes,
+  prepareItems,
+  State,
 } from "@window-splitter/state";
 import { html, LitElement, PropertyValues } from "lit";
 import { property } from "lit/decorators.js";
@@ -31,6 +37,7 @@ import { consume, createContext, provide } from "@lit/context";
 const isPrerenderContext = createContext<boolean>("isPrerender");
 const sendContext = createContext<SendFn>("send");
 const contextContext = createContext<GroupMachineContextValue>("context");
+const stateContext = createContext<{ current: State }>("state");
 
 let _id = 0;
 
@@ -73,6 +80,8 @@ export class WindowSplitter extends LitElement {
   private send: SendFn;
   @provide({ context: isPrerenderContext })
   private isPrerender = true;
+  @provide({ context: stateContext })
+  private state: { current: State };
 
   constructor() {
     super();
@@ -121,8 +130,47 @@ export class WindowSplitter extends LitElement {
       }
     );
 
+    this.state = machineState;
     this.send = send;
     this.context = initialState;
+  }
+
+  public getId() {
+    return this.groupId;
+  }
+
+  public getPixelSizes() {
+    return getPanelGroupPixelSizes(this.context);
+  }
+
+  public getPercentageSizes() {
+    return getPanelGroupPercentageSizes(this.context);
+  }
+
+  public getTemplate() {
+    return buildTemplate({
+      ...this.context,
+      items: prepareItems(this.context),
+    });
+  }
+
+  public getState() {
+    return this.state.current === "idle" ? "idle" : "dragging";
+  }
+
+  public setSizes(updates: Unit[]) {
+    for (let index = 0; index < updates.length; index++) {
+      const item = this.context.items[index];
+      const update = updates[index];
+
+      if (item && isPanelData(item) && update) {
+        this.send({
+          type: "setPanelPixelSize",
+          panelId: item.id,
+          size: update,
+        });
+      }
+    }
   }
 
   private measureSize() {
@@ -235,7 +283,41 @@ export class Panel extends LitElement {
     this.id = `${id || getNextId()}`;
   }
 
-  initPanel() {
+  public collapse() {
+    if (!this.getPanelData()?.collapsible) return;
+    this.send({ type: "collapsePanel", panelId: this.id, controlled: true });
+  }
+
+  public isCollapsed() {
+    return Boolean(
+      this.getPanelData()?.collapsible && this.getPanelData()?.collapsed
+    );
+  }
+
+  public expand() {
+    if (!this.getPanelData()?.collapsible) return;
+    this.send({ type: "expandPanel", panelId: this.id, controlled: true });
+  }
+
+  public isExpanded() {
+    return Boolean(
+      this.getPanelData()?.collapsible && !this.getPanelData()?.collapsed
+    );
+  }
+
+  public getPixelSize() {
+    return getPanelPixelSize(this.context, this.id);
+  }
+
+  public getPercentageSize() {
+    return getPanelPercentageSize(this.context, this.id);
+  }
+
+  public setSize(size: Unit) {
+    this.send({ type: "setPanelPixelSize", panelId: this.id, size });
+  }
+
+  private initPanel() {
     return initializePanel({
       id: this.id,
       min: this.getAttribute("min") as Unit | undefined,
@@ -256,13 +338,13 @@ export class Panel extends LitElement {
     });
   }
 
-  getPanelData() {
+  private getPanelData() {
     return this.context.items.find((item) => item.id === this.id) as
       | PanelData
       | undefined;
   }
 
-  getAttributes() {
+  private getAttributes() {
     return {
       ...getPanelDomAttributes({
         groupId: this.context.groupId,
@@ -365,14 +447,14 @@ export class PanelResizer extends LitElement {
     this.id = `${id || getNextId()}`;
   }
 
-  initPanelResizer() {
+  private initPanelResizer() {
     return initializePanelHandleData({
       id: this.id,
       size: (this.getAttribute("size") as PixelUnit | undefined) || "0px",
     });
   }
 
-  getHandleData() {
+  private getHandleData() {
     return this.context?.items.find((item) => item.id === this.id) as
       | PanelHandleData
       | undefined;
