@@ -72,7 +72,7 @@ function isBooleanPropValue(value: string | null) {
   return undefined;
 }
 
-export class WindowSplitter extends LitElement {
+export class PanelGroup extends LitElement {
   private observer: ResizeObserver;
   private cleanupChildrenObserver: () => void;
   private groupId: string;
@@ -269,7 +269,7 @@ export class WindowSplitter extends LitElement {
   }
 }
 
-customElements.define("window-splitter", WindowSplitter);
+customElements.define("window-splitter", PanelGroup);
 
 export class Panel extends LitElement {
   static observedContexts = ["send"];

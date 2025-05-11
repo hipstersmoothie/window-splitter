@@ -3,6 +3,8 @@ import { spring } from "framer-motion";
 import { when } from "lit/directives/when.js";
 
 import ".";
+import { Panel, PanelGroup } from "./index.js";
+import { property } from "lit/decorators.js";
 
 // More on how to set up stories at: https://storybook.js.org/docs/writing-stories
 export default {
@@ -74,7 +76,7 @@ export const AutosaveCollapsible = {
         collapsible
         collapsedSize="100px"
         min="140px"
-        .onCollapseChange=${(e) => {
+        .onCollapseChange=${(e: boolean) => {
           // eslint-disable-next-line no-console
           console.log(e);
         }}
@@ -112,10 +114,10 @@ export const DynamicConstraints = {
 
     <button
       @click=${() => {
-        const panel1 = document.getElementById("panel-1");
-        const panel3 = document.getElementById("panel-3");
-        const group = document.getElementById("panel-group");
-        const isCustomOn = group.getAttribute("data-custom-on");
+        const panel1 = document.getElementById("panel-1") as Panel;
+        const panel3 = document.getElementById("panel-3") as Panel;
+        const group = document.getElementById("panel-group") as PanelGroup;
+        const isCustomOn = group?.getAttribute("data-custom-on");
 
         if (isCustomOn) {
           panel1.min = "100px";
@@ -403,7 +405,7 @@ export const Collapsible = {
         collapsible
         collapsedSize="60px"
         style="border: 10px solid green; box-sizing: border-box"
-        .onCollapseChange=${(e) => {
+        .onCollapseChange=${(e: boolean) => {
           // eslint-disable-next-line no-console
           console.log("COLLAPSE PASSIVE", e);
         }}
@@ -428,7 +430,7 @@ export const Collapsible = {
         collapsedSize="60px"
         style="border: 10px solid blue; box-sizing: border-box"
         collapsed=${true}
-        .onCollapseChange=${(newCollapsed, el) => {
+        .onCollapseChange=${(newCollapsed: boolean, el: Panel) => {
           el.collapsed = newCollapsed;
         }}
       >
@@ -475,7 +477,7 @@ export const CustomCollapseAnimation = {
         collapsedSize="60px"
         defaultCollapsed
         .collapseAnimation=${{
-          easing: (t) => springFn.next(t * 1000).value,
+          easing: (t: number) => springFn.next(t * 1000).value,
           duration: 1000,
         }}
       >
@@ -520,83 +522,129 @@ export const ImperativePanel = {
     <div>
       <button
         type="button"
-        @click=${() => alert(`Sizes: ${window["panel-group"].getPixelSizes()}`)}
+        @click=${() =>
+          alert(
+            `Sizes: ${(window as unknown as Record<string, PanelGroup>)[
+              "panel-group"
+            ]?.getPixelSizes()}`
+          )}
       >
         Get pixel sizes
       </button>
       <button
         type="button"
         @click=${() =>
-          alert(`Sizes: ${window["panel-group"].getPercentageSizes()}`)}
+          alert(
+            `Sizes: ${(window as unknown as Record<string, PanelGroup>)[
+              "panel-group"
+            ]?.getPercentageSizes()}`
+          )}
       >
         Get percent sizes
       </button>
       <button
         type="button"
         @click=${() =>
-          window["panel-group"].setSizes([
-            "200px",
-            "10px",
-            "50%",
-            "10px",
-            "150px",
-          ])}
+          (window as unknown as Record<string, PanelGroup>)[
+            "panel-group"
+          ]?.setSizes(["200px", "10px", "50%", "10px", "150px"])}
       >
         Override sizes
       </button>
     </div>
 
     <div>
-      <button type="button" @click=${() => window["panel-1"].collapse()}>
+      <button
+        type="button"
+        @click=${() =>
+          (window as unknown as Record<string, Panel>)["panel-1"]?.collapse()}
+      >
         Collapse
       </button>
       <button
         type="button"
-        @click=${() => alert(`Collapsed: ${window["panel-1"].isCollapsed()}`)}
+        @click=${() =>
+          alert(
+            `Collapsed: ${(window as unknown as Record<string, Panel>)[
+              "panel-1"
+            ]?.isCollapsed()}`
+          )}
       >
         Is Collapsed?
       </button>
-      <button type="button" @click=${() => window["panel-1"].expand()}>
+      <button
+        type="button"
+        @click=${() =>
+          (window as unknown as Record<string, Panel>)["panel-1"]?.expand()}
+      >
         Expand
       </button>
       <button
         type="button"
-        @click=${() => alert(`Expanded: ${window["panel-1"].isExpanded()}`)}
+        @click=${() =>
+          alert(
+            `Expanded: ${(window as unknown as Record<string, Panel>)[
+              "panel-1"
+            ]?.isExpanded()}`
+          )}
       >
         Is Expanded?
       </button>
       <button
         type="button"
-        @click=${() => alert(`Id: ${window["panel-1"].getId()}`)}
+        @click=${() =>
+          alert(
+            `Id: ${(window as unknown as Record<string, Panel>)["panel-1"]?.id}`
+          )}
       >
         Get Id
       </button>
       <button
         type="button"
-        @click=${() => alert(`Size: ${window["panel-1"].getPixelSize()}`)}
+        @click=${() =>
+          alert(
+            `Size: ${(window as unknown as Record<string, Panel>)[
+              "panel-1"
+            ]?.getPixelSize()}`
+          )}
       >
         Get Pixel Size
       </button>
       <button
         type="button"
         @click=${() =>
-          alert(`Percentage: ${window["panel-1"].getPercentageSize()}`)}
+          alert(
+            `Percentage: ${(window as unknown as Record<string, Panel>)[
+              "panel-1"
+            ]?.getPercentageSize()}`
+          )}
       >
         Get Percentage Size
       </button>
-      <button type="button" @click=${() => window["panel-1"].setSize("30px")}>
+      <button
+        type="button"
+        @click=${() =>
+          (window as unknown as Record<string, Panel>)["panel-1"]?.setSize(
+            "30px"
+          )}
+      >
         Set size to 100px
       </button>
-      <button type="button" @click=${() => window["panel-1"].setSize("50%")}>
+      <button
+        type="button"
+        @click=${() =>
+          (window as unknown as Record<string, Panel>)["panel-1"]?.setSize(
+            "50%"
+          )}
+      >
         Set size to 50%
       </button>
     </div>
   `,
 };
 class ConditionalPanelElement extends LitElement {
-  static properties = {
-    isExpanded: { type: Boolean },
-  };
+  @property({ type: Boolean, reflect: true })
+  isExpanded = false;
 
   // pass through class styles
   static styles = css`
@@ -675,9 +723,8 @@ export const ConditionalPanel = {
 };
 
 class ConditionalPanelComplexElement extends LitElement {
-  static properties = {
-    isExpanded: { type: Boolean },
-  };
+  @property({ type: Boolean, reflect: true })
+  isExpanded = false;
 
   // pass through class styles
   static styles = css`
