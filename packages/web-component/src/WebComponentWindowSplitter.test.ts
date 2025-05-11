@@ -9,8 +9,8 @@ import * as stories from "./WebComponentWindowSplitter.stories.js";
 import { Panel, PanelGroup, PanelResizer } from "./index.js";
 import { render as litRender, TemplateResult } from "lit";
 
-customElements.define("window-panel", Panel);
 customElements.define("window-splitter", PanelGroup);
+customElements.define("window-panel", Panel);
 customElements.define("window-panel-resizer", PanelResizer);
 
 async function getHandle(selector: string) {

@@ -39,6 +39,7 @@
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "catalog:",
     "@vitest/browser": "catalog:",
+    "@vitest/coverage-istanbul": "catalog:",
     "eslint": "catalog:",
     "eslint-plugin-lit": "^2.1.1",
     "framer-motion": "^11.3.28",
