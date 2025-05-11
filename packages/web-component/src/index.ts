@@ -66,12 +66,6 @@ function updateAttributes(
   }
 }
 
-function isBooleanPropValue(value: string | null) {
-  if (value === "true" || value === "") return true;
-  if (value === "false") return false;
-  return undefined;
-}
-
 export class PanelGroup extends LitElement {
   private observer: ResizeObserver;
   private cleanupChildrenObserver: () => void;
@@ -284,14 +278,14 @@ export class Panel extends LitElement {
   max?: string;
   @property({ type: String, reflect: true })
   default?: string;
-  @property({ type: String, reflect: true })
-  collapsible?: string;
-  @property({ type: String, reflect: true })
-  defaultCollapsed?: string;
+  @property({ type: Boolean, reflect: true })
+  collapsible?: boolean;
+  @property({ type: Boolean, reflect: true })
+  defaultCollapsed?: boolean;
   @property({ type: String, reflect: true })
   collapsedSize?: string;
-  @property({ type: String, reflect: true })
-  isStaticAtRest?: string;
+  @property({ type: Boolean, reflect: true })
+  isStaticAtRest?: boolean;
 
   @consume({ context: contextContext })
   @property({ attribute: false })
@@ -354,19 +348,17 @@ export class Panel extends LitElement {
       id: this.id,
       min: this.getAttribute("min") as Unit | undefined,
       max: this.getAttribute("max") as Unit | undefined,
-      collapsible: isBooleanPropValue(this.getAttribute("collapsible")),
-      collapsed: isBooleanPropValue(this.getAttribute("collapsed")),
+      collapsible: this.collapsible,
+      collapsed: this.collapsed,
       collapsedSize: this.getAttribute("collapsedSize") as Unit | undefined,
       onCollapseChange: this.onCollapseChange
         ? { current: (e) => this.onCollapseChange?.(e, this) }
         : undefined,
       collapseAnimation: this.collapseAnimation,
       onResize: this.onResize ? { current: this.onResize } : undefined,
-      defaultCollapsed: isBooleanPropValue(
-        this.getAttribute("defaultCollapsed")
-      ),
-      default: this.getAttribute("default") as Unit | undefined,
-      isStaticAtRest: isBooleanPropValue(this.getAttribute("isStaticAtRest")),
+      defaultCollapsed: this.defaultCollapsed,
+      default: this.default as Unit | undefined,
+      isStaticAtRest: this.isStaticAtRest,
     });
   }
 
@@ -637,6 +629,7 @@ export class PanelResizer extends LitElement {
   updated(changedProperties: PropertyValues) {
     if (changedProperties.has("size")) {
       const currentHandleData = this.getHandleData();
+
       if (
         currentHandleData &&
         haveConstraintsChangedForPanelHandle(
@@ -648,6 +641,7 @@ export class PanelResizer extends LitElement {
       }
     }
   }
+
   disconnectedCallback(): void {
     requestAnimationFrame(() =>
       this.send({ type: "unregisterPanelHandle", id: this.id })
