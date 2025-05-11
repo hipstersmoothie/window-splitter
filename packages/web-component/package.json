@@ -1,5 +1,5 @@
 {
-  "name": "web-component",
+  "name": "@window-splitter/web-component",
   "version": "1.0.0",
   "main": "./dist/commonjs/index.js",
   "scripts": {
@@ -28,7 +28,7 @@
     "access": "public"
   },
   "license": "MIT",
-  "description": "",
+  "description": "A full featured window splitter as a web component.",
   "devDependencies": {
     "@internal/eslint-config": "workspace:*",
     "@storybook/addon-essentials": "^8.6.12",

@@ -3,7 +3,7 @@ import { spring } from "framer-motion";
 import { when } from "lit/directives/when.js";
 
 import ".";
-import { Panel, PanelGroup } from "./index.js";
+import { Panel, PanelGroup, PanelResizer } from "./index.js";
 import { property } from "lit/decorators.js";
 
 // More on how to set up stories at: https://storybook.js.org/docs/writing-stories
@@ -15,6 +15,10 @@ export default {
     "window-panel-resizer": "window-panel-resizer",
   },
 };
+
+customElements.define("window-panel", Panel);
+customElements.define("window-splitter", PanelGroup);
+customElements.define("window-panel-resizer", PanelResizer);
 
 // More on writing stories with args: https://storybook.js.org/docs/writing-stories/args
 export const Simple = {

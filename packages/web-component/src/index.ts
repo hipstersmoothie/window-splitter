@@ -269,8 +269,6 @@ export class PanelGroup extends LitElement {
   }
 }
 
-customElements.define("window-splitter", PanelGroup);
-
 export class Panel extends LitElement {
   static observedContexts = ["send"];
 
@@ -483,8 +481,6 @@ export class Panel extends LitElement {
   }
 }
 
-customElements.define("window-panel", Panel);
-
 export class PanelResizer extends LitElement {
   static observedContexts = ["send"];
 
@@ -662,5 +658,3 @@ export class PanelResizer extends LitElement {
     return html`<slot></slot>`;
   }
 }
-
-customElements.define("window-panel-resizer", PanelResizer);

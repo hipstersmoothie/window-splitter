@@ -1,6 +1,6 @@
-# @window-splitter/svelte
+# @window-splitter/web-component
 
-A full featured window splitter for Svelte.
+A full featured window splitter as a web component.
 
 - Support for the full [window splitter](https://www.w3.org/WAI/ARIA/apg/patterns/windowsplitter/) ARIA spec
 - Support for percentage and pixel based constraints
@@ -15,21 +15,33 @@ A full featured window splitter for Svelte.
 ## Installation
 
 ```bash
-npm install @window-splitter/svelte
+npm install @window-splitter/web-component
 ```
 
 ## Usage
 
-```svelte
-<script>
-  import { PanelGroup } from '@window-splitter/svelte';
-</script>
+First register the elements.
 
-<PanelGroup>
-  <Panel min="130px" max="400px" />
-  <PanelResizer />
-  <Panel min="130px" />
-</PanelGroup>
+```js
+import {
+  Panel,
+  PanelGroup,
+  PanelResizer,
+} from "@window-splitter/web-component";
+
+customElements.define("window-panel-group", PanelGroup);
+customElements.define("window-panel", Panel);
+customElements.define("window-panel-resizer", PanelResizer);
+```
+
+Then you can use them.
+
+```html
+<window-panel-group>
+  <window-panel min="130px" max="400px" />
+  <window-panel-resizer />
+  <window-panel min="130px" />
+</window-panel-group>
 ```
 
 ## Features
