@@ -13,7 +13,7 @@ const COLLAPSE_THRESHOLD = 50;
 export type PixelUnit = `${number}px`;
 export type PercentUnit = `${number}%`;
 export type Unit = PixelUnit | PercentUnit;
-type Orientation = "horizontal" | "vertical";
+export type Orientation = "horizontal" | "vertical";
 
 export interface ParsedPercentUnit {
   type: "percent";

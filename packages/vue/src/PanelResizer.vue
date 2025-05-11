@@ -182,7 +182,7 @@ const combinedProps = computed(() => {
 </script>
 
 <template>
-  <div v-bind="combinedProps" data-panel-resizer :tabindex="disabled ? -1 : 0">
+  <div v-bind="combinedProps" :tabindex="disabled ? -1 : 0">
     <slot />
   </div>
 </template>

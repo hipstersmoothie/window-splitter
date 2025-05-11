@@ -1,0 +1,83 @@
+{
+  "name": "@window-splitter/web-component",
+  "version": "1.0.0",
+  "main": "./dist/commonjs/index.js",
+  "scripts": {
+    "build": "tshy",
+    "test": "CI=true vitest",
+    "dev": "tshy -w",
+    "lint": "eslint .",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build",
+    "clean": "rm -rf dist .turbo .tshy .tshy-build"
+  },
+  "sideEffects": false,
+  "keywords": [],
+  "repository": {
+    "url": "https://github.com/hipstersmoothie/window-splitter",
+    "directory": "packages/solid"
+  },
+  "author": {
+    "name": "Andrew Lisowski",
+    "email": "lisowski54@gmail.com"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "MIT",
+  "description": "A full featured window splitter as a web component.",
+  "devDependencies": {
+    "@internal/eslint-config": "workspace:*",
+    "@storybook/addon-essentials": "^8.6.12",
+    "@storybook/blocks": "^8.6.12",
+    "@storybook/test": "^8.6.12",
+    "@storybook/web-components": "^8.6.12",
+    "@storybook/web-components-vite": "^8.6.12",
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/jest-dom": "catalog:",
+    "@vitest/browser": "catalog:",
+    "@vitest/coverage-istanbul": "catalog:",
+    "eslint": "catalog:",
+    "eslint-plugin-lit": "^2.1.1",
+    "framer-motion": "^11.3.28",
+    "lit": "^3.3.0",
+    "storybook": "^8.6.12",
+    "tiny-cookie": "^2.5.1",
+    "tshy": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  },
+  "dependencies": {
+    "@lit/context": "^1.1.5",
+    "@window-splitter/interface": "workspace:*",
+    "@window-splitter/state": "workspace:*"
+  },
+  "tshy": {
+    "exclude": [
+      "node_modules",
+      "src/**/*.test.ts",
+      "**/*stories.*"
+    ],
+    "exports": {
+      ".": "./src/index.ts"
+    }
+  },
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/esm/index.d.ts",
+        "default": "./dist/esm/index.js"
+      },
+      "require": {
+        "types": "./dist/commonjs/index.d.ts",
+        "default": "./dist/commonjs/index.js"
+      }
+    }
+  },
+  "types": "./dist/commonjs/index.d.ts",
+  "module": "./dist/esm/index.js"
+}

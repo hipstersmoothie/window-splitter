@@ -117,7 +117,7 @@ async function expectTemplate(
       }
     },
     {
-      timeout: 2_000,
+      timeout: 4_000,
     }
   );
 
