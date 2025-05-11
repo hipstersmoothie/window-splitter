@@ -1,3 +1,16 @@
+# v0.8.7 (Sun May 11 2025)
+
+#### 🐛 Bug Fix
+
+- Web Component [#59](https://github.com/hipstersmoothie/window-splitter/pull/59) ([@hipstersmoothie](https://github.com/hipstersmoothie))
+- add readme ([@hipstersmoothie](https://github.com/hipstersmoothie))
+
+#### Authors: 1
+
+- Andrew Lisowski ([@hipstersmoothie](https://github.com/hipstersmoothie))
+
+---
+
 # v0.8.5 (Sun May 04 2025)
 
 #### 🐛 Bug Fix

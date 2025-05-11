@@ -1,3 +1,21 @@
+# v0.8.7 (Sun May 11 2025)
+
+#### 🐛 Bug Fix
+
+- `@window-splitter/interface`, `@window-splitter/solid`, `@window-splitter/state`, `@window-splitter/svelte`, `@window-splitter/vue`, `@window-splitter/web-component`
+  - Web Component [#59](https://github.com/hipstersmoothie/window-splitter/pull/59) ([@hipstersmoothie](https://github.com/hipstersmoothie))
+
+#### ⚠️ Pushed to `main`
+
+- add license ([@hipstersmoothie](https://github.com/hipstersmoothie))
+- fix api docs ([@hipstersmoothie](https://github.com/hipstersmoothie))
+
+#### Authors: 1
+
+- Andrew Lisowski ([@hipstersmoothie](https://github.com/hipstersmoothie))
+
+---
+
 # v0.8.6 (Sun May 04 2025)
 
 #### ⚠️ Pushed to `main`
