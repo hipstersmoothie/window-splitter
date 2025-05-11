@@ -22,6 +22,8 @@ import {
   getPanelGroupPercentageSizes,
   prepareItems,
   State,
+  haveConstraintsChangedForPanel,
+  haveConstraintsChangedForPanelHandle,
 } from "@window-splitter/state";
 import { html, LitElement, PropertyValues } from "lit";
 import { property } from "lit/decorators.js";
@@ -48,22 +50,20 @@ const getNextId = () => {
 
 function updateAttributes(
   element: HTMLElement,
-  attributes:
-    | Record<string, string>
-    | { style: Record<string, string | number> }
+  attributes: Record<string, any> | { style: Record<string, any> }
 ) {
   for (const attr of Object.keys(attributes)) {
     if (attr === "style") {
       for (const style of Object.keys(attributes[attr])) {
-        element.style[style] = attributes[attr][style];
+        (element.style as any)[style] = attributes[attr][style];
       }
     } else {
-      element.setAttribute(attr, attributes[attr]);
+      element.setAttribute(attr, (attributes as any)[attr]);
     }
   }
 }
 
-function isBooleanPropValue(value: string | undefined) {
+function isBooleanPropValue(value: string | null) {
   if (value === "true" || value === "") return true;
   if (value === "false") return false;
   return undefined;
@@ -85,6 +85,9 @@ export class WindowSplitter extends LitElement {
 
   constructor() {
     super();
+
+    this.observer = new ResizeObserver(() => {});
+    this.cleanupChildrenObserver = () => {};
 
     const autosaveId = this.getAttribute("autosaveId");
     const autosaveStrategy =
@@ -174,6 +177,10 @@ export class WindowSplitter extends LitElement {
   }
 
   private measureSize() {
+    if (this.observer) {
+      this.observer.disconnect();
+    }
+
     this.observer = new ResizeObserver(([entry]) => {
       if (!entry) return;
       if (entry.contentRect.width > 0 && entry.contentRect.height > 0) {
@@ -187,6 +194,10 @@ export class WindowSplitter extends LitElement {
   }
 
   private measureChildren() {
+    if (this.cleanupChildrenObserver) {
+      this.cleanupChildrenObserver();
+    }
+
     const childrenObserver = new ResizeObserver((childrenEntries) => {
       const childrenSizes: Record<string, { width: number; height: number }> =
         {};
@@ -207,7 +218,11 @@ export class WindowSplitter extends LitElement {
       this.send({ type: "setActualItemsSize", childrenSizes });
     });
 
+    if (!this.shadowRoot) return;
+
     const slot = this.shadowRoot.querySelector("slot");
+    if (!slot) return;
+
     const elements = slot.assignedElements();
 
     for (const child of elements) {
@@ -262,10 +277,24 @@ export class Panel extends LitElement {
 
   @property({ type: Boolean, reflect: true })
   collapsed?: boolean;
+  @property({ type: String, reflect: true })
+  min?: string;
+  @property({ type: String, reflect: true })
+  max?: string;
+  @property({ type: String, reflect: true })
+  default?: string;
+  @property({ type: String, reflect: true })
+  collapsible?: string;
+  @property({ type: String, reflect: true })
+  defaultCollapsed?: string;
+  @property({ type: String, reflect: true })
+  collapsedSize?: string;
+  @property({ type: String, reflect: true })
+  isStaticAtRest?: string;
 
   @consume({ context: contextContext })
   @property({ attribute: false })
-  public context?: GroupMachineContextValue;
+  public context: GroupMachineContextValue;
 
   @consume({ context: sendContext })
   @property({ attribute: false })
@@ -275,12 +304,13 @@ export class Panel extends LitElement {
   @property({ attribute: false })
   public isPrerender = true;
 
-  id: string;
+  id = getNextId();
 
-  constructor({ id }: { id?: string } = {}) {
+  constructor() {
     super();
 
-    this.id = `${id || getNextId()}`;
+    this.send = () => {};
+    this.context = {} as GroupMachineContextValue;
   }
 
   public collapse() {
@@ -339,7 +369,7 @@ export class Panel extends LitElement {
   }
 
   private getPanelData() {
-    return this.context.items.find((item) => item.id === this.id) as
+    return this.context?.items.find((item) => item.id === this.id) as
       | PanelData
       | undefined;
   }
@@ -369,6 +399,16 @@ export class Panel extends LitElement {
     updateAttributes(this, this.getAttributes());
 
     if (this.getPanelData()) {
+      this.send?.({
+        type: "rebindPanelCallbacks",
+        data: {
+          id: this.id,
+          onCollapseChange: this.onCollapseChange
+            ? { current: (e) => this.onCollapseChange?.(e, this) }
+            : undefined,
+          onResize: this.onResize ? { current: this.onResize } : undefined,
+        },
+      });
     } else {
       if (this.isPrerender) {
         this.send({ type: "registerPanel", data: this.initPanel() });
@@ -413,6 +453,25 @@ export class Panel extends LitElement {
         }
       }
     }
+
+    if (
+      changedProperties.has("min") ||
+      changedProperties.has("max") ||
+      changedProperties.has("default") ||
+      changedProperties.has("collapsible") ||
+      changedProperties.has("collapsedSize") ||
+      changedProperties.has("defaultCollapsed") ||
+      changedProperties.has("isStaticAtRest")
+    ) {
+      const currentPanelData = this.getPanelData();
+
+      if (
+        currentPanelData &&
+        haveConstraintsChangedForPanel(currentPanelData, this.initPanel())
+      ) {
+        this.send({ type: "updateConstraints", data: this.initPanel() });
+      }
+    }
   }
 
   render() {
@@ -426,12 +485,12 @@ export class PanelResizer extends LitElement {
   static observedContexts = ["send"];
 
   public onDragStart?: () => void;
-  public onDrag?: (e: Parameters<MoveEvents["onMove"]>[0]) => void;
+  public onDrag?: (e: Parameters<NonNullable<MoveEvents["onMove"]>>[0]) => void;
   public onDragEnd?: () => void;
 
   @consume({ context: contextContext })
   @property({ attribute: false })
-  public context?: GroupMachineContextValue;
+  public context: GroupMachineContextValue;
   @consume({ context: sendContext })
   @property({ attribute: false })
   public send: SendFn;
@@ -439,11 +498,18 @@ export class PanelResizer extends LitElement {
   @property({ attribute: false })
   public isPrerender = true;
 
+  @property({ type: String, reflect: true })
+  size?: string;
+  @property({ type: Boolean, reflect: true })
+  disabled?: boolean;
+
   id: string;
 
   constructor({ id }: { id?: string } = {}) {
     super();
 
+    this.send = () => {};
+    this.context = {} as GroupMachineContextValue;
     this.id = `${id || getNextId()}`;
   }
 
@@ -464,9 +530,12 @@ export class PanelResizer extends LitElement {
     const handleIndex = this.context?.items.findIndex(
       (item) => item.id === this.id
     );
-    const panelBeforeHandle = isPanelData(this.context?.items[handleIndex - 1])
-      ? (this.context?.items[handleIndex - 1] as PanelData | undefined)
-      : undefined;
+
+    const panelBeforeHandle =
+      handleIndex !== undefined &&
+      isPanelData(this.context?.items[handleIndex - 1])
+        ? (this.context?.items[handleIndex - 1] as PanelData | undefined)
+        : undefined;
     const handleData = this.getHandleData() || this.initPanelResizer();
 
     return {
@@ -506,7 +575,7 @@ export class PanelResizer extends LitElement {
       onMoveStart: () => {
         this.send({
           type: "dragHandleStart",
-          handleId: this.getHandleData().id,
+          handleId: this.id,
         });
         this.onDragStart?.();
         document.body.style.cursor = getCursor(this.context) || "auto";
@@ -514,13 +583,13 @@ export class PanelResizer extends LitElement {
       onMove: (e) => {
         this.send({
           type: "dragHandle",
-          handleId: this.getHandleData().id,
+          handleId: this.id,
           value: e,
         });
         this.onDrag?.(e);
       },
       onMoveEnd: () => {
-        this.send({ type: "dragHandleEnd", handleId: this.getHandleData().id });
+        this.send({ type: "dragHandleEnd", handleId: this.id });
         this.onDragEnd?.();
         document.body.style.cursor = "auto";
       },
@@ -573,6 +642,20 @@ export class PanelResizer extends LitElement {
     }
   }
 
+  updated(changedProperties: PropertyValues) {
+    if (changedProperties.has("size")) {
+      const currentHandleData = this.getHandleData();
+      if (
+        currentHandleData &&
+        haveConstraintsChangedForPanelHandle(
+          currentHandleData,
+          this.initPanelResizer()
+        )
+      ) {
+        this.send({ type: "updateConstraints", data: this.initPanelResizer() });
+      }
+    }
+  }
   disconnectedCallback(): void {
     requestAnimationFrame(() =>
       this.send({ type: "unregisterPanelHandle", id: this.id })

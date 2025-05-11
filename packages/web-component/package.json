@@ -1,15 +1,33 @@
 {
   "name": "web-component",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "./dist/commonjs/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tshy",
+    "test": "CI=true vitest",
+    "dev": "tshy -w",
+    "lint": "eslint .",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "clean": "rm -rf dist .turbo .tshy .tshy-build"
   },
+  "sideEffects": false,
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "repository": {
+    "url": "https://github.com/hipstersmoothie/window-splitter",
+    "directory": "packages/solid"
+  },
+  "author": {
+    "name": "Andrew Lisowski",
+    "email": "lisowski54@gmail.com"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "MIT",
   "description": "",
   "devDependencies": {
     "@storybook/addon-essentials": "^8.6.12",
@@ -17,13 +35,43 @@
     "@storybook/test": "^8.6.12",
     "@storybook/web-components": "^8.6.12",
     "@storybook/web-components-vite": "^8.6.12",
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/jest-dom": "catalog:",
     "framer-motion": "^11.3.28",
     "lit": "^3.3.0",
-    "storybook": "^8.6.12"
+    "storybook": "^8.6.12",
+    "tshy": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   },
   "dependencies": {
     "@lit/context": "^1.1.5",
     "@window-splitter/interface": "workspace:*",
     "@window-splitter/state": "workspace:*"
-  }
+  },
+  "tshy": {
+    "exclude": [
+      "node_modules",
+      "src/**/*.test.ts",
+      "**/*stories.*"
+    ],
+    "exports": {
+      ".": "./src/index.ts"
+    }
+  },
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/esm/index.d.ts",
+        "default": "./dist/esm/index.js"
+      },
+      "require": {
+        "types": "./dist/commonjs/index.d.ts",
+        "default": "./dist/commonjs/index.js"
+      }
+    }
+  },
+  "types": "./dist/commonjs/index.d.ts",
+  "module": "./dist/esm/index.js"
 }

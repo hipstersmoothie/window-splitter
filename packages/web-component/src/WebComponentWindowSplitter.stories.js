@@ -1,12 +1,17 @@
 import { css, html, LitElement } from "lit";
 import { spring } from "framer-motion";
-import { Panel, WindowSplitter, PanelResizer } from ".";
-import { property } from "lit/decorators.js";
 import { when } from "lit/directives/when.js";
+
+import ".";
 
 // More on how to set up stories at: https://storybook.js.org/docs/writing-stories
 export default {
   title: "WindowSplitter/WebComponent",
+  component: "window-splitter",
+  subcomponents: {
+    "window-panel": "window-panel",
+    "window-panel-resizer": "window-panel-resizer",
+  },
 };
 
 // More on writing stories with args: https://storybook.js.org/docs/writing-stories/args
@@ -82,7 +87,50 @@ export const AutosaveCollapsible = {
   `,
 };
 
-// TODO: Add dynamic constraints
+export const DynamicConstraints = {
+  render: () => html`
+    <window-splitter class="panel-group" id="panel-group">
+      <window-panel class="panel" default="100px" min="100px" id="panel-1">
+        Panel 1
+      </window-panel>
+      <window-panel-resizer
+        size="10px"
+        class="panel-resizer"
+      ></window-panel-resizer>
+      <window-panel class="panel" min="100px">Panel 2</window-panel>
+      <window-panel-resizer
+        size="10px"
+        class="panel-resizer"
+      ></window-panel-resizer>
+      <window-panel class="panel" min="400px" max="700px" id="panel-3">
+        Panel 3
+      </window-panel>
+    </window-splitter>
+
+    <button
+      @click=${() => {
+        const panel1 = document.getElementById("panel-1");
+        const panel3 = document.getElementById("panel-3");
+        const group = document.getElementById("panel-group");
+        const isCustomOn = group.getAttribute("data-custom-on");
+
+        if (isCustomOn) {
+          panel1.min = "100px";
+          panel3.min = "400px";
+          panel3.max = "700px";
+          group.removeAttribute("data-custom-on");
+        } else {
+          panel1.min = "200px";
+          panel3.min = "100px";
+          panel3.max = "300px";
+          group.setAttribute("data-custom-on", "true");
+        }
+      }}
+    >
+      Toggle custom
+    </button>
+  `,
+};
 
 export const SimpleMin = {
   render: () => html`

@@ -56,7 +56,7 @@
     "typescript-eslint": "^8.1.0",
     "vite": "^6.3.3",
     "vite-plugin-dts": "^4.5.3",
-    "vitest": "^3.1.2",
+    "vitest": "catalog:",
     "vue": "^3.5.13"
   },
   "dependencies": {

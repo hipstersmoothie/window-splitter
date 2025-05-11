@@ -448,7 +448,7 @@ importers:
         version: 1.3.12
       '@rsdoctor/rspack-plugin':
         specifier: ^1.0.2
-        version: 1.0.2(@rsbuild/core@1.3.12)(@rspack/core@1.3.7(@swc/helpers@0.5.17))(webpack@5.93.0)
+        version: 1.0.2(@rsbuild/core@1.3.12)(@rspack/core@1.3.7(@swc/helpers@0.5.17))(webpack@5.93.0(esbuild@0.25.3))
       '@storybook/addon-svelte-csf':
         specifier: ^5.0.0-next.0
         version: 5.0.0-next.29(@storybook/svelte@8.6.12(storybook@8.6.12(prettier@3.3.3))(svelte@5.28.2))(@sveltejs/vite-plugin-svelte@5.0.3(svelte@5.28.2)(vite@6.3.3(@types/node@20.14.14)(jiti@2.4.2)(terser@5.31.5)(yaml@2.5.0)))(storybook@8.6.12(prettier@3.3.3))(svelte@5.28.2)(vite@6.3.3(@types/node@20.14.14)(jiti@2.4.2)(terser@5.31.5)(yaml@2.5.0))
@@ -580,7 +580,7 @@ importers:
         specifier: ^4.5.3
         version: 4.5.3(@types/node@22.2.0)(rollup@4.40.0)(typescript@5.8.3)(vite@6.3.3(@types/node@22.2.0)(jiti@2.4.2)(terser@5.31.5)(yaml@2.5.0))
       vitest:
-        specifier: ^3.1.2
+        specifier: 'catalog:'
         version: 3.1.2(@types/debug@4.1.12)(@types/node@22.2.0)(@vitest/browser@3.1.2)(jiti@2.4.2)(jsdom@24.1.1)(msw@2.7.5(@types/node@22.2.0)(typescript@5.8.3))(terser@5.31.5)(yaml@2.5.0)
       vue:
         specifier: ^3.5.13
@@ -613,6 +613,12 @@ importers:
       '@storybook/web-components-vite':
         specifier: ^8.6.12
         version: 8.6.12(lit@3.3.0)(storybook@8.6.12(prettier@3.3.3))(vite@6.3.3(@types/node@22.2.0)(jiti@2.4.2)(terser@5.31.5)(yaml@2.5.0))
+      '@testing-library/dom':
+        specifier: ^10.4.0
+        version: 10.4.0
+      '@testing-library/jest-dom':
+        specifier: 'catalog:'
+        version: 6.6.3
       framer-motion:
         specifier: ^11.3.28
         version: 11.3.28(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -622,6 +628,15 @@ importers:
       storybook:
         specifier: ^8.6.12
         version: 8.6.12(prettier@3.3.3)
+      tshy:
+        specifier: 'catalog:'
+        version: 3.0.2
+      typescript:
+        specifier: 'catalog:'
+        version: 5.8.3
+      vitest:
+        specifier: 'catalog:'
+        version: 3.1.2(@types/debug@4.1.12)(@types/node@22.2.0)(@vitest/browser@3.1.2)(jiti@2.4.2)(jsdom@24.1.1)(msw@2.7.5(@types/node@22.2.0)(typescript@5.8.3))(terser@5.31.5)(yaml@2.5.0)
 
 packages:
 
@@ -3185,10 +3200,10 @@ packages:
       storybook: ^8.6.12
       vite: ^4.0.0 || ^5.0.0 || ^6.0.0
 
-  '@storybook/builder-vite@9.0.0-beta.10':
-    resolution: {integrity: sha512-mTD5G+Niqa7km0EljNWn08fBDzZ+mNAMp42U/ksL7plVnecSgoa+J/YC1VCgynwgHed65ZjG7TtbFgIU2W62Vg==}
+  '@storybook/builder-vite@9.0.0-beta.11':
+    resolution: {integrity: sha512-jaa6KaKjmmOxozotDieuH7Qcc5KyIBQhwMHoh9YSinqmAoHdLKQSrPEEpluEjwoMW+BDPRVYLAMWiXmemuDTRg==}
     peerDependencies:
-      storybook: ^9.0.0-beta.10
+      storybook: ^9.0.0-beta.11
       vite: ^5.0.0 || ^6.0.0
 
   '@storybook/builder-vite@9.0.0-beta.4':
@@ -3231,10 +3246,10 @@ packages:
     peerDependencies:
       storybook: ^8.6.12
 
-  '@storybook/csf-plugin@9.0.0-beta.10':
-    resolution: {integrity: sha512-R7RkaPVL0fm6hsNZHOe9LT70YMihNU9s5BGf6a/78vwhwp41H4V7fJA6G7d5bqT4bnPsbOKERmum4lnyHRt3BA==}
+  '@storybook/csf-plugin@9.0.0-beta.11':
+    resolution: {integrity: sha512-nkx1/8KnJ/SPrZtVc0tlJJwDZA9B7CAx2vNNKK36cdcOxq5sHzu9ahfQs7RiY12W3nHiAoAuYAlHITTY15ujsQ==}
     peerDependencies:
-      storybook: ^9.0.0-beta.10
+      storybook: ^9.0.0-beta.11
 
   '@storybook/csf-plugin@9.0.0-beta.4':
     resolution: {integrity: sha512-eHyYQBWW5kwn8HtaDooIeT0nuhQysafyHL5QfPlyErAzDn1oVR+0EDWPlEgXy0pzqVzY3Axh3SqZ37ccA7kIeA==}
@@ -13685,32 +13700,6 @@ snapshots:
       - utf-8-validate
       - webpack
 
-  '@rsdoctor/core@1.0.2(@rsbuild/core@1.3.12)(@rspack/core@1.3.7(@swc/helpers@0.5.17))(webpack@5.93.0)':
-    dependencies:
-      '@rsbuild/plugin-check-syntax': 1.3.0(@rsbuild/core@1.3.12)
-      '@rsdoctor/graph': 1.0.2(@rspack/core@1.3.7(@swc/helpers@0.5.17))(webpack@5.93.0)
-      '@rsdoctor/sdk': 1.0.2(@rspack/core@1.3.7(@swc/helpers@0.5.17))(webpack@5.93.0)
-      '@rsdoctor/types': 1.0.2(@rspack/core@1.3.7(@swc/helpers@0.5.17))(webpack@5.93.0)
-      '@rsdoctor/utils': 1.0.2(@rspack/core@1.3.7(@swc/helpers@0.5.17))(webpack@5.93.0)
-      axios: 1.9.0
-      browserslist-load-config: 1.0.0
-      enhanced-resolve: 5.12.0
-      filesize: 10.1.6
-      fs-extra: 11.2.0
-      lodash: 4.17.21
-      path-browserify: 1.0.1
-      semver: 7.6.3
-      source-map: 0.7.4
-      webpack-bundle-analyzer: 4.10.2
-    transitivePeerDependencies:
-      - '@rsbuild/core'
-      - '@rspack/core'
-      - bufferutil
-      - debug
-      - supports-color
-      - utf-8-validate
-      - webpack
-
   '@rsdoctor/graph@1.0.2(@rspack/core@1.3.7(@swc/helpers@0.5.17))(webpack@5.93.0(esbuild@0.21.5))':
     dependencies:
       '@rsdoctor/types': 1.0.2(@rspack/core@1.3.7(@swc/helpers@0.5.17))(webpack@5.93.0(esbuild@0.21.5))
@@ -13729,20 +13718,6 @@ snapshots:
     dependencies:
       '@rsdoctor/types': 1.0.2(@rspack/core@1.3.7(@swc/helpers@0.5.17))(webpack@5.93.0(esbuild@0.25.3))
       '@rsdoctor/utils': 1.0.2(@rspack/core@1.3.7(@swc/helpers@0.5.17))(webpack@5.93.0(esbuild@0.25.3))
-      lodash.unionby: 4.8.0
-      socket.io: 4.8.1
-      source-map: 0.7.4
-    transitivePeerDependencies:
-      - '@rspack/core'
-      - bufferutil
-      - supports-color
-      - utf-8-validate
-      - webpack
-
-  '@rsdoctor/graph@1.0.2(@rspack/core@1.3.7(@swc/helpers@0.5.17))(webpack@5.93.0)':
-    dependencies:
-      '@rsdoctor/types': 1.0.2(@rspack/core@1.3.7(@swc/helpers@0.5.17))(webpack@5.93.0)
-      '@rsdoctor/utils': 1.0.2(@rspack/core@1.3.7(@swc/helpers@0.5.17))(webpack@5.93.0)
       lodash.unionby: 4.8.0
       socket.io: 4.8.1
       source-map: 0.7.4
@@ -13777,23 +13752,6 @@ snapshots:
       '@rsdoctor/sdk': 1.0.2(@rspack/core@1.3.7(@swc/helpers@0.5.17))(webpack@5.93.0(esbuild@0.25.3))
       '@rsdoctor/types': 1.0.2(@rspack/core@1.3.7(@swc/helpers@0.5.17))(webpack@5.93.0(esbuild@0.25.3))
       '@rsdoctor/utils': 1.0.2(@rspack/core@1.3.7(@swc/helpers@0.5.17))(webpack@5.93.0(esbuild@0.25.3))
-      '@rspack/core': 1.3.7(@swc/helpers@0.5.17)
-      lodash: 4.17.21
-    transitivePeerDependencies:
-      - '@rsbuild/core'
-      - bufferutil
-      - debug
-      - supports-color
-      - utf-8-validate
-      - webpack
-
-  '@rsdoctor/rspack-plugin@1.0.2(@rsbuild/core@1.3.12)(@rspack/core@1.3.7(@swc/helpers@0.5.17))(webpack@5.93.0)':
-    dependencies:
-      '@rsdoctor/core': 1.0.2(@rsbuild/core@1.3.12)(@rspack/core@1.3.7(@swc/helpers@0.5.17))(webpack@5.93.0)
-      '@rsdoctor/graph': 1.0.2(@rspack/core@1.3.7(@swc/helpers@0.5.17))(webpack@5.93.0)
-      '@rsdoctor/sdk': 1.0.2(@rspack/core@1.3.7(@swc/helpers@0.5.17))(webpack@5.93.0)
-      '@rsdoctor/types': 1.0.2(@rspack/core@1.3.7(@swc/helpers@0.5.17))(webpack@5.93.0)
-      '@rsdoctor/utils': 1.0.2(@rspack/core@1.3.7(@swc/helpers@0.5.17))(webpack@5.93.0)
       '@rspack/core': 1.3.7(@swc/helpers@0.5.17)
       lodash: 4.17.21
     transitivePeerDependencies:
@@ -13854,31 +13812,6 @@ snapshots:
       - utf-8-validate
       - webpack
 
-  '@rsdoctor/sdk@1.0.2(@rspack/core@1.3.7(@swc/helpers@0.5.17))(webpack@5.93.0)':
-    dependencies:
-      '@rsdoctor/client': 1.0.2
-      '@rsdoctor/graph': 1.0.2(@rspack/core@1.3.7(@swc/helpers@0.5.17))(webpack@5.93.0)
-      '@rsdoctor/types': 1.0.2(@rspack/core@1.3.7(@swc/helpers@0.5.17))(webpack@5.93.0)
-      '@rsdoctor/utils': 1.0.2(@rspack/core@1.3.7(@swc/helpers@0.5.17))(webpack@5.93.0)
-      '@types/fs-extra': 11.0.4
-      body-parser: 1.20.3
-      cors: 2.8.5
-      dayjs: 1.11.13
-      fs-extra: 11.2.0
-      json-cycle: 1.5.0
-      lodash: 4.17.21
-      open: 8.4.2
-      sirv: 2.0.4
-      socket.io: 4.8.1
-      source-map: 0.7.4
-      tapable: 2.2.1
-    transitivePeerDependencies:
-      - '@rspack/core'
-      - bufferutil
-      - supports-color
-      - utf-8-validate
-      - webpack
-
   '@rsdoctor/types@1.0.2(@rspack/core@1.3.7(@swc/helpers@0.5.17))(webpack@5.93.0(esbuild@0.21.5))':
     dependencies:
       '@types/connect': 3.4.38
@@ -13896,16 +13829,6 @@ snapshots:
       '@types/tapable': 2.2.7
       source-map: 0.7.4
       webpack: 5.93.0(esbuild@0.25.3)
-    optionalDependencies:
-      '@rspack/core': 1.3.7(@swc/helpers@0.5.17)
-
-  '@rsdoctor/types@1.0.2(@rspack/core@1.3.7(@swc/helpers@0.5.17))(webpack@5.93.0)':
-    dependencies:
-      '@types/connect': 3.4.38
-      '@types/estree': 1.0.5
-      '@types/tapable': 2.2.7
-      source-map: 0.7.4
-      webpack: 5.93.0
     optionalDependencies:
       '@rspack/core': 1.3.7(@swc/helpers@0.5.17)
 
@@ -13937,30 +13860,6 @@ snapshots:
     dependencies:
       '@babel/code-frame': 7.26.2
       '@rsdoctor/types': 1.0.2(@rspack/core@1.3.7(@swc/helpers@0.5.17))(webpack@5.93.0(esbuild@0.25.3))
-      '@types/estree': 1.0.5
-      acorn: 8.14.1
-      acorn-import-attributes: 1.9.5(acorn@8.14.1)
-      acorn-walk: 8.3.4
-      chalk: 4.1.2
-      connect: 3.7.0
-      deep-eql: 4.1.4
-      envinfo: 7.14.0
-      filesize: 10.1.6
-      fs-extra: 11.2.0
-      get-port: 5.1.1
-      json-stream-stringify: 3.0.1
-      lines-and-columns: 2.0.4
-      rslog: 1.2.3
-      strip-ansi: 6.0.1
-    transitivePeerDependencies:
-      - '@rspack/core'
-      - supports-color
-      - webpack
-
-  '@rsdoctor/utils@1.0.2(@rspack/core@1.3.7(@swc/helpers@0.5.17))(webpack@5.93.0)':
-    dependencies:
-      '@babel/code-frame': 7.26.2
-      '@rsdoctor/types': 1.0.2(@rspack/core@1.3.7(@swc/helpers@0.5.17))(webpack@5.93.0)
       '@types/estree': 1.0.5
       acorn: 8.14.1
       acorn-import-attributes: 1.9.5(acorn@8.14.1)
@@ -14250,9 +14149,9 @@ snapshots:
       ts-dedent: 2.2.0
       vite: 6.3.3(@types/node@22.2.0)(jiti@2.4.2)(terser@5.31.5)(yaml@2.5.0)
 
-  '@storybook/builder-vite@9.0.0-beta.10(storybook@9.0.0-beta.4(prettier@3.3.3))(vite@6.3.3(@types/node@20.14.14)(jiti@2.4.2)(terser@5.31.5)(yaml@2.5.0))':
+  '@storybook/builder-vite@9.0.0-beta.11(storybook@9.0.0-beta.4(prettier@3.3.3))(vite@6.3.3(@types/node@20.14.14)(jiti@2.4.2)(terser@5.31.5)(yaml@2.5.0))':
     dependencies:
-      '@storybook/csf-plugin': 9.0.0-beta.10(storybook@9.0.0-beta.4(prettier@3.3.3))
+      '@storybook/csf-plugin': 9.0.0-beta.11(storybook@9.0.0-beta.4(prettier@3.3.3))
       browser-assert: 1.2.1
       storybook: 9.0.0-beta.4(prettier@3.3.3)
       ts-dedent: 2.2.0
@@ -14343,7 +14242,7 @@ snapshots:
       storybook: 8.6.12(prettier@3.3.3)
       unplugin: 1.12.1
 
-  '@storybook/csf-plugin@9.0.0-beta.10(storybook@9.0.0-beta.4(prettier@3.3.3))':
+  '@storybook/csf-plugin@9.0.0-beta.11(storybook@9.0.0-beta.4(prettier@3.3.3))':
     dependencies:
       storybook: 9.0.0-beta.4(prettier@3.3.3)
       unplugin: 1.12.1
@@ -21804,7 +21703,7 @@ snapshots:
 
   storybook-solidjs-vite@1.0.0-beta.6(@testing-library/jest-dom@6.6.3)(solid-js@1.9.5)(storybook@9.0.0-beta.4(prettier@3.3.3))(vite@6.3.3(@types/node@20.14.14)(jiti@2.4.2)(terser@5.31.5)(yaml@2.5.0)):
     dependencies:
-      '@storybook/builder-vite': 9.0.0-beta.10(storybook@9.0.0-beta.4(prettier@3.3.3))(vite@6.3.3(@types/node@20.14.14)(jiti@2.4.2)(terser@5.31.5)(yaml@2.5.0))
+      '@storybook/builder-vite': 9.0.0-beta.11(storybook@9.0.0-beta.4(prettier@3.3.3))(vite@6.3.3(@types/node@20.14.14)(jiti@2.4.2)(terser@5.31.5)(yaml@2.5.0))
       magic-string: 0.30.17
       vite-plugin-solid: 2.11.6(@testing-library/jest-dom@6.6.3)(solid-js@1.9.5)(vite@6.3.3(@types/node@20.14.14)(jiti@2.4.2)(terser@5.31.5)(yaml@2.5.0))
     transitivePeerDependencies:
