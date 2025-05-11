@@ -307,11 +307,12 @@ export class Panel extends LitElement {
   @property({ attribute: false })
   public isPrerender = true;
 
-  id = getNextId();
+  id: string;
 
   constructor() {
     super();
 
+    this.id ||= getNextId();
     this.send = () => {};
     this.context = {} as GroupMachineContextValue;
   }
@@ -506,14 +507,12 @@ export class PanelResizer extends LitElement {
   @property({ type: Boolean, reflect: true })
   disabled?: boolean;
 
-  id: string;
-
-  constructor({ id }: { id?: string } = {}) {
+  constructor() {
     super();
 
+    this.id ||= getNextId();
     this.send = () => {};
     this.context = {} as GroupMachineContextValue;
-    this.id = `${id || getNextId()}`;
   }
 
   private initPanelResizer() {

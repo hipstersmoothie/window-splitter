@@ -47,25 +47,33 @@ export const Autosave = {
 };
 
 export const AutosaveCookie = {
-  render: () => html`
-    <window-splitter
-      autosaveId="autosave-example-web-component"
-      autosaveStrategy="cookie"
-      class="panel-group"
-      style="height: 200px"
-    >
-      <window-panel class="panel" id="1">Panel 1</window-panel>
-      <window-panel-resizer
-        size="10px"
-        class="panel-resizer"
-      ></window-panel-resizer>
-      <window-panel class="panel" id="2">Panel 2</window-panel>
-    </window-splitter>
-  `,
+  render: ({ snapshot }: { snapshot?: string } = {}) => {
+    return html`
+      <window-splitter
+        autosaveId="autosave-cookie-web-component"
+        autosaveStrategy="cookie"
+        class="panel-group"
+        style="height: 200px"
+        .snapshot=${snapshot}
+      >
+        <window-panel class="panel" id="1">Panel 1</window-panel>
+        <window-panel-resizer
+          size="10px"
+          class="panel-resizer"
+          id="resizer-1"
+        ></window-panel-resizer>
+        <window-panel class="panel" id="2">Panel 2</window-panel>
+      </window-splitter>
+    `;
+  },
 };
 
 export const AutosaveCollapsible = {
-  render: () => html`
+  render: ({
+    onCollapseChange,
+  }: {
+    onCollapseChange: (e: boolean) => void;
+  }) => html`
     <window-splitter
       autosaveId="autosave-example-web-component-2"
       class="panel-group"
@@ -79,6 +87,7 @@ export const AutosaveCollapsible = {
         .onCollapseChange=${(e: boolean) => {
           // eslint-disable-next-line no-console
           console.log(e);
+          onCollapseChange(e);
         }}
       >
         Panel 1
@@ -86,6 +95,7 @@ export const AutosaveCollapsible = {
       <window-panel-resizer
         size="10px"
         class="panel-resizer"
+        id="resizer-1"
       ></window-panel-resizer>
       <window-panel class="panel" id="2">Panel 2</window-panel>
     </window-splitter>
@@ -94,7 +104,11 @@ export const AutosaveCollapsible = {
 
 export const DynamicConstraints = {
   render: () => html`
-    <window-splitter class="panel-group" id="panel-group">
+    <window-splitter
+      class="panel-group"
+      id="panel-group"
+      style="min-width: 1000px"
+    >
       <window-panel class="panel" default="100px" min="100px" id="panel-1">
         Panel 1
       </window-panel>
@@ -132,7 +146,7 @@ export const DynamicConstraints = {
         }
       }}
     >
-      Toggle custom
+      Toggle Custom
     </button>
   `,
 };
@@ -211,17 +225,17 @@ export const VerticalLayout = {
       orientation="vertical"
       style="height: 322px"
     >
-      <window-panel default="30%" min="20%" class="panel">Top</window-panel>
+      <window-panel default="30%" min="20%" class="panel">top</window-panel>
       <window-panel-resizer
         size="10px"
         class="panel-resizer"
       ></window-panel-resizer>
-      <window-panel min="20%" class="panel">Middle</window-panel>
+      <window-panel min="20%" class="panel">middle</window-panel>
       <window-panel-resizer
         size="10px"
         class="panel-resizer"
       ></window-panel-resizer>
-      <window-panel default="30%" min="20%" class="panel">Bottom</window-panel>
+      <window-panel default="30%" min="20%" class="panel">bottom</window-panel>
     </window-splitter>
   `,
 };
@@ -409,17 +423,19 @@ export const Collapsible = {
           // eslint-disable-next-line no-console
           console.log("COLLAPSE PASSIVE", e);
         }}
+        id="panel-1"
       >
-        Panel 1
+        1
       </window-panel>
       <window-panel-resizer
         size="10px"
         class="panel-resizer"
       ></window-panel-resizer>
-      <window-panel min="100px" class="panel">Panel 2</window-panel>
+      <window-panel min="100px" class="panel"> 2</window-panel>
       <window-panel-resizer
         size="10px"
         class="panel-resizer"
+        id="resizer-2"
       ></window-panel-resizer>
       <window-panel
         id="panel-3"
@@ -434,7 +450,7 @@ export const Collapsible = {
           el.collapsed = newCollapsed;
         }}
       >
-        Panel 3
+        3
       </window-panel>
     </window-splitter>
   `,
@@ -645,6 +661,10 @@ export const ImperativePanel = {
 class ConditionalPanelElement extends LitElement {
   @property({ type: Boolean, reflect: true })
   isExpanded = false;
+
+  createRenderRoot() {
+    return this;
+  }
 
   // pass through class styles
   static styles = css`

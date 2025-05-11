@@ -38,11 +38,13 @@
     "@storybook/web-components-vite": "^8.6.12",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "catalog:",
+    "@vitest/browser": "catalog:",
     "eslint": "catalog:",
     "eslint-plugin-lit": "^2.1.1",
     "framer-motion": "^11.3.28",
     "lit": "^3.3.0",
     "storybook": "^8.6.12",
+    "tiny-cookie": "^2.5.1",
     "tshy": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
