@@ -541,23 +541,20 @@ export class PanelResizer extends LitElement {
     const handleData = this.getHandleData() || this.initPanelResizer();
 
     return {
-      // ...attrs, TODO other props
       ...getPanelResizerDomAttributes({
         groupId: this.context?.groupId,
         id: this.id,
         orientation: this.context?.orientation || "horizontal",
         isDragging: this.context?.activeDragHandleId === this.id,
         activeDragHandleId: this.context?.activeDragHandleId,
-        disabled: false,
-        // disabled: disabled, // TODO
+        disabled: this.disabled,
         controlsId: panelBeforeHandle?.id,
         min: panelBeforeHandle?.min,
         max: panelBeforeHandle?.max,
         currentValue: panelBeforeHandle?.currentValue,
         groupSize: getGroupSize(this.context),
       }),
-      tabIndex: 0,
-      // tabIndex: disabled ? -1 : 0,
+      tabIndex: this.disabled ? -1 : 0,
       style: {
         cursor: this.context ? getCursor(this.context) : undefined,
         width:
@@ -598,7 +595,7 @@ export class PanelResizer extends LitElement {
     });
 
     this.addEventListener("pointerdown", (e) => {
-      // if (disabled) return; // TODO
+      if (this.disabled) return;
       moveProps.onPointerDown(e);
     });
     this.addEventListener("keydown", (e) => {
