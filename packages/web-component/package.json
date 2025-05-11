@@ -1,6 +1,6 @@
 {
   "name": "@window-splitter/web-component",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "./dist/commonjs/index.js",
   "scripts": {
     "build": "tshy",
