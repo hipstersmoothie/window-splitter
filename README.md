@@ -17,6 +17,7 @@ A full featured window splitter component.
 - [Solid](./packages/solid/)
 - [Svelte](./packages/svelte/)
 - [Vue](./packages/vue/)
+- [Web Component](./packages/web-component/)
 
 ## Contributors ✨
 
