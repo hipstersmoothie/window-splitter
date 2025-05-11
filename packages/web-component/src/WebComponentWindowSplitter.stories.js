@@ -74,7 +74,10 @@ export const AutosaveCollapsible = {
         collapsible
         collapsedSize="100px"
         min="140px"
-        .onCollapseChange=${(e) => console.log(e)}
+        .onCollapseChange=${(e) => {
+          // eslint-disable-next-line no-console
+          console.log(e);
+        }}
       >
         Panel 1
       </window-panel>
@@ -400,7 +403,10 @@ export const Collapsible = {
         collapsible
         collapsedSize="60px"
         style="border: 10px solid green; box-sizing: border-box"
-        .onCollapseChange=${(e) => console.log("COLLAPSE PASSIVE", e)}
+        .onCollapseChange=${(e) => {
+          // eslint-disable-next-line no-console
+          console.log("COLLAPSE PASSIVE", e);
+        }}
       >
         Panel 1
       </window-panel>

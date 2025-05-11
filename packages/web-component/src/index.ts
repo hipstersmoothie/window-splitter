@@ -50,14 +50,17 @@ const getNextId = () => {
 
 function updateAttributes(
   element: HTMLElement,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   attributes: Record<string, any> | { style: Record<string, any> }
 ) {
   for (const attr of Object.keys(attributes)) {
     if (attr === "style") {
       for (const style of Object.keys(attributes[attr])) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (element.style as any)[style] = attributes[attr][style];
       }
     } else {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       element.setAttribute(attr, (attributes as any)[attr]);
     }
   }
@@ -609,10 +612,8 @@ export class PanelResizer extends LitElement {
 
       if (e.key === "Enter" && collapsiblePanel) {
         if (collapsiblePanel.collapsed) {
-          console.log("expandPanel", collapsiblePanel.id);
           this.send({ type: "expandPanel", panelId: collapsiblePanel.id });
         } else {
-          console.log("collapsePanel", collapsiblePanel.id);
           this.send({ type: "collapsePanel", panelId: collapsiblePanel.id });
         }
       }
@@ -620,8 +621,7 @@ export class PanelResizer extends LitElement {
 
     updateAttributes(this, this.getAttributes());
 
-    if (this.getHandleData()) {
-    } else {
+    if (!this.getHandleData()) {
       if (this.isPrerender) {
         this.send({
           type: "registerPanelHandle",
