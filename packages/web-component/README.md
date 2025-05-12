@@ -38,9 +38,9 @@ Then you can use them.
 
 ```html
 <window-panel-group>
-  <window-panel min="130px" max="400px" />
-  <window-panel-resizer />
-  <window-panel min="130px" />
+  <window-panel min="130px" max="400px"></window-panel>
+  <window-panel-resizer></window-panel-resizer>
+  <window-panel min="130px"></<window-panel>
 </window-panel-group>
 ```
 
