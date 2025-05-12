@@ -1,3 +1,23 @@
+# v1.0.2 (Mon May 12 2025)
+
+#### 🐛 Bug Fix
+
+- `@window-splitter/web-component`
+  - Fix the HTML structure in the README. [#60](https://github.com/hipstersmoothie/window-splitter/pull/60) ([@justinfagnani](https://github.com/justinfagnani))
+
+#### ⚠️ Pushed to `main`
+
+- readme ([@hipstersmoothie](https://github.com/hipstersmoothie))
+- `@window-splitter/web-component`
+  - use properties correclty ([@hipstersmoothie](https://github.com/hipstersmoothie))
+
+#### Authors: 2
+
+- Andrew Lisowski ([@hipstersmoothie](https://github.com/hipstersmoothie))
+- Justin Fagnani ([@justinfagnani](https://github.com/justinfagnani))
+
+---
+
 # v0.8.7 (Sun May 11 2025)
 
 #### 🐛 Bug Fix

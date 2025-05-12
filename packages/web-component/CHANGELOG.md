@@ -1,3 +1,21 @@
+# v1.0.2 (Mon May 12 2025)
+
+#### 🐛 Bug Fix
+
+- Fix the HTML structure in the README. [#60](https://github.com/hipstersmoothie/window-splitter/pull/60) ([@justinfagnani](https://github.com/justinfagnani))
+- Fix the HTML structure in the README. ([@justinfagnani](https://github.com/justinfagnani))
+
+#### ⚠️ Pushed to `main`
+
+- use properties correclty ([@hipstersmoothie](https://github.com/hipstersmoothie))
+
+#### Authors: 2
+
+- Andrew Lisowski ([@hipstersmoothie](https://github.com/hipstersmoothie))
+- Justin Fagnani ([@justinfagnani](https://github.com/justinfagnani))
+
+---
+
 # v1.0.1 (Sun May 11 2025)
 
 #### 🐛 Bug Fix
