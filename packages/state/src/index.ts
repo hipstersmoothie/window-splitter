@@ -317,6 +317,11 @@ export interface GroupMachineContextValue {
    * How to save the persisted state
    */
   autosaveStrategy?: "localStorage" | "cookie";
+  /**
+   * The amount to move the drag handle when shift is held down.
+   * @default 15px
+   */
+  shiftAmount?: number;
 }
 
 interface LockGroupEvent {
@@ -1119,7 +1124,7 @@ function updateLayout(
       : dragEvent.value.deltaY;
 
   if (dragEvent.value.shiftKey) {
-    moveAmount *= 15;
+    moveAmount *= context.shiftAmount ?? 15;
   }
 
   if (moveAmount === 0) {
@@ -1689,6 +1694,7 @@ export interface GroupMachineInput {
   groupId: string;
   items?: Item[];
   autosaveStrategy?: "localStorage" | "cookie";
+  shiftAmount?: number;
 }
 
 export type State = "idle" | "dragging" | "togglingCollapse";
@@ -1712,6 +1718,7 @@ export function groupMachine(
     dragOvershoot: new Big(0),
     groupId: input.groupId || `group-${groupId++}`,
     autosaveStrategy: input.autosaveStrategy,
+    shiftAmount: input.shiftAmount ?? 15,
   };
 
   const actions = {

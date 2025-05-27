@@ -66,6 +66,7 @@ exports[`utils > prepareSnapshot 1`] = `
     },
   ],
   "orientation": "horizontal",
+  "shiftAmount": 15,
   "size": {
     "height": 200,
     "width": 500,
@@ -131,6 +132,7 @@ exports[`utils > prepareSnapshot 2`] = `
     },
   ],
   "orientation": "horizontal",
+  "shiftAmount": 15,
   "size": {
     "height": 200,
     "width": 500,
