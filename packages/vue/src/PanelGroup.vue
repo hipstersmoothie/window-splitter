@@ -33,6 +33,7 @@ const {
   snapshot: snapshotProp,
   autosaveId,
   id,
+  shiftAmount,
   ...attrs
 } = defineProps<PanelGroupProps>();
 
@@ -60,6 +61,7 @@ const [initialState, send, machineState] = groupMachine(
     orientation: orientation,
     groupId,
     autosaveStrategy: autosaveStrategy,
+    shiftAmount,
     ...(snapshot ? prepareSnapshot(snapshot) : undefined),
   },
   (s) => {

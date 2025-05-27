@@ -341,6 +341,7 @@ const PanelGroupImpl = React.forwardRef<
     autosaveStrategy = "localStorage",
     snapshot: snapshotProp,
     initialItems,
+    shiftAmount,
     ...props
   },
   ref
@@ -377,6 +378,7 @@ const PanelGroupImpl = React.forwardRef<
         groupId,
         items: initialItems.current,
         autosaveStrategy,
+        shiftAmount,
         ...(typeof snapshotMemo === "object" ? snapshotMemo : undefined),
       }}
     >

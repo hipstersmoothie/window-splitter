@@ -71,6 +71,8 @@ export class PanelGroup extends LitElement {
   private cleanupChildrenObserver: () => void;
   private groupId: string;
 
+  @property({ type: Number, reflect: true })
+  shiftAmount?: number;
   @provide({ context: contextContext })
   private context: GroupMachineContextValue;
   @provide({ context: sendContext })
@@ -115,6 +117,7 @@ export class PanelGroup extends LitElement {
           (this.getAttribute("orientation") as Orientation) || "horizontal",
         groupId: this.groupId,
         autosaveStrategy,
+        shiftAmount: this.shiftAmount,
         ...(snapshot ? prepareSnapshot(JSON.parse(snapshot)) : undefined),
       },
       (s) => {

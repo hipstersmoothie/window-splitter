@@ -32,7 +32,10 @@ export interface PanelGroupHandle {
 
 export interface SharedPanelGroupProps
   extends Partial<
-    Pick<GroupMachineContextValue, "orientation" | "autosaveStrategy">
+    Pick<
+      GroupMachineContextValue,
+      "orientation" | "autosaveStrategy" | "shiftAmount"
+    >
   > {
   /** Persisted state to initialized the machine with */
   snapshot?: GroupMachineContextValue;

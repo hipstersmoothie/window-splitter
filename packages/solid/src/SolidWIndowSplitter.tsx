@@ -70,6 +70,7 @@ export function PanelGroup(props: PanelGroupProps) {
     "autosaveStrategy",
     "autosaveId",
     "snapshot",
+    "shiftAmount",
   ]);
   const [intiialValue, send, machineState, groupId] = createRoot(() => {
     const defaultGroupId = `panel-group-${createUniqueId()}`;
@@ -99,6 +100,7 @@ export function PanelGroup(props: PanelGroupProps) {
           orientation,
           groupId: groupIdInit,
           autosaveStrategy: autosaveStrategy,
+          shiftAmount: props.shiftAmount,
           ...(snapshot ? prepareSnapshot(snapshot) : undefined),
         },
         (value) => {

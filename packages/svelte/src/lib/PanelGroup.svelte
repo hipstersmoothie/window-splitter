@@ -28,6 +28,7 @@
     autosaveStrategy = "localStorage",
     autosaveId,
     snapshot,
+    shiftAmount,
     ...attrs
   }: PanelGroupProps = $props();
 
@@ -52,6 +53,7 @@
       orientation,
       groupId: id,
       autosaveStrategy,
+      shiftAmount,
       ...(snapshot ? prepareSnapshot(snapshot) : undefined),
     },
     (s) => updateContext(s)
