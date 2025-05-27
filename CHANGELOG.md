@@ -1,3 +1,16 @@
+# v1.1.0 (Mon May 26 2025)
+
+#### 🚀 Enhancement
+
+- `@window-splitter/interface`, `@window-splitter/react`, `@window-splitter/solid`, `@window-splitter/state`, `@window-splitter/svelte`, `@window-splitter/vue`, `@window-splitter/web-component`
+  - Add "shiftAmount" prop [#64](https://github.com/hipstersmoothie/window-splitter/pull/64) ([@hipstersmoothie](https://github.com/hipstersmoothie))
+
+#### Authors: 1
+
+- Andrew Lisowski ([@hipstersmoothie](https://github.com/hipstersmoothie))
+
+---
+
 # v1.0.2 (Mon May 12 2025)
 
 #### 🐛 Bug Fix

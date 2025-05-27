@@ -1,3 +1,19 @@
+# v1.1.0 (Mon May 26 2025)
+
+#### 🚀 Enhancement
+
+- Add "shiftAmount" prop [#64](https://github.com/hipstersmoothie/window-splitter/pull/64) ([@hipstersmoothie](https://github.com/hipstersmoothie))
+
+#### 🐛 Bug Fix
+
+- Add "shiftAmount" prop ([@hipstersmoothie](https://github.com/hipstersmoothie))
+
+#### Authors: 1
+
+- Andrew Lisowski ([@hipstersmoothie](https://github.com/hipstersmoothie))
+
+---
+
 # v0.8.7 (Sun May 11 2025)
 
 #### 🐛 Bug Fix
