@@ -672,7 +672,7 @@ export function ConditionalPanelComplex() {
 
 export function WithDefaultWidth() {
   return (
-    <PanelGroup style={{ height: "400px" }}>
+    <PanelGroup style={{ height: "400px" }} autosaveId="with-default-width">
       <Panel style={{ backgroundColor: "#333366" }} />
       <PanelResizer size="3px" />
       {/* I expected the right panel to be 100px wide */}
