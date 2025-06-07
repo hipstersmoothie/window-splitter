@@ -1,4 +1,4 @@
-import { expect, test, describe } from "vitest";
+import { expect, test, describe, assert } from "vitest";
 
 import {
   getUnitPercentageValue,
@@ -6,6 +6,8 @@ import {
   initializePanel,
   getCursor,
   initializePanelHandleData,
+  prepareSnapshot,
+  type Item,
 } from "./index.js";
 import Big from "big.js";
 import { createActor } from "./test-utils.js";
@@ -188,5 +190,30 @@ describe("initializePanelHandleData", () => {
         "type": "handle",
       }
     `);
+  });
+});
+
+describe('prepareSnapshot', () => {
+  test('converts sizes to Big', () => {
+    const item: Item = initializePanel({ id: 'panel-1', min: '100px', max: '300px', default: '200px' });
+
+    prepareSnapshot({
+      size: { width: 500, height: 300 },
+      items: [item, initializePanel({ id: 'panel-2', min: '100px' })],
+      groupId: 'group-1',
+      orientation: 'horizontal',
+      dragOvershoot: new Big(0),
+    });
+
+    expect(item.currentValue.value).toBeInstanceOf(Big);
+    expect(item.collapsedSize.value).toBeInstanceOf(Big);
+
+    expect(item.min.value).toBeInstanceOf(Big);
+
+    assert(typeof item.max === 'object');
+    expect(item.max.value).toBeInstanceOf(Big);
+
+    assert(typeof item.default === 'object');
+    expect(item.default.value).toBeInstanceOf(Big);
   });
 });

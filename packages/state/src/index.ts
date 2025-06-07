@@ -402,6 +402,10 @@ export function prepareSnapshot(snapshot: GroupMachineContextValue) {
       item.collapsedSize.value = new Big(item.collapsedSize.value);
       item.min.value = new Big(item.min.value);
 
+      if (item.default) {
+        item.default.value = new Big(item.default.value);
+      }
+
       if (item.max && item.max !== "1fr") {
         item.max.value = new Big(item.max.value);
       }
