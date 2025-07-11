@@ -485,6 +485,78 @@ describe("constraints", () => {
     );
   });
 
+  test("sibling collapsible panels work", async () => {
+    const onCollapseChange = (isCollapsed: boolean) => {
+      if (isCollapsed) {
+        actor.send({
+          type: "collapsePanel",
+          panelId: "panel-1",
+          controlled: true,
+        });
+      } else {
+        actor.send({
+          type: "expandPanel",
+          panelId: "panel-1",
+          controlled: true,
+        });
+      }
+    };
+
+    const actor = createActor({
+      groupId: "group",
+      items: [
+        initializePanel({
+          id: "panel-1",
+          default: "200px",
+          min: "100px",
+          collapsible: true,
+          collapsed: false,
+          onCollapseChange: { current: onCollapseChange },
+        }),
+        initializePanelHandleData({ id: "resizer-1", size: "10px" }),
+        initializePanel({
+          id: "panel-2",
+          default: "200px",
+          min: "100px",
+          collapsible: true,
+        }),
+        initializePanelHandleData({ id: "resizer-2", size: "10px" }),
+        initializePanel({
+          id: "panel-3",
+          min: "200px",
+          collapsible: true,
+          collapsedSize: "60px",
+        }),
+      ],
+    });
+
+    initializeSizes(actor, { width: 800, height: 200 });
+
+    capturePixelValues(actor, () => {
+      // First collapse both panels
+      expect(buildTemplate(actor.value)).toMatchInlineSnapshot(
+        `"200px 10px 200px 10px 380px"`
+      );
+      dragHandle(actor, { id: "resizer-2", delta: -410 });
+      expect(buildTemplate(actor.value)).toMatchInlineSnapshot(
+        `"0px 10px 0px 10px 780px"`
+      );
+    });
+
+    actor.send({
+      type: "expandPanel",
+      panelId: "panel-1",
+      controlled: true,
+    });
+    await waitForIdle(actor);
+
+    capturePixelValues(actor, () => {
+      expect(buildTemplate(actor.value)).toMatchInlineSnapshot(
+        `"100px 10px 0px 10px 680px"`
+      );
+    });
+  });
+
   test("panel can have a min", () => {
     const actor = createActor({ groupId: "group" });
 

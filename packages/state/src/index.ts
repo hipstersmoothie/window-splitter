@@ -804,8 +804,8 @@ function panelHasSpace(
     `panelHasSpace only works with number values: ${item.id} ${item.currentValue}`
   );
 
-  if (item.collapsible && !item.collapsed) {
-    return true;
+  if (adjustment === "subtract" && item.collapsible) {
+    return !item.collapsed;
   }
 
   if (adjustment === "add") {
@@ -1287,7 +1287,10 @@ function updateLayout(
           .minus(Math.abs(moveAmount))
       );
 
-    if (panelBeforeNewValue.lt(panelBefore.min.value)) {
+    if (
+      panelBeforeNewValue.lt(panelBefore.min.value) &&
+      !panelBefore.collapsible
+    ) {
       // TODO this should probably distribute the space between the panels?
       return { dragOvershoot: newDragOvershoot };
     }
@@ -1328,7 +1331,7 @@ function updateLayout(
     panelBefore.collapsed = true;
     panelBeforeNewValue = getUnitPixelValue(context, panelBefore.collapsedSize);
     // Add the extra space created to the before panel
-    panelAfterNewValue = panelAfterNewValue.add(
+    panelAfterNewValue = panelAfter.currentValue.value.add(
       panelBeforePreviousValue.minus(panelBeforeNewValue)
     );
 
