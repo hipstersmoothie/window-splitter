@@ -741,6 +741,22 @@ function getHandleForPanelId(
 ) {
   const panelIndex = context.items.findIndex((item) => item.id === panelId);
 
+  if (context.activeDragHandleId) {
+    const handleIndex = getPanelHandleIndex(
+      context,
+      context.activeDragHandleId
+    );
+
+    let item = context.items[handleIndex];
+
+    if (item && isPanelHandle(item)) {
+      return {
+        item,
+        direction: handleIndex > panelIndex ? (1 as const) : (-1 as const),
+      };
+    }
+  }
+
   invariant(panelIndex !== -1, `Expected panel before: ${panelId}`);
 
   let item = context.items[panelIndex + 1];
