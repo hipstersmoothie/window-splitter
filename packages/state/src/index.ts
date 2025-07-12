@@ -774,6 +774,37 @@ function getHandleForPanelId(
   throw new Error(`Cant find handle for panel: ${panelId}`);
 }
 
+function getHandleForPanelIdWithAvailableSpace(
+  context: GroupMachineContextValue,
+  panelId: string
+) {
+  const panelIndex = context.items.findIndex((item) => item.id === panelId);
+
+  invariant(panelIndex !== -1, `Expected panel before: ${panelId}`);
+
+  let item = context.items[panelIndex + 1];
+
+  if (
+    item &&
+    isPanelHandle(item) &&
+    findPanelWithSpace(context, context.items, panelIndex + 1, 1, "add")
+  ) {
+    return { item, direction: 1 as const };
+  }
+
+  item = context.items[panelIndex - 1];
+
+  if (
+    item &&
+    isPanelHandle(item) &&
+    findPanelWithSpace(context, context.items, panelIndex - 1, -1, "add")
+  ) {
+    return { item, direction: -1 as const };
+  }
+
+  return getHandleForPanelId(context, panelId);
+}
+
 /** Given the specified order props and default order of the items, order the items */
 function sortWithOrder(items: Array<Item>) {
   const defaultPlacement: Record<string, number> = {};
@@ -1675,8 +1706,7 @@ function animationActor(
   abortController: AbortController
 ) {
   const panel = getPanelWithId(context, event.panelId);
-  const handle = getHandleForPanelId(context, event.panelId);
-
+  const handle = getHandleForPanelIdWithAvailableSpace(context, event.panelId);
   let direction = new Big(handle.direction);
   const fullDelta = getDeltaForEvent(context, event);
 
@@ -1902,11 +1932,15 @@ export function groupMachine(
     },
     cannotExpandPanel: (event: GroupMachineEvent) => {
       isEvent(event, ["expandPanel"]);
-      const delta = getDeltaForEvent(context, event);
-      const handle = getHandleForPanelId(context, event.panelId);
       const pixelItems = prepareItems(context);
-
       let interimContext = { ...context, items: pixelItems };
+
+      const delta = getDeltaForEvent(context, event);
+      const handle = getHandleForPanelIdWithAvailableSpace(
+        interimContext,
+        event.panelId
+      );
+
       interimContext = {
         ...interimContext,
         ...iterativelyUpdateLayout({
