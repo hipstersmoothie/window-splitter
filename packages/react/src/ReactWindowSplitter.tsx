@@ -643,9 +643,19 @@ const PanelVisible = React.forwardRef<
       const p = getPanelWithId(context, panelId);
 
       if (collapsed === true && !p.collapsed) {
-        send({ type: "collapsePanel", panelId, controlled: true });
+        send({
+          type: "collapsePanel",
+          panelId,
+          controlled: true,
+          resolve: () => {},
+        });
       } else if (collapsed === false && p.collapsed) {
-        send({ type: "expandPanel", panelId, controlled: true });
+        send({
+          type: "expandPanel",
+          panelId,
+          controlled: true,
+          resolve: () => {},
+        });
       }
     }
   }, [send, collapsed, panelId, machineRef]);
@@ -655,16 +665,19 @@ const PanelVisible = React.forwardRef<
   useImperativeHandle(handle || fallbackHandleRef, () => {
     return {
       getId: () => panelId,
-      collapse: () => {
+      collapse: async () => {
         if (collapsible) {
-          // TODO: setting controlled here might be wrong
-          send({ type: "collapsePanel", panelId, controlled: true });
+          await new Promise<void>((resolve) => {
+            send({ type: "collapsePanel", panelId, controlled: true, resolve });
+          });
         }
       },
       isCollapsed: () => Boolean(collapsible && panel?.collapsed),
-      expand: () => {
+      expand: async () => {
         if (collapsible) {
-          send({ type: "expandPanel", panelId, controlled: true });
+          await new Promise<void>((resolve) => {
+            send({ type: "expandPanel", panelId, controlled: true, resolve });
+          });
         }
       },
       isExpanded: () => Boolean(collapsible && !panel?.collapsed),
@@ -839,9 +852,17 @@ const PanelResizerVisible = React.forwardRef<
   const onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.key === "Enter" && collapsiblePanel) {
       if (collapsiblePanel.collapsed) {
-        send({ type: "expandPanel", panelId: collapsiblePanel.id });
+        send({
+          type: "expandPanel",
+          panelId: collapsiblePanel.id,
+          resolve: () => {},
+        });
       } else {
-        send({ type: "collapsePanel", panelId: collapsiblePanel.id });
+        send({
+          type: "collapsePanel",
+          panelId: collapsiblePanel.id,
+          resolve: () => {},
+        });
       }
     }
   };

@@ -279,6 +279,7 @@ interface CollapsePanelEvent extends ControlledCollapseToggle {
   type: "collapsePanel";
   /** The panel to collapse */
   panelId: string;
+  resolve: () => void;
 }
 
 interface ExpandPanelEvent extends ControlledCollapseToggle {
@@ -286,6 +287,7 @@ interface ExpandPanelEvent extends ControlledCollapseToggle {
   type: "expandPanel";
   /** The panel to expand */
   panelId: string;
+  resolve: () => void;
 }
 
 interface SetPanelPixelSizeEvent {
@@ -1681,6 +1683,7 @@ function setCookie(name: string, jsonData: unknown) {
 interface AnimationActorOutput {
   panelId: string;
   action: "expand" | "collapse";
+  resolve: () => void;
 }
 
 function getDeltaForEvent(
@@ -1752,7 +1755,7 @@ function animationActor(
 
       if (e.eq(1)) {
         const action = event.type === "expandPanel" ? "expand" : "collapse";
-        resolve({ panelId: panel.id, action });
+        resolve({ panelId: panel.id, action, resolve: event.resolve });
         return false;
       }
 
@@ -2204,6 +2207,7 @@ export function groupMachine(
           const delta = isBigger
             ? newSize.minus(current)
             : current.minus(newSize);
+          panel.sizeBeforeCollapse = newSize.toNumber();
 
           Object.assign(
             context,
@@ -2234,6 +2238,9 @@ export function groupMachine(
                 (output) => {
                   actions.onAnimationEnd(output);
                   transition("idle");
+                  requestAnimationFrame(event.resolve);
+                  panel.collapsed = true;
+                  panel.onCollapseChange?.current?.(true);
                 }
               );
             }
@@ -2254,6 +2261,9 @@ export function groupMachine(
                 (output) => {
                   actions.onAnimationEnd(output);
                   transition("idle");
+                  requestAnimationFrame(event.resolve);
+                  panel.collapsed = false;
+                  panel.onCollapseChange?.current?.(false);
                 }
               );
             }

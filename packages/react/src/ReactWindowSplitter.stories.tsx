@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import { spring } from "framer-motion";
 import {
   PanelGroup,
@@ -9,6 +9,7 @@ import {
   PanelResizerProps,
 } from "./ReactWindowSplitter.js";
 import { PanelGroupHandle, PanelHandle } from "@window-splitter/interface";
+import { PercentUnit } from "@window-splitter/state";
 
 export default {
   title: "Components/React",
@@ -701,5 +702,210 @@ export function StaticAtRest({
       <StyledResizer />
       <StyledPanel min="100px">Panel 3</StyledPanel>
     </StyledPanelGroup>
+  );
+}
+
+function Flex({
+  direction = "row",
+  gap = "0x",
+  align = "start",
+  justify = "start",
+  ...props
+}: React.HTMLAttributes<HTMLDivElement> & {
+  direction?: "row" | "column";
+  gap?: string;
+  align?: "center" | "start" | "end";
+  justify?: "center" | "start" | "end" | "between";
+}) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: direction,
+        gap,
+        alignItems: align,
+        justifyContent: justify === "between" ? "space-between" : justify,
+      }}
+      {...props}
+    />
+  );
+}
+
+export function SiblingCollapsiblePanels() {
+  const sidebarHandle = useRef<PanelHandle>(null);
+  const editorHandle = useRef<PanelHandle>(null);
+  const previewHandle = useRef<PanelHandle>(null);
+  const [editModeSize, setEditModeSize] = useState<number[] | undefined>();
+  const panelGroupRef = useRef<PanelGroupHandle>(null);
+  const [isEditMode, setIsEditMode] = useState(true);
+
+  const handleEditModeToggle = useCallback(async () => {
+    const newMode = !isEditMode;
+    setIsEditMode(newMode);
+
+    if (!newMode) {
+      setEditModeSize(panelGroupRef.current?.getPercentageSizes());
+
+      await sidebarHandle.current?.collapse();
+      await editorHandle.current?.collapse();
+      await previewHandle.current?.expand();
+    } else {
+      if (editModeSize) {
+        panelGroupRef.current?.setSizes(
+          editModeSize.map((i) => `${i * 100}%` as PercentUnit)
+        );
+      }
+
+      await sidebarHandle.current?.expand();
+      await editorHandle.current?.expand();
+      await previewHandle.current?.expand();
+    }
+  }, [editModeSize, isEditMode]);
+
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(!isEditMode);
+  const [isEditorCollapsed, setIsEditorCollapsed] = useState(!isEditMode);
+  const [isPreviewCollapsed, setIsPreviewCollapsed] = useState(false);
+
+  const handleSidebarCollapseChange = useCallback(
+    (isCollapsed: boolean) => {
+      if (isEditMode) {
+        setIsSidebarCollapsed(isCollapsed);
+      }
+    },
+    [isEditMode]
+  );
+  const handleEditorCollapseChange = useCallback(
+    (isCollapsed: boolean) => {
+      console.log("EDITOR COLLAPSE CHANGE", isCollapsed);
+      if (isEditMode) {
+        setIsEditorCollapsed(isCollapsed);
+      }
+    },
+    [isEditMode]
+  );
+  const handlePreviewCollapseChange = useCallback(
+    (isCollapsed: boolean) => {
+      if (isEditMode) {
+        setIsPreviewCollapsed(isCollapsed);
+      }
+    },
+    [isEditMode]
+  );
+
+  return (
+    <Flex direction="column" style={{ height: "90vh", width: "90vw" }}>
+      <StyledPanelGroup handle={panelGroupRef}>
+        <StyledPanel
+          handle={sidebarHandle}
+          id="sidebar"
+          min="100px"
+          collapsible
+          collapsed={isSidebarCollapsed}
+          collapseAnimation="ease-in-out"
+          onCollapseChange={handleSidebarCollapseChange}
+        >
+          <Flex
+            align="center"
+            justify="center"
+            style={{ height: "100%", width: "100%" }}
+          >
+            Sidebar
+          </Flex>
+        </StyledPanel>
+        <StyledResizer id="resizer-1" />
+        <StyledPanel
+          handle={editorHandle}
+          id="editor"
+          min="100px"
+          collapsible
+          collapsed={isEditorCollapsed}
+          collapseAnimation="ease-in-out"
+          onCollapseChange={handleEditorCollapseChange}
+        >
+          <Flex
+            align="center"
+            justify="center"
+            style={{ height: "100%", width: "100%" }}
+          >
+            Editor
+          </Flex>
+        </StyledPanel>
+        <StyledResizer id="resizer-2" />
+        <StyledPanel
+          handle={previewHandle}
+          id="preview"
+          min="100px"
+          collapsible
+          collapsed={isPreviewCollapsed}
+          collapseAnimation="ease-in-out"
+          onCollapseChange={handlePreviewCollapseChange}
+        >
+          <Flex
+            align="center"
+            justify="center"
+            style={{ height: "100%", width: "100%" }}
+          >
+            Preview
+          </Flex>
+        </StyledPanel>
+      </StyledPanelGroup>
+      <Flex align="center" justify="between">
+        <Flex gap="2px">
+          <button
+            disabled={!isEditMode}
+            type="button"
+            onClick={() =>
+              setIsSidebarCollapsed(
+                (prevSidebarCollapsed) => !prevSidebarCollapsed
+              )
+            }
+            style={{
+              backgroundColor: isSidebarCollapsed ? "blue" : undefined,
+            }}
+          >
+            {isSidebarCollapsed ? "Open sidebar" : "Close sidebar"}
+          </button>
+          <button
+            disabled={!isEditMode}
+            type="button"
+            onClick={() =>
+              setIsEditorCollapsed(
+                (prevEditorCollapsed) => !prevEditorCollapsed
+              )
+            }
+            style={{
+              backgroundColor: isEditorCollapsed ? "blue" : undefined,
+            }}
+          >
+            {isEditorCollapsed ? "Open editor" : "Close editor"}
+          </button>
+          <button
+            disabled={!isEditMode}
+            type="button"
+            onClick={() =>
+              setIsPreviewCollapsed(
+                (prevPreviewCollapsed) => !prevPreviewCollapsed
+              )
+            }
+            style={{
+              backgroundColor: isPreviewCollapsed ? "blue" : undefined,
+            }}
+          >
+            {isPreviewCollapsed ? "Open preview" : "Close preview"}
+          </button>
+        </Flex>
+        <Flex gap="8px">
+          <button
+            type="button"
+            onClick={handleEditModeToggle}
+            style={{
+              backgroundColor: isEditMode ? "blue" : undefined,
+            }}
+          >
+            Edit mode
+          </button>
+        </Flex>
+      </Flex>
+    </Flex>
   );
 }

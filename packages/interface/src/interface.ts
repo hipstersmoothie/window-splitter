@@ -45,11 +45,11 @@ export interface SharedPanelGroupProps
 
 export interface PanelHandle {
   /** Collapse the panel */
-  collapse: () => void;
+  collapse: () => Promise<void>;
   /** Returns true if the panel is collapsed */
   isCollapsed: () => boolean;
   /** Expand the panel */
-  expand: () => void;
+  expand: () => Promise<void>;
   /** Returns true if the panel is expanded */
   isExpanded: () => boolean;
   /** The id of the panel */
