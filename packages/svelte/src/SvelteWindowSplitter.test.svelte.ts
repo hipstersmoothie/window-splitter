@@ -255,18 +255,24 @@ test("Keyboard interactions with collapsed panels", async () => {
 
   const resizer2 = document.getElementById("resizer-2")!;
   fireEvent.keyDown(resizer2, { key: "Enter" });
-  await expectTemplate(collapsibleHandle, "209px 10px 169px 10px 100px");
+  await expectTemplate(
+    collapsibleHandle,
+    "209.015625px 10px 167px 10px 101.984375px"
+  );
 
   fireEvent.keyDown(resizer2, { key: "ArrowLeft" });
   fireEvent.keyDown(resizer2, { key: "ArrowLeft" });
   fireEvent.keyDown(resizer2, { key: "ArrowLeft" });
   fireEvent.keyDown(resizer2, { key: "ArrowLeft" });
-  await expectTemplate(collapsibleHandle, "209px 10px 165px 10px 104px");
+  await expectTemplate(
+    collapsibleHandle,
+    "209.015625px 10px 163px 10px 105.984375px"
+  );
 
   fireEvent.keyDown(resizer2, { key: "ArrowLeft", shiftKey: true });
   await expectTemplate(
     collapsibleHandle,
-    "209.03125px 10px 149.984375px 10px 118.984375px"
+    "209.03125px 10px 147.984375px 10px 120.984375px"
   );
 
   fireEvent.keyDown(resizer2, { key: "Enter" });
@@ -278,6 +284,6 @@ test("Keyboard interactions with collapsed panels", async () => {
   fireEvent.keyDown(resizer2, { key: "Enter" });
   await expectTemplate(
     collapsibleHandle,
-    "209.0625px 10px 149.96875px 10px 118.96875px"
+    "209.046875px 10px 144.9375px 10px 124.015625px"
   );
 });

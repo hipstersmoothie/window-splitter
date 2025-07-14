@@ -673,7 +673,7 @@ describe("constraints", () => {
     });
   });
 
-  test.only("controlled collapse events", async () => {
+  test("controlled collapse events", async () => {
     const onCollapseChange = (panelId: string) => (isCollapsed: boolean) => {
       if (isCollapsed) {
         actor.send({

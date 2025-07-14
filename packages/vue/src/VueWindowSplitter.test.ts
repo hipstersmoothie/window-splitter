@@ -101,10 +101,10 @@ describe("Autosave", () => {
     await expectTemplate(handle.value!, "342px 10px 146px");
 
     await waitForCondition(() =>
-      Boolean(localStorage.getItem("autosave-example-vue")),
+      Boolean(localStorage.getItem("autosave-example-vue"))
     );
     const obj = JSON.parse(
-      localStorage.getItem("autosave-example-vue") || "{}",
+      localStorage.getItem("autosave-example-vue") || "{}"
     );
     expect(obj.items).toMatchSnapshot();
   });
@@ -145,7 +145,7 @@ describe("Autosave", () => {
     await expectTemplate(handle.value!, "343px 10px 147px");
 
     await waitForCondition(() =>
-      document.cookie.includes("autosave-cookie-vue"),
+      document.cookie.includes("autosave-cookie-vue")
     );
 
     expect(document.cookie).toMatchSnapshot();
@@ -172,18 +172,24 @@ test("Keyboard interactions with collapsed panels", async () => {
 
   const resizer2 = document.getElementById("resizer-2")!;
   fireEvent.keyDown(resizer2, { key: "Enter" });
-  await expectTemplate(handle.value!, "209px 10px 169px 10px 100px");
+  await expectTemplate(
+    handle.value!,
+    "209.015625px 10px 167px 10px 101.984375px"
+  );
 
   fireEvent.keyDown(resizer2, { key: "ArrowLeft" });
   fireEvent.keyDown(resizer2, { key: "ArrowLeft" });
   fireEvent.keyDown(resizer2, { key: "ArrowLeft" });
   fireEvent.keyDown(resizer2, { key: "ArrowLeft" });
-  await expectTemplate(handle.value!, "209px 10px 165px 10px 104px");
+  await expectTemplate(
+    handle.value!,
+    "209.015625px 10px 163px 10px 105.984375px"
+  );
 
   fireEvent.keyDown(resizer2, { key: "ArrowLeft", shiftKey: true });
   await expectTemplate(
     handle.value!,
-    "209.03125px 10px 149.984375px 10px 118.984375px",
+    "209.03125px 10px 147.984375px 10px 120.984375px"
   );
 
   fireEvent.keyDown(resizer2, { key: "Enter" });
@@ -192,7 +198,7 @@ test("Keyboard interactions with collapsed panels", async () => {
   fireEvent.keyDown(resizer2, { key: "Enter" });
   await expectTemplate(
     handle.value!,
-    "209.0625px 10px 149.96875px 10px 118.96875px",
+    "209.046875px 10px 144.9375px 10px 124.015625px"
   );
 });
 
@@ -260,10 +266,10 @@ describe("imperative panel API", async () => {
     expect(leftHandle.value!.isCollapsed()).toBe(true);
     expect(leftHandle.value!.isExpanded()).toBe(false);
     expect(rightHandle.value!.getPercentageSize()).toBe(
-      leftHandle.value!.getPercentageSize(),
+      leftHandle.value!.getPercentageSize()
     );
     expect(rightHandle.value!.getPixelSize()).toBe(
-      leftHandle.value!.getPixelSize(),
+      leftHandle.value!.getPixelSize()
     );
 
     leftHandle.value!.expand();

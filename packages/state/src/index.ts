@@ -2260,8 +2260,6 @@ export function groupMachine(
                 (output) => {
                   actions.onAnimationEnd(output);
                   transition("idle");
-                  panel.collapsed = true;
-                  panel.onCollapseChange?.current?.(true);
                   if (event.resolve) {
                     requestAnimationFrame(event.resolve);
                   }
@@ -2285,8 +2283,6 @@ export function groupMachine(
                 (output) => {
                   actions.onAnimationEnd(output);
                   transition("idle");
-                  panel.collapsed = false;
-                  panel.onCollapseChange?.current?.(false);
                   if (event.resolve) {
                     requestAnimationFrame(event.resolve);
                   }
