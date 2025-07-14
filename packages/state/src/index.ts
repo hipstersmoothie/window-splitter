@@ -1768,7 +1768,9 @@ function animationActor(
         // Ideally we figure out some way to not do this but disregardCollapseBuffer is needed for animations
         if (
           context.items.find(
-            (i) => isPanelData(i) && i.currentValue.value.lt(0)
+            (i) =>
+              isPanelData(i) &&
+              i.currentValue.value.round(undefined, Big.roundHalfEven).lt(0)
           )
         ) {
           assign(context, finalLayout);
