@@ -643,19 +643,9 @@ const PanelVisible = React.forwardRef<
       const p = getPanelWithId(context, panelId);
 
       if (collapsed === true && !p.collapsed) {
-        send({
-          type: "collapsePanel",
-          panelId,
-          controlled: true,
-          resolve: () => {},
-        });
+        send({ type: "collapsePanel", panelId, controlled: true });
       } else if (collapsed === false && p.collapsed) {
-        send({
-          type: "expandPanel",
-          panelId,
-          controlled: true,
-          resolve: () => {},
-        });
+        send({ type: "expandPanel", panelId, controlled: true });
       }
     }
   }, [send, collapsed, panelId, machineRef]);
@@ -852,17 +842,9 @@ const PanelResizerVisible = React.forwardRef<
   const onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.key === "Enter" && collapsiblePanel) {
       if (collapsiblePanel.collapsed) {
-        send({
-          type: "expandPanel",
-          panelId: collapsiblePanel.id,
-          resolve: () => {},
-        });
+        send({ type: "expandPanel", panelId: collapsiblePanel.id });
       } else {
-        send({
-          type: "collapsePanel",
-          panelId: collapsiblePanel.id,
-          resolve: () => {},
-        });
+        send({ type: "collapsePanel", panelId: collapsiblePanel.id });
       }
     }
   };
