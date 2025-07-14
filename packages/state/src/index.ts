@@ -279,7 +279,7 @@ interface CollapsePanelEvent extends ControlledCollapseToggle {
   type: "collapsePanel";
   /** The panel to collapse */
   panelId: string;
-  resolve: () => void;
+  resolve?: () => void;
 }
 
 interface ExpandPanelEvent extends ControlledCollapseToggle {
@@ -287,7 +287,7 @@ interface ExpandPanelEvent extends ControlledCollapseToggle {
   type: "expandPanel";
   /** The panel to expand */
   panelId: string;
-  resolve: () => void;
+  resolve?: () => void;
 }
 
 interface SetPanelPixelSizeEvent {
@@ -1683,7 +1683,7 @@ function setCookie(name: string, jsonData: unknown) {
 interface AnimationActorOutput {
   panelId: string;
   action: "expand" | "collapse";
-  resolve: () => void;
+  resolve?: () => void;
 }
 
 function getDeltaForEvent(
@@ -1712,6 +1712,16 @@ function animationActor(
   const handle = getHandleForPanelIdWithAvailableSpace(context, event.panelId);
   let direction = new Big(handle.direction);
   const fullDelta = getDeltaForEvent(context, event);
+
+  const contextCopy = { ...context, items: prepareItems(context) };
+  const finalLayout = iterativelyUpdateLayout({
+    context: contextCopy,
+    panelId: event.panelId,
+    handleId: handle.item.id,
+    delta: fullDelta,
+    direction: handle.direction,
+    isVirtual: true,
+  });
 
   return new Promise<AnimationActorOutput | undefined>((resolve, reject) => {
     abortController.signal.addEventListener("abort", () => {
@@ -1754,6 +1764,17 @@ function animationActor(
       );
 
       if (e.eq(1)) {
+        // If we're controlled expanding to a value that breaks the layout we might get negative values
+        // In this case we need to use a valid layout like `iterativelyUpdateLayout`'s return value
+        // Ideally we figure out some way to not do this but disregardCollapseBuffer is needed for animations
+        if (
+          context.items.find(
+            (i) => isPanelData(i) && i.currentValue.value.lt(0)
+          )
+        ) {
+          assign(context, finalLayout);
+        }
+
         const action = event.type === "expandPanel" ? "expand" : "collapse";
         resolve({ panelId: panel.id, action, resolve: event.resolve });
         return false;
@@ -1997,6 +2018,8 @@ export function groupMachine(
     }
 
     state.current = to;
+
+    onUpdate?.(context);
   }
 
   function send(event: GroupMachineEvent) {
@@ -2238,7 +2261,9 @@ export function groupMachine(
                 (output) => {
                   actions.onAnimationEnd(output);
                   transition("idle");
-                  requestAnimationFrame(event.resolve);
+                  if (event.resolve) {
+                    requestAnimationFrame(event.resolve);
+                  }
                   panel.collapsed = true;
                   panel.onCollapseChange?.current?.(true);
                 }
@@ -2261,9 +2286,11 @@ export function groupMachine(
                 (output) => {
                   actions.onAnimationEnd(output);
                   transition("idle");
-                  requestAnimationFrame(event.resolve);
                   panel.collapsed = false;
                   panel.onCollapseChange?.current?.(false);
+                  if (event.resolve) {
+                    requestAnimationFrame(event.resolve);
+                  }
                 }
               );
             }

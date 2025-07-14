@@ -793,15 +793,16 @@ export function SiblingCollapsiblePanels() {
   );
 
   return (
-    <Flex direction="column" style={{ height: "90vh", width: "90vw" }}>
+    <Flex direction="column" style={{ height: "90vh", width: "800px" }}>
       <StyledPanelGroup handle={panelGroupRef}>
         <StyledPanel
           handle={sidebarHandle}
           id="sidebar"
           min="100px"
+          default="200px"
           collapsible
           collapsed={isSidebarCollapsed}
-          collapseAnimation="ease-in-out"
+          // collapseAnimation="ease-in-out"
           onCollapseChange={handleSidebarCollapseChange}
         >
           <Flex
@@ -817,10 +818,14 @@ export function SiblingCollapsiblePanels() {
           handle={editorHandle}
           id="editor"
           min="100px"
+          default="200px"
           collapsible
           collapsed={isEditorCollapsed}
-          collapseAnimation="ease-in-out"
-          onCollapseChange={handleEditorCollapseChange}
+          // collapseAnimation="ease-in-out"
+          onCollapseChange={(v) => {
+            console.log("COLLAPSE CHANGE editor", v);
+            setIsEditorCollapsed(v);
+          }}
         >
           <Flex
             align="center"
@@ -837,7 +842,7 @@ export function SiblingCollapsiblePanels() {
           min="100px"
           collapsible
           collapsed={isPreviewCollapsed}
-          collapseAnimation="ease-in-out"
+          // collapseAnimation="ease-in-out"
           onCollapseChange={handlePreviewCollapseChange}
         >
           <Flex

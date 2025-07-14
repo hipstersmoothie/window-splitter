@@ -557,6 +557,211 @@ describe("constraints", () => {
     });
   });
 
+  test("controlled collapse complex drags", async () => {
+    const onCollapseChange = (panelId: string) => (isCollapsed: boolean) => {
+      if (isCollapsed) {
+        actor.send({
+          type: "collapsePanel",
+          panelId,
+          controlled: true,
+        });
+      } else {
+        actor.send({ type: "expandPanel", panelId, controlled: true });
+      }
+    };
+
+    const onChange1 = onCollapseChange("panel-1");
+    const onChange2 = onCollapseChange("panel-2");
+    const onChange3 = onCollapseChange("panel-3");
+
+    const actor = createActor({
+      groupId: "group",
+      items: [
+        initializePanel({
+          id: "panel-1",
+          default: "200px",
+          min: "100px",
+          collapsible: true,
+          collapsed: false,
+          onCollapseChange: { current: onChange1 },
+        }),
+        initializePanelHandleData({ id: "resizer-1", size: "10px" }),
+        initializePanel({
+          id: "panel-2",
+          default: "200px",
+          min: "100px",
+          collapsible: true,
+          onCollapseChange: { current: onChange2 },
+        }),
+        initializePanelHandleData({ id: "resizer-2", size: "10px" }),
+        initializePanel({
+          id: "panel-3",
+          min: "100px",
+          collapsible: true,
+          onCollapseChange: { current: onChange3 },
+        }),
+      ],
+    });
+
+    initializeSizes(actor, { width: 800, height: 200 });
+
+    // Collapse middle panel from the left
+    capturePixelValues(actor, () => {
+      expect(buildTemplate(actor.value)).toMatchInlineSnapshot(
+        `"200px 10px 200px 10px 380px"`
+      );
+      dragHandle(actor, { id: "resizer-1", delta: 200 });
+      expect(buildTemplate(actor.value)).toMatchInlineSnapshot(
+        `"450px 10px 0px 10px 330px"`
+      );
+      dragHandle(actor, { id: "resizer-1", delta: -200 });
+      expect(buildTemplate(actor.value)).toMatchInlineSnapshot(
+        `"249px 10px 201px 10px 330px"`
+      );
+    });
+
+    // Collapse middle panel from the right
+    capturePixelValues(actor, () => {
+      dragHandle(actor, { id: "resizer-2", delta: -200 });
+      expect(buildTemplate(actor.value)).toMatchInlineSnapshot(
+        `"200px 10px 0px 10px 580px"`
+      );
+      dragHandle(actor, { id: "resizer-2", delta: 200 });
+      expect(buildTemplate(actor.value)).toMatchInlineSnapshot(
+        `"200px 10px 201px 10px 379px"`
+      );
+    });
+
+    // Collapse the left panel
+    capturePixelValues(actor, () => {
+      dragHandle(actor, { id: "resizer-1", delta: -200 });
+      expect(buildTemplate(actor.value)).toMatchInlineSnapshot(
+        `"0px 10px 401px 10px 379px"`
+      );
+      dragHandle(actor, { id: "resizer-1", delta: 200 });
+      expect(buildTemplate(actor.value)).toMatchInlineSnapshot(
+        `"150px 10px 251px 10px 379px"`
+      );
+    });
+
+    // Collapse the right panel
+    capturePixelValues(actor, () => {
+      dragHandle(actor, { id: "resizer-2", delta: 600 });
+      expect(buildTemplate(actor.value)).toMatchInlineSnapshot(
+        `"150px 10px 630px 10px 0px"`
+      );
+      dragHandle(actor, { id: "resizer-2", delta: -600 });
+      expect(buildTemplate(actor.value)).toMatchInlineSnapshot(
+        `"150px 10px 300px 10px 330px"`
+      );
+    });
+
+    // Sweep the left handle to the right
+    capturePixelValues(actor, () => {
+      dragHandle(actor, { id: "resizer-1", delta: 1000 });
+      expect(buildTemplate(actor.value)).toMatchInlineSnapshot(
+        `"780px 10px 0px 10px 0px"`
+      );
+    });
+
+    // Sweep the right handle to the left
+    capturePixelValues(actor, () => {
+      dragHandle(actor, { id: "resizer-2", delta: -1000 });
+      expect(buildTemplate(actor.value)).toMatchInlineSnapshot(
+        `"0px 10px 0px 10px 780px"`
+      );
+    });
+  });
+
+  test.only("controlled collapse events", async () => {
+    const onCollapseChange = (panelId: string) => (isCollapsed: boolean) => {
+      if (isCollapsed) {
+        actor.send({
+          type: "collapsePanel",
+          panelId,
+          controlled: true,
+        });
+      } else {
+        actor.send({ type: "expandPanel", panelId, controlled: true });
+      }
+    };
+
+    const onChange1 = onCollapseChange("panel-1");
+    const onChange2 = onCollapseChange("panel-2");
+    const onChange3 = onCollapseChange("panel-3");
+
+    const actor = createActor({
+      groupId: "group",
+      items: [
+        initializePanel({
+          id: "panel-1",
+          default: "200px",
+          min: "100px",
+          collapsible: true,
+          collapsed: false,
+          onCollapseChange: { current: onChange1 },
+        }),
+        initializePanelHandleData({ id: "resizer-1", size: "10px" }),
+        initializePanel({
+          id: "panel-2",
+          default: "200px",
+          min: "100px",
+          collapsible: true,
+          collapsed: false,
+          onCollapseChange: { current: onChange2 },
+        }),
+        initializePanelHandleData({ id: "resizer-2", size: "10px" }),
+        initializePanel({
+          id: "panel-3",
+          min: "100px",
+          collapsible: true,
+          collapsed: false,
+          onCollapseChange: { current: onChange3 },
+        }),
+      ],
+    });
+
+    initializeSizes(actor, { width: 800, height: 200 });
+
+    capturePixelValues(actor, () => {
+      expect(buildTemplate(actor.value)).toMatchInlineSnapshot(
+        `"200px 10px 200px 10px 380px"`
+      );
+    });
+
+    actor.send({ type: "collapsePanel", panelId: "panel-2", controlled: true });
+    await waitForIdle(actor);
+    capturePixelValues(actor, () => {
+      expect(buildTemplate(actor.value)).toMatchInlineSnapshot(
+        `"200px 10px 0px 10px 580px"`
+      );
+    });
+
+    actor.send({ type: "collapsePanel", panelId: "panel-3", controlled: true });
+    await waitForIdle(actor);
+    capturePixelValues(actor, () => {
+      expect(buildTemplate(actor.value)).toMatchInlineSnapshot(
+        `"780px 10px 0px 10px 0px"`
+      );
+    });
+
+    actor.send({ type: "expandPanel", panelId: "panel-2", controlled: true });
+    await waitForIdle(actor);
+    capturePixelValues(actor, () => {
+      expect(buildTemplate(actor.value)).toMatchInlineSnapshot(
+        `"580px 10px 200px 10px 0px"`
+      );
+    });
+
+    actor.send({ type: "expandPanel", panelId: "panel-3", controlled: true });
+    await waitForIdle(actor);
+    capturePixelValues(actor, () => {
+      expect(buildTemplate(actor.value)).toMatchInlineSnapshot(
+        `"100px 10px 0px 10px 680px"`
+      );
+    });
+  });
+
   test("panel can have a min", () => {
     const actor = createActor({ groupId: "group" });
 
