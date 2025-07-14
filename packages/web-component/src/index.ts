@@ -312,9 +312,16 @@ export class Panel extends LitElement {
     this.context = {} as GroupMachineContextValue;
   }
 
-  public collapse() {
+  public async collapse() {
     if (!this.getPanelData()?.collapsible) return;
-    this.send({ type: "collapsePanel", panelId: this.id, controlled: true });
+    return await new Promise<void>((resolve) => {
+      this.send({
+        type: "collapsePanel",
+        panelId: this.id,
+        controlled: true,
+        resolve,
+      });
+    });
   }
 
   public isCollapsed() {
@@ -323,9 +330,16 @@ export class Panel extends LitElement {
     );
   }
 
-  public expand() {
+  public async expand() {
     if (!this.getPanelData()?.collapsible) return;
-    this.send({ type: "expandPanel", panelId: this.id, controlled: true });
+    return await new Promise<void>((resolve) => {
+      this.send({
+        type: "expandPanel",
+        panelId: this.id,
+        controlled: true,
+        resolve,
+      });
+    });
   }
 
   public isExpanded() {

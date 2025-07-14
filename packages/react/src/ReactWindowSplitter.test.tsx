@@ -255,7 +255,7 @@ test("Keyboard interactions with collapsed panels", async () => {
   fireEvent.keyDown(resizer2, { key: "Enter" });
   await expectTemplate(
     handle.current,
-    "209px 10px 168.953125px 10px 100.03125px"
+    "209.015625px 10px 167px 10px 101.984375px"
   );
 
   fireEvent.keyDown(resizer2, { key: "ArrowLeft" });
@@ -264,22 +264,25 @@ test("Keyboard interactions with collapsed panels", async () => {
   fireEvent.keyDown(resizer2, { key: "ArrowLeft" });
   await expectTemplate(
     handle.current,
-    "209px 10px 164.96875px 10px 104.03125px"
+    "209.015625px 10px 163px 10px 105.984375px"
   );
 
   fireEvent.keyDown(resizer2, { key: "ArrowLeft", shiftKey: true });
   await expectTemplate(
     handle.current,
-    "209px 10px 149.96875px 10px 119.03125px"
+    "209.03125px 10px 147.984375px 10px 120.984375px"
   );
-
-  fireEvent.keyDown(resizer2, { key: "Enter" });
-  await expectTemplate(handle.current, "209px 10px 209px 10px 60px");
 
   fireEvent.keyDown(resizer2, { key: "Enter" });
   await expectTemplate(
     handle.current,
-    "209px 10px 149.96875px 10px 119.03125px"
+    "209.03125px 10px 208.96875px 10px 60px"
+  );
+
+  fireEvent.keyDown(resizer2, { key: "Enter" });
+  await expectTemplate(
+    handle.current,
+    "209.046875px 10px 144.9375px 10px 124.015625px"
   );
 });
 

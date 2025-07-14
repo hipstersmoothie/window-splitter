@@ -131,15 +131,19 @@ onUnmounted(() => {
 
 defineExpose<PanelHandle>({
   getId: () => panelId,
-  collapse: () => {
+  collapse: async () => {
     if (!panelData.value?.collapsible) return;
-    send?.({ type: "collapsePanel", panelId: panelId, controlled: true });
+    return await new Promise<void>((resolve) => {
+      send?.({ type: "collapsePanel", panelId: panelId, controlled: true, resolve });
+    });
   },
   isCollapsed: () =>
     Boolean(panelData.value?.collapsible && panelData.value?.collapsed),
-  expand: () => {
+  expand: async () => {
     if (!panelData.value?.collapsible) return;
-    send?.({ type: "expandPanel", panelId: panelId, controlled: true });
+    return await new Promise<void>((resolve) => {
+      send?.({ type: "expandPanel", panelId: panelId, controlled: true, resolve });
+    });
   },
   isExpanded: () =>
     Boolean(panelData.value?.collapsible && !panelData.value?.collapsed),

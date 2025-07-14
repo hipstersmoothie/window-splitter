@@ -257,6 +257,7 @@ interface ApplyDeltaEvent {
   type: "applyDelta";
   delta: number;
   handleId: string;
+  panelId: string;
 }
 
 interface SetOrientationEvent {
@@ -278,6 +279,7 @@ interface CollapsePanelEvent extends ControlledCollapseToggle {
   type: "collapsePanel";
   /** The panel to collapse */
   panelId: string;
+  resolve?: () => void;
 }
 
 interface ExpandPanelEvent extends ControlledCollapseToggle {
@@ -285,6 +287,7 @@ interface ExpandPanelEvent extends ControlledCollapseToggle {
   type: "expandPanel";
   /** The panel to expand */
   panelId: string;
+  resolve?: () => void;
 }
 
 interface SetPanelPixelSizeEvent {
@@ -744,6 +747,25 @@ function getHandleForPanelId(
 ) {
   const panelIndex = context.items.findIndex((item) => item.id === panelId);
 
+  // When in controlled collapse mode we defer to the controlled state to know if we need to update.
+  // The confirmation comes along as an expand/collapse event.
+  // The default behavior is to find the closes handle and use that to collapse, if we're dragging some other
+  // handle though we want to use that instead. This will results in a smoother visual experience.
+  if (context.activeDragHandleId) {
+    const handleIndex = getPanelHandleIndex(
+      context,
+      context.activeDragHandleId
+    );
+    const item = context.items[handleIndex];
+
+    if (item && isPanelHandle(item)) {
+      return {
+        item,
+        direction: handleIndex > panelIndex ? (1 as const) : (-1 as const),
+      };
+    }
+  }
+
   invariant(panelIndex !== -1, `Expected panel before: ${panelId}`);
 
   let item = context.items[panelIndex + 1];
@@ -759,6 +781,37 @@ function getHandleForPanelId(
   }
 
   throw new Error(`Cant find handle for panel: ${panelId}`);
+}
+
+function getHandleForPanelIdWithAvailableSpace(
+  context: GroupMachineContextValue,
+  panelId: string
+) {
+  const panelIndex = context.items.findIndex((item) => item.id === panelId);
+
+  invariant(panelIndex !== -1, `Expected panel before: ${panelId}`);
+
+  let item = context.items[panelIndex + 1];
+
+  if (
+    item &&
+    isPanelHandle(item) &&
+    findPanelWithSpace(context, context.items, panelIndex + 1, 1, "add")
+  ) {
+    return { item, direction: 1 as const };
+  }
+
+  item = context.items[panelIndex - 1];
+
+  if (
+    item &&
+    isPanelHandle(item) &&
+    findPanelWithSpace(context, context.items, panelIndex - 1, -1, "add")
+  ) {
+    return { item, direction: -1 as const };
+  }
+
+  return getHandleForPanelId(context, panelId);
 }
 
 /** Given the specified order props and default order of the items, order the items */
@@ -808,8 +861,8 @@ function panelHasSpace(
     `panelHasSpace only works with number values: ${item.id} ${item.currentValue}`
   );
 
-  if (item.collapsible && !item.collapsed) {
-    return true;
+  if (item.collapsible) {
+    return !item.collapsed;
   }
 
   if (adjustment === "add") {
@@ -1107,6 +1160,7 @@ function updateLayout(
     | (DragHandleEvent & {
         controlled?: boolean;
         disregardCollapseBuffer?: never;
+        panelId?: string;
         isVirtual?: boolean;
       })
     | {
@@ -1114,6 +1168,7 @@ function updateLayout(
         value: MoveMoveEvent;
         handleId: string;
         controlled?: boolean;
+        panelId: string;
         disregardCollapseBuffer?: boolean;
         isVirtual?: boolean;
       }
@@ -1156,7 +1211,26 @@ function updateLayout(
 
   invariant(isPanelData(panelBefore), `Expected panel before: ${handle.id}`);
 
-  const panelAfter = newItems[handleIndex - moveDirection];
+  /** The panel that gets bigger */
+  const panelAfter =
+    dragEvent.type === "collapsePanel"
+      ? // If we have the panel id just use that
+        newItems.find(
+          (item) =>
+            item.id === dragEvent.panelId &&
+            panelBefore.id !== dragEvent.panelId
+        ) ||
+        // otherwise fallback to the next panel with space
+        findPanelWithSpace(
+          context,
+          newItems,
+          handleIndex - moveDirection,
+          moveDirection * -1,
+          "add",
+          dragEvent.disregardCollapseBuffer
+        ) ||
+        newItems[handleIndex - moveDirection]
+      : newItems[handleIndex - moveDirection];
 
   invariant(
     panelAfter && isPanelData(panelAfter),
@@ -1174,7 +1248,7 @@ function updateLayout(
   const newDragOvershoot = context.dragOvershoot.add(moveAmount);
 
   // Don't let the panel expand until the threshold is reached
-  if (!dragEvent.disregardCollapseBuffer) {
+  if (!dragEvent.disregardCollapseBuffer && !dragEvent.controlled) {
     const isInLeftBuffer = newDragOvershoot.lt(0) && moveDirection > 0;
     const isInLeftOvershoot = newDragOvershoot.gt(0) && moveDirection > 0;
     const isInRightBuffer = newDragOvershoot.gt(0) && moveDirection < 0;
@@ -1208,6 +1282,7 @@ function updateLayout(
   // Don't let the panel collapse until the threshold is reached
   if (
     !dragEvent.disregardCollapseBuffer &&
+    !dragEvent.controlled &&
     panelBefore.collapsible &&
     panelBefore.currentValue.value.eq(
       getUnitPixelValue(context, panelBefore.min)
@@ -1291,7 +1366,10 @@ function updateLayout(
           .minus(Math.abs(moveAmount))
       );
 
-    if (panelBeforeNewValue.lt(panelBefore.min.value)) {
+    if (
+      panelBeforeNewValue.lt(panelBefore.min.value) &&
+      !panelBefore.collapsible
+    ) {
       // TODO this should probably distribute the space between the panels?
       return { dragOvershoot: newDragOvershoot };
     }
@@ -1332,7 +1410,7 @@ function updateLayout(
     panelBefore.collapsed = true;
     panelBeforeNewValue = getUnitPixelValue(context, panelBefore.collapsedSize);
     // Add the extra space created to the before panel
-    panelAfterNewValue = panelAfterNewValue.add(
+    panelAfterNewValue = panelAfter.currentValue.value.add(
       panelBeforePreviousValue.minus(panelBeforeNewValue)
     );
 
@@ -1436,6 +1514,7 @@ function iterativelyUpdateLayout({
   controlled,
   disregardCollapseBuffer,
   isVirtual,
+  panelId,
 }: {
   context: GroupMachineContextValue;
   handleId: string;
@@ -1448,6 +1527,7 @@ function iterativelyUpdateLayout({
    * no on* callbacks will be called
    */
   isVirtual?: boolean;
+  panelId: string;
 }) {
   let newContext: Partial<GroupMachineContextValue> = context;
 
@@ -1463,6 +1543,7 @@ function iterativelyUpdateLayout({
         controlled,
         disregardCollapseBuffer,
         isVirtual,
+        panelId,
         value: dragHandlePayload({
           delta: direction,
           orientation: context.orientation,
@@ -1569,6 +1650,7 @@ function handleOverflow(context: GroupMachineContextValue) {
         handleId: handleId.item.id,
         delta: sizeChange,
         direction: (handleId.direction * -1) as -1 | 1,
+        panelId: collapsiblePanel.id,
         context: {
           ...newContext,
           // act like its the old size so the space is distributed correctly
@@ -1604,6 +1686,7 @@ function setCookie(name: string, jsonData: unknown) {
 interface AnimationActorOutput {
   panelId: string;
   action: "expand" | "collapse";
+  resolve?: () => void;
 }
 
 function getDeltaForEvent(
@@ -1629,10 +1712,19 @@ function animationActor(
   abortController: AbortController
 ) {
   const panel = getPanelWithId(context, event.panelId);
-  const handle = getHandleForPanelId(context, event.panelId);
-
+  const handle = getHandleForPanelIdWithAvailableSpace(context, event.panelId);
   let direction = new Big(handle.direction);
   const fullDelta = getDeltaForEvent(context, event);
+
+  const contextCopy = { ...context, items: prepareItems(context) };
+  const finalLayout = iterativelyUpdateLayout({
+    context: contextCopy,
+    panelId: event.panelId,
+    handleId: handle.item.id,
+    delta: fullDelta,
+    direction: handle.direction,
+    isVirtual: true,
+  });
 
   return new Promise<AnimationActorOutput | undefined>((resolve, reject) => {
     abortController.signal.addEventListener("abort", () => {
@@ -1661,6 +1753,7 @@ function animationActor(
         type: "applyDelta",
         handleId: handle.item.id,
         delta: delta.toNumber(),
+        panelId: panel.id,
       });
 
       appliedDelta = appliedDelta.add(
@@ -1674,8 +1767,21 @@ function animationActor(
       );
 
       if (e.eq(1)) {
+        // If we're controlled expanding to a value that breaks the layout we might get negative values
+        // In this case we need to use a valid layout like `iterativelyUpdateLayout`'s return value
+        // Ideally we figure out some way to not do this but disregardCollapseBuffer is needed for animations
+        if (
+          context.items.find(
+            (i) =>
+              isPanelData(i) &&
+              i.currentValue.value.round(undefined, Big.roundHalfEven).lt(0)
+          )
+        ) {
+          assign(context, finalLayout);
+        }
+
         const action = event.type === "expandPanel" ? "expand" : "collapse";
-        resolve({ panelId: panel.id, action });
+        resolve({ panelId: panel.id, action, resolve: event.resolve });
         return false;
       }
 
@@ -1810,6 +1916,7 @@ export function groupMachine(
           : handle.direction;
 
       const newContext = updateLayout(context, {
+        panelId: event.panelId,
         handleId: handle.item.id,
         type: "dragHandle",
         controlled: event.controlled,
@@ -1854,15 +1961,20 @@ export function groupMachine(
     },
     cannotExpandPanel: (event: GroupMachineEvent) => {
       isEvent(event, ["expandPanel"]);
-      const delta = getDeltaForEvent(context, event);
-      const handle = getHandleForPanelId(context, event.panelId);
       const pixelItems = prepareItems(context);
-
       let interimContext = { ...context, items: pixelItems };
+
+      const delta = getDeltaForEvent(context, event);
+      const handle = getHandleForPanelIdWithAvailableSpace(
+        interimContext,
+        event.panelId
+      );
+
       interimContext = {
         ...interimContext,
         ...iterativelyUpdateLayout({
           context: interimContext,
+          panelId: event.panelId,
           handleId: handle.item.id,
           controlled: event.controlled,
           delta: delta,
@@ -1911,6 +2023,8 @@ export function groupMachine(
     }
 
     state.current = to;
+
+    onUpdate?.(context);
   }
 
   function send(event: GroupMachineEvent) {
@@ -2121,11 +2235,13 @@ export function groupMachine(
           const delta = isBigger
             ? newSize.minus(current)
             : current.minus(newSize);
+          panel.sizeBeforeCollapse = newSize.toNumber();
 
           Object.assign(
             context,
             iterativelyUpdateLayout({
               context,
+              panelId: event.panelId,
               direction: (handle.direction * (isBigger ? 1 : -1)) as -1 | 1,
               handleId: handle.item.id,
               delta,
@@ -2150,6 +2266,9 @@ export function groupMachine(
                 (output) => {
                   actions.onAnimationEnd(output);
                   transition("idle");
+                  if (event.resolve) {
+                    requestAnimationFrame(event.resolve);
+                  }
                 }
               );
             }
@@ -2170,6 +2289,9 @@ export function groupMachine(
                 (output) => {
                   actions.onAnimationEnd(output);
                   transition("idle");
+                  if (event.resolve) {
+                    requestAnimationFrame(event.resolve);
+                  }
                 }
               );
             }
@@ -2202,6 +2324,7 @@ export function groupMachine(
           assign(
             context,
             updateLayout(context, {
+              panelId: event.panelId,
               handleId: event.handleId,
               type: "collapsePanel",
               disregardCollapseBuffer: true,
