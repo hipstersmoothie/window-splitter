@@ -1,3 +1,22 @@
+# v1.1.1 (Mon Jul 14 2025)
+
+#### 🐛 Bug Fix
+
+- `@window-splitter/interface`, `@window-splitter/react`, `@window-splitter/solid`, `@window-splitter/state`, `@window-splitter/svelte`, `@window-splitter/vue`, `@window-splitter/web-component`
+  - Fix controlled panel resize bugs and make collapse/expand awaitable [#67](https://github.com/hipstersmoothie/window-splitter/pull/67) ([@sfc-gh-alisowski](https://github.com/sfc-gh-alisowski))
+- `@window-splitter/react`, `@window-splitter/state`
+  - fix: parse stored default value to Big [#65](https://github.com/hipstersmoothie/window-splitter/pull/65) ([@andrefgneves](https://github.com/andrefgneves))
+- `@window-splitter/react`
+  - fix: Prevent React panel group data from being saved to local storage when autosaveId is not set [#66](https://github.com/hipstersmoothie/window-splitter/pull/66) ([@y4ure](https://github.com/y4ure))
+
+#### Authors: 3
+
+- Adam Yau ([@y4ure](https://github.com/y4ure))
+- André Neves ([@andrefgneves](https://github.com/andrefgneves))
+- Andrew Lisowski ([@sfc-gh-alisowski](https://github.com/sfc-gh-alisowski))
+
+---
+
 # v1.1.0 (Mon May 26 2025)
 
 #### 🚀 Enhancement

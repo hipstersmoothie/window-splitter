@@ -1,3 +1,17 @@
+# v1.1.1 (Mon Jul 14 2025)
+
+#### 🐛 Bug Fix
+
+- Fix controlled panel resize bugs and make collapse/expand awaitable [#67](https://github.com/hipstersmoothie/window-splitter/pull/67) ([@sfc-gh-alisowski](https://github.com/sfc-gh-alisowski))
+- tests ([@sfc-gh-alisowski](https://github.com/sfc-gh-alisowski))
+- add awaitable expand/collapse to other implementations ([@sfc-gh-alisowski](https://github.com/sfc-gh-alisowski))
+
+#### Authors: 1
+
+- Andrew Lisowski ([@sfc-gh-alisowski](https://github.com/sfc-gh-alisowski))
+
+---
+
 # v1.1.0 (Mon May 26 2025)
 
 #### 🚀 Enhancement

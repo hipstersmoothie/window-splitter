@@ -1,3 +1,28 @@
+# v1.1.1 (Mon Jul 14 2025)
+
+#### 🐛 Bug Fix
+
+- Fix controlled panel resize bugs and make collapse/expand awaitable [#67](https://github.com/hipstersmoothie/window-splitter/pull/67) ([@sfc-gh-alisowski](https://github.com/sfc-gh-alisowski))
+- round it ([@sfc-gh-alisowski](https://github.com/sfc-gh-alisowski))
+- tests ([@sfc-gh-alisowski](https://github.com/sfc-gh-alisowski))
+- fix: parse stored default value to Big [#65](https://github.com/hipstersmoothie/window-splitter/pull/65) ([@andrefgneves](https://github.com/andrefgneves))
+- comments ([@sfc-gh-alisowski](https://github.com/sfc-gh-alisowski))
+- fix lint ([@sfc-gh-alisowski](https://github.com/sfc-gh-alisowski))
+- fix some controlled panel bugs ([@sfc-gh-alisowski](https://github.com/sfc-gh-alisowski))
+- awaitable colllapse ([@sfc-gh-alisowski](https://github.com/sfc-gh-alisowski))
+- find panel with space ([@sfc-gh-alisowski](https://github.com/sfc-gh-alisowski))
+- always use active drag handle if there is one during controlled collapse ([@sfc-gh-alisowski](https://github.com/sfc-gh-alisowski))
+- fix subsequent panels not being able to be uncollapsed sometimes ([@sfc-gh-alisowski](https://github.com/sfc-gh-alisowski))
+- fix subsequent collapsed panels not toggling collapse ([@sfc-gh-alisowski](https://github.com/sfc-gh-alisowski))
+- fix: parse stored default value to Big ([@andrefgneves](https://github.com/andrefgneves))
+
+#### Authors: 2
+
+- André Neves ([@andrefgneves](https://github.com/andrefgneves))
+- Andrew Lisowski ([@sfc-gh-alisowski](https://github.com/sfc-gh-alisowski))
+
+---
+
 # v1.1.0 (Mon May 26 2025)
 
 #### 🚀 Enhancement
