@@ -776,7 +776,6 @@ export function SiblingCollapsiblePanels() {
   );
   const handleEditorCollapseChange = useCallback(
     (isCollapsed: boolean) => {
-      console.log("EDITOR COLLAPSE CHANGE", isCollapsed);
       if (isEditMode) {
         setIsEditorCollapsed(isCollapsed);
       }
@@ -822,10 +821,7 @@ export function SiblingCollapsiblePanels() {
           collapsible
           collapsed={isEditorCollapsed}
           // collapseAnimation="ease-in-out"
-          onCollapseChange={(v) => {
-            console.log("COLLAPSE CHANGE editor", v);
-            setIsEditorCollapsed(v);
-          }}
+          onCollapseChange={handleEditorCollapseChange}
         >
           <Flex
             align="center"

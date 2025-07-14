@@ -748,8 +748,7 @@ function getHandleForPanelId(
       context,
       context.activeDragHandleId
     );
-
-    let item = context.items[handleIndex];
+    const item = context.items[handleIndex];
 
     if (item && isPanelHandle(item)) {
       return {
