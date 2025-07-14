@@ -743,6 +743,10 @@ function getHandleForPanelId(
 ) {
   const panelIndex = context.items.findIndex((item) => item.id === panelId);
 
+  // When in controlled collapse mode we defer to the controlled state to know if we need to update.
+  // The confirmation comes along as an expand/collapse event.
+  // The default behavior is to find the closes handle and use that to collapse, if we're dragging some other
+  // handle though we want to use that instead. This will results in a smoother visual experience.
   if (context.activeDragHandleId) {
     const handleIndex = getPanelHandleIndex(
       context,
@@ -853,12 +857,8 @@ function panelHasSpace(
     `panelHasSpace only works with number values: ${item.id} ${item.currentValue}`
   );
 
-  if (adjustment === "subtract" && item.collapsible) {
+  if (item.collapsible) {
     return !item.collapsed;
-  }
-
-  if (adjustment === "add" && item.collapsible) {
-    return item.collapsed ? false : true;
   }
 
   if (adjustment === "add") {
@@ -2260,11 +2260,11 @@ export function groupMachine(
                 (output) => {
                   actions.onAnimationEnd(output);
                   transition("idle");
+                  panel.collapsed = true;
+                  panel.onCollapseChange?.current?.(true);
                   if (event.resolve) {
                     requestAnimationFrame(event.resolve);
                   }
-                  panel.collapsed = true;
-                  panel.onCollapseChange?.current?.(true);
                 }
               );
             }
