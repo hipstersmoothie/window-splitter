@@ -338,7 +338,7 @@ const PanelGroupImpl = React.forwardRef<
 >(function PanelGroupImpl(
   {
     autosaveId,
-    autosaveStrategy = "localStorage",
+    autosaveStrategy = autosaveId ? "localStorage" : undefined,
     snapshot: snapshotProp,
     initialItems,
     shiftAmount,
