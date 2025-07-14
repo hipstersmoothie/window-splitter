@@ -379,14 +379,32 @@ export function Panel(props: PanelProps) {
     () => props.handle,
     () => ({
       getId: () => panelId(),
-      collapse: () => {
-        if (!panel().collapsible) return;
-        send?.({ type: "collapsePanel", panelId: panelId(), controlled: true });
+      collapse: async () => {
+        if (panel().collapsible) {
+          // eslint-disable-next-line solid/reactivity
+          return await new Promise<void>((resolve) => {
+            send?.({
+              type: "collapsePanel",
+              panelId: panelId(),
+              controlled: true,
+              resolve,
+            });
+          });
+        }
       },
       isCollapsed: () => Boolean(panel().collapsible && panel().collapsed),
-      expand: () => {
-        if (!panel().collapsible) return;
-        send?.({ type: "expandPanel", panelId: panelId(), controlled: true });
+      expand: async () => {
+        if (panel().collapsible) {
+          // eslint-disable-next-line solid/reactivity
+          return await new Promise<void>((resolve) => {
+            send?.({
+              type: "expandPanel",
+              panelId: panelId(),
+              controlled: true,
+              resolve,
+            });
+          });
+        }
       },
       isExpanded: () => Boolean(panel().collapsible && !panel().collapsed),
       getPixelSize: () => {

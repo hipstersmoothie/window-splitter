@@ -146,15 +146,19 @@
   };
 
   export const getId = () => id;
-  export const collapse = () => {
+  export const collapse = async () => {
     if (!panelData()?.collapsible) return;
-    send({ type: "collapsePanel", panelId: id, controlled: true });
+    return await new Promise<void>((resolve) => {
+      send({ type: "collapsePanel", panelId: id, controlled: true, resolve });
+    });
   };
   export const isCollapsed = () =>
     Boolean(panelData()?.collapsible && panelData()?.collapsed);
-  export const expand = () => {
+  export const expand = async () => {
     if (!panelData()?.collapsible) return;
-    send({ type: "expandPanel", panelId: id, controlled: true });
+    return await new Promise<void>((resolve) => {
+      send({ type: "expandPanel", panelId: id, controlled: true, resolve });
+    });
   };
   export const isExpanded = () =>
     Boolean(panelData()?.collapsible && !panelData()?.collapsed);
