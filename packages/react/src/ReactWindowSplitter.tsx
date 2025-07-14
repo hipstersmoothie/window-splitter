@@ -612,11 +612,11 @@ const PanelVisible = React.forwardRef<
     }
   });
 
-  const contraintChanged =
+  const constraintChanged =
     panel && haveConstraintsChangedForPanel(panelProp, panel);
 
   const onConstraintChange = useEffectEvent(() => {
-    if (contraintChanged) {
+    if (constraintChanged) {
       send({
         type: "updateConstraints",
         data: { ...panelProp, id: panel.id },
@@ -625,10 +625,10 @@ const PanelVisible = React.forwardRef<
   });
 
   React.useEffect(() => {
-    if (contraintChanged) {
+    if (constraintChanged) {
       onConstraintChange();
     }
-  }, [send, contraintChanged, onConstraintChange]);
+  }, [send, constraintChanged, onConstraintChange]);
 
   // For controlled collapse we track if the `collapse` prop changes
   // and update the state machine if it does.
@@ -830,12 +830,12 @@ const PanelResizerVisible = React.forwardRef<
     },
   });
 
-  const contraintChanged =
+  const constraintChanged =
     panelHandle &&
     haveConstraintsChangedForPanelHandle(panelHandleProp, panelHandle);
 
   const onConstraintChange = useEffectEvent(() => {
-    if (contraintChanged) {
+    if (constraintChanged) {
       send({
         type: "updateConstraints",
         data: { ...panelHandleProp, id: handleId },
@@ -844,10 +844,10 @@ const PanelResizerVisible = React.forwardRef<
   });
 
   React.useEffect(() => {
-    if (contraintChanged) {
+    if (constraintChanged) {
       onConstraintChange();
     }
-  }, [send, contraintChanged, onConstraintChange]);
+  }, [send, constraintChanged, onConstraintChange]);
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.key === "Enter" && collapsiblePanel) {
