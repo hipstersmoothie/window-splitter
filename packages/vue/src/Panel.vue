@@ -36,6 +36,7 @@ const {
   collapsedSize: _collapsedSize,
   onCollapseChange: _onCollapseChange,
   collapseAnimation: _collapseAnimation,
+  collapseAnimationOnPointer: _collapseAnimationOnPointer,
   onResize: _onResize,
   defaultCollapsed,
   default: defaultSize,
@@ -61,6 +62,7 @@ const initPanel = (): PanelData =>
       ? { current: props.onCollapseChange }
       : undefined,
     collapseAnimation: props.collapseAnimation,
+    collapseAnimationOnPointer: props.collapseAnimationOnPointer,
     onResize: props.onResize ? { current: props.onResize } : undefined,
     defaultCollapsed,
     default: defaultSize,

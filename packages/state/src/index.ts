@@ -107,6 +107,11 @@ export interface PanelData
   collapseAnimation?:
     | CollapseAnimation
     | { duration: number; easing: CollapseAnimation | ((t: number) => number) };
+  /**
+   * Whether to animate collapse/expand interactions that are triggered via
+   * pointer dragging (not just keyboard toggles).
+   */
+  collapseAnimationOnPointer?: boolean;
   lastKnownSize?: Rect;
 }
 
@@ -179,7 +184,13 @@ interface UpdateConstraintsEvent {
   data:
     | Pick<
         PanelData,
-        "id" | "min" | "max" | "default" | "collapsedSize" | "isStaticAtRest"
+        | "id"
+        | "min"
+        | "max"
+        | "default"
+        | "collapsedSize"
+        | "isStaticAtRest"
+        | "collapseAnimationOnPointer"
       >
     | Pick<PanelHandleData, "id" | "size">;
 }
@@ -490,6 +501,7 @@ type InitializePanelOptions = {
     | "collapsible"
     | "collapsed"
     | "onCollapseChange"
+    | "collapseAnimationOnPointer"
   >
 >;
 
@@ -536,6 +548,7 @@ export function initializePanel(
     sizeBeforeCollapse: undefined,
     id: item.id,
     collapseAnimation: item.collapseAnimation,
+    collapseAnimationOnPointer: item.collapseAnimationOnPointer,
     default: item.default ? parseUnit(item.default) : undefined,
     isStaticAtRest: item.isStaticAtRest,
   } satisfies Omit<PanelData, "id" | "currentValue"> & { id?: string };
@@ -587,6 +600,7 @@ export function haveConstraintsChangedForPanel(
   }
 
   if (
+    a.collapseAnimationOnPointer !== b.collapseAnimationOnPointer ||
     (a.collapseAnimation && !b.collapseAnimation) ||
     (!a.collapseAnimation && b.collapseAnimation) ||
     (typeof a.collapseAnimation === "string" &&
@@ -1069,6 +1083,36 @@ function createUnrestrainedPanel(_: GroupMachineContextValue, data: PanelData) {
     min: makePixelUnit(-100000),
     max: makePixelUnit(100000),
   };
+}
+
+function cloneParsedUnit<T extends ParsedUnit | "1fr">(unit: T): T {
+  if (unit === "1fr") {
+    return unit;
+  }
+
+  return { type: unit.type, value: new Big(unit.value) } as T;
+}
+
+function cloneItem(item: Item): Item {
+  if (isPanelHandle(item)) {
+    return { ...item, size: cloneParsedUnit(item.size) };
+  }
+
+  return {
+    ...item,
+    min: cloneParsedUnit(item.min),
+    max: cloneParsedUnit(item.max),
+    default: item.default ? cloneParsedUnit(item.default) : undefined,
+    collapsedSize: cloneParsedUnit(item.collapsedSize),
+    currentValue: cloneParsedUnit(item.currentValue),
+    lastKnownSize: item.lastKnownSize
+      ? { ...item.lastKnownSize }
+      : undefined,
+  };
+}
+
+function cloneItems(items: Array<Item>) {
+  return items.map((item) => cloneItem(item));
 }
 
 // #endregion
@@ -1681,6 +1725,38 @@ function handleOverflow(context: GroupMachineContextValue) {
   return { ...newContext, items: commitLayout(newContext) };
 }
 
+function getPointerCollapseAnimationChange(
+  previousItems: Array<Item>,
+  nextItems: Array<Item>
+):
+  | {
+      panelId: string;
+      action: "collapse" | "expand";
+    }
+  | undefined {
+  const previousPanels = new Map(
+    previousItems
+      .filter((i): i is PanelData => isPanelData(i))
+      .map((panel) => [panel.id, panel])
+  );
+
+  for (const item of nextItems) {
+    if (!isPanelData(item)) continue;
+    if (!item.collapseAnimationOnPointer || !item.collapsible) continue;
+
+    const previous = previousPanels.get(item.id);
+
+    if (!previous) continue;
+
+    if (previous.collapsed !== item.collapsed) {
+      return {
+        panelId: item.id,
+        action: item.collapsed ? "collapse" : "expand",
+      };
+    }
+  }
+}
+
 function clearLastKnownSize(items: Item[]) {
   return items.map((i) => ({ ...i, lastKnownSize: undefined }));
 }
@@ -1825,7 +1901,9 @@ export function groupMachine(
   input: Partial<GroupMachineContextValue>,
   onUpdate?: (context: GroupMachineContextValue) => void
 ) {
-  const abortController = new AbortController();
+  let abortController = new AbortController();
+  let pointerIsDown = false;
+  let resumeDragHandleId: string | undefined;
   const state = {
     current: "idle" as State,
   };
@@ -2039,6 +2117,13 @@ export function groupMachine(
 
   function send(event: GroupMachineEvent) {
     switch (event.type) {
+      case "dragHandleStart":
+        pointerIsDown = true;
+        break;
+      case "dragHandleEnd":
+        pointerIsDown = false;
+        resumeDragHandleId = undefined;
+        break;
       case "lockGroup":
         locked = true;
         break;
@@ -2167,6 +2252,7 @@ export function groupMachine(
             item.isStaticAtRest = panel.isStaticAtRest;
             item.collapseAnimation = panel.collapseAnimation;
             item.collapsible = panel.collapsible;
+            item.collapseAnimationOnPointer = panel.collapseAnimationOnPointer;
           } else if (isPanelHandle(item) && item.id === event.data.id) {
             const handle = event.data as PanelHandleData;
             item.size = handle.size;
@@ -2288,6 +2374,7 @@ export function groupMachine(
             if (!panel.collapsed) {
               transition("togglingCollapse");
               abortController.abort();
+              abortController = new AbortController();
               animationActor(context, event, send, abortController).then(
                 (output) => {
                   actions.onAnimationEnd(output);
@@ -2311,6 +2398,7 @@ export function groupMachine(
             if (panel.collapsed) {
               transition("togglingCollapse");
               abortController.abort();
+              abortController = new AbortController();
               animationActor(context, event, send, abortController).then(
                 (output) => {
                   actions.onAnimationEnd(output);
@@ -2331,8 +2419,50 @@ export function groupMachine(
       switch (event.type) {
         case "dragHandle":
           actions.clearLastKnownSize();
-          assign(context, updateLayout(context, event));
-          actions.onResize();
+          {
+            const previousItems = cloneItems(context.items);
+            const dragContext = { ...context, items: cloneItems(context.items) };
+            const result = updateLayout(dragContext, event);
+            const nextItems = result.items ?? dragContext.items;
+            const pointerAnimationChange = getPointerCollapseAnimationChange(
+              previousItems,
+              nextItems
+            );
+
+            if (pointerAnimationChange) {
+              resumeDragHandleId = event.handleId;
+              transition("togglingCollapse");
+              abortController.abort();
+              abortController = new AbortController();
+
+              animationActor(
+                context,
+                {
+                  type:
+                    pointerAnimationChange.action === "collapse"
+                      ? "collapsePanel"
+                      : "expandPanel",
+                  panelId: pointerAnimationChange.panelId,
+                },
+                send,
+                abortController
+              ).then((output) => {
+                actions.onAnimationEnd(output);
+                if (pointerIsDown && resumeDragHandleId) {
+                  context.activeDragHandleId = resumeDragHandleId;
+                  transition("dragging");
+                } else {
+                  transition("idle");
+                }
+                resumeDragHandleId = undefined;
+              });
+
+              break;
+            }
+
+            assign(context, result);
+            actions.onResize();
+          }
           break;
         case "dragHandleEnd":
           transition("idle");

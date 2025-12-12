@@ -1617,6 +1617,81 @@ describe("collapsible panel", () => {
     });
   });
 
+  test("collapse animations run on pointer interactions and ignore extra drag during expand", async () => {
+    const actor = createActor({ groupId: "group" });
+
+    sendAll(actor, [
+      { type: "registerPanel", data: initializePanel({ id: "panel-1" }) },
+      {
+        type: "registerPanelHandle",
+        data: initializePanelHandleData({ id: "resizer-1", size: "10px" }),
+      },
+      {
+        type: "registerPanel",
+        data: initializePanel({
+          id: "panel-2",
+          collapsible: true,
+          min: "100px",
+          collapseAnimation: { duration: 1, easing: "linear" as const },
+          collapseAnimationOnPointer: true,
+        }),
+      },
+    ]);
+
+    initializeSizes(actor, { width: 500, height: 200 });
+
+    capturePixelValues(actor, () => {
+      dragHandle(actor, { id: "resizer-1", delta: 260 });
+    });
+
+    await waitForIdle(actor);
+    expect(getPanelPixelSize(actor.value, "panel-2")).toBe(0);
+
+    capturePixelValues(actor, () => {
+      dragHandle(actor, { id: "resizer-1", delta: -120 });
+      dragHandle(actor, { id: "resizer-1", delta: -120 });
+    });
+
+    await waitForIdle(actor);
+    expect(getPanelPixelSize(actor.value, "panel-2")).toBeCloseTo(245);
+  });
+
+  test("dragging continues after pointer-triggered animation completes", async () => {
+    const actor = createActor({ groupId: "group" });
+
+    sendAll(actor, [
+      { type: "registerPanel", data: initializePanel({ id: "panel-1" }) },
+      {
+        type: "registerPanelHandle",
+        data: initializePanelHandleData({ id: "resizer-1", size: "10px" }),
+      },
+      {
+        type: "registerPanel",
+        data: initializePanel({
+          id: "panel-2",
+          collapsible: true,
+          min: "100px",
+          collapseAnimation: { duration: 1, easing: "linear" as const },
+          collapseAnimationOnPointer: true,
+        }),
+      },
+    ]);
+
+    initializeSizes(actor, { width: 500, height: 200 });
+
+    actor.send({ type: "dragHandleStart", handleId: "resizer-1" });
+    dragHandle(actor, { id: "resizer-1", delta: 260 });
+
+    await waitForIdle(actor);
+    expect(getPanelPixelSize(actor.value, "panel-2")).toBe(0);
+
+    dragHandle(actor, { id: "resizer-1", delta: -80 });
+    await waitForIdle(actor);
+    expect(getPanelPixelSize(actor.value, "panel-2")).toBeGreaterThan(0);
+
+    actor.send({ type: "dragHandleEnd", handleId: "resizer-1" });
+  });
+
   describe("constraints", () => {
     test("on render", async () => {
       const actor = createActor({ groupId: "group" });
