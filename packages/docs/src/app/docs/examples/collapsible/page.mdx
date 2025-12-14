@@ -113,7 +113,8 @@ The component support 3 basic animations:
 - `linear`
 
 You can also customize the `duration` by providing and object to the `collapseAnimation` prop.
-Try focus one of the resizer handles and pressing `Enter` to see the animation in action.
+Animations normally run when toggling via keyboard, but you can opt into animating pointer-triggered collapse/expand (dragging past the collapse buffer) by adding the `collapseAnimationOnPointer` prop (default `false`).
+Try focus one of the resizer handles and pressing `Enter`, or drag to collapse/expand, to see the animation in action.
 
 <ColorfulPanelGroup className='my-6' style={{ height: 200 }}>
   <ColorfulPanel
@@ -123,6 +124,7 @@ Try focus one of the resizer handles and pressing `Enter` to see the animation i
     collapsedSize="100px"
     min="150px"
     max="400px"
+    collapseAnimationOnPointer
     collapseAnimation={{
       easing: "ease-in-out",
       duration: 1000,
@@ -144,6 +146,7 @@ function CollapsibleExample() {
         max="400px"
         collapsible
         collapsedSize="100px"
+        collapseAnimationOnPointer
         collapseAnimation={{
           easing: "ease-in-out",
           duration: 1000,

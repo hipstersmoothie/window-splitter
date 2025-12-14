@@ -272,6 +272,8 @@ export class Panel extends LitElement {
   public onCollapseChange?: (newCollapsed: boolean, el: Panel) => void;
   public onResize?: OnResizeCallback;
   public collapseAnimation?: SharedPanelProps<boolean>["collapseAnimation"];
+  @property({ type: Boolean, reflect: true })
+  collapseAnimationOnPointer?: boolean;
 
   @property({ type: Boolean, reflect: true })
   collapsed?: boolean;
@@ -372,6 +374,7 @@ export class Panel extends LitElement {
         ? { current: (e) => this.onCollapseChange?.(e, this) }
         : undefined,
       collapseAnimation: this.collapseAnimation,
+      collapseAnimationOnPointer: this.collapseAnimationOnPointer,
       onResize: this.onResize ? { current: this.onResize } : undefined,
       defaultCollapsed: this.defaultCollapsed,
       default: this.default as Unit | undefined,

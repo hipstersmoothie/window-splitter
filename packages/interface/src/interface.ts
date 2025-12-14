@@ -69,7 +69,7 @@ export interface PanelHandle {
 }
 export interface SharedPanelProps<CollapsValue>
   extends Constraints<Unit>,
-    Pick<PanelData, "collapseAnimation"> {
+    Pick<PanelData, "collapseAnimation" | "collapseAnimationOnPointer"> {
   /** Callback called when the panel is resized */
   onResize?: OnResizeCallback;
   /**

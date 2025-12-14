@@ -537,6 +537,7 @@ export const Panel = React.forwardRef<HTMLDivElement, PanelProps>(
       onCollapseChange,
       onResize,
       collapseAnimation,
+      collapseAnimationOnPointer,
       isStaticAtRest,
       ...props
     },
@@ -561,6 +562,7 @@ export const Panel = React.forwardRef<HTMLDivElement, PanelProps>(
         collapsedSize: collapsedSize,
         onCollapseChange: onCollapseChangeRef,
         collapseAnimation: collapseAnimation,
+        collapseAnimationOnPointer,
         onResize: onResizeRef,
         id: props.id,
         defaultCollapsed,
@@ -578,6 +580,7 @@ export const Panel = React.forwardRef<HTMLDivElement, PanelProps>(
       props.id,
       defaultSize,
       isStaticAtRest,
+      collapseAnimationOnPointer,
     ]);
 
     const { id: panelId } = useGroupItem(panelDataRef);
@@ -607,6 +610,7 @@ const PanelVisible = React.forwardRef<
     | "min"
     | "max"
     | "collapseAnimation"
+    | "collapseAnimationOnPointer"
     | "onResize"
   > & {
     panelId: string;
