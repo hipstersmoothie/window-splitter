@@ -33,6 +33,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://github.com/sfc-gh-alisowski"><img src="https://avatars.githubusercontent.com/u/196691327?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Andrew Lisowski</b></sub></a><br /><a href="https://github.com/hipstersmoothie/window-splitter/commits?author=sfc-gh-alisowski" title="Code">💻</a></td>
     <td align="center"><a href="http://justinfagnani.com/"><img src="https://avatars.githubusercontent.com/u/522948?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Justin Fagnani</b></sub></a><br /><a href="https://github.com/hipstersmoothie/window-splitter/commits?author=justinfagnani" title="Documentation">📖</a></td>
     <td align="center"><a href="https://github.com/y4ure"><img src="https://avatars.githubusercontent.com/u/16659947?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Adam Yau</b></sub></a><br /><a href="https://github.com/hipstersmoothie/window-splitter/commits?author=y4ure" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/EugeneKite"><img src="https://avatars.githubusercontent.com/u/123805703?v=4?s=100" width="100px;" alt=""/><br /><sub><b>EugeneKite</b></sub></a><br /><a href="https://github.com/hipstersmoothie/window-splitter/commits?author=EugeneKite" title="Code">💻</a></td>
   </tr>
 </table>
 
