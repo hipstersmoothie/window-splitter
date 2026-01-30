@@ -2257,7 +2257,7 @@ export function groupMachine(
             panel,
             getUnitPixelValue(context, parseUnit(event.size))
           );
-          const isBigger = newSize > current;
+          const isBigger = newSize.gt(current);
           const delta = isBigger
             ? newSize.minus(current)
             : current.minus(newSize);
