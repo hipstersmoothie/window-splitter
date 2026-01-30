@@ -1,3 +1,19 @@
+# v1.1.3 (Fri Jan 30 2026)
+
+#### 🐛 Bug Fix
+
+- `@window-splitter/state`
+  - fix for animation + controlled component [#80](https://github.com/hipstersmoothie/window-splitter/pull/80) ([@chrisdrackett](https://github.com/chrisdrackett) [@sfc-gh-alisowski](https://github.com/sfc-gh-alisowski))
+  - Fix incorrect size comparison between new and current size [#75](https://github.com/hipstersmoothie/window-splitter/pull/75) ([@EugeneKite](https://github.com/EugeneKite))
+
+#### Authors: 3
+
+- [@EugeneKite](https://github.com/EugeneKite)
+- Andrew Lisowski ([@sfc-gh-alisowski](https://github.com/sfc-gh-alisowski))
+- Chris Drackett ([@chrisdrackett](https://github.com/chrisdrackett))
+
+---
+
 # v1.1.2 (Mon Jul 21 2025)
 
 #### ⚠️ Pushed to `main`
