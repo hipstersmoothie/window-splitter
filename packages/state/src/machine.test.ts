@@ -13,9 +13,11 @@ import {
   GroupMachineEvent,
   initializePanel,
   initializePanelHandleData,
+  isPanelData,
   isPanelHandle,
   prepareSnapshot,
 } from "./index.js";
+import Big from "big.js";
 import { spring } from "framer-motion";
 import * as Cookies from "tiny-cookie";
 import { Actor, createActor } from "./test-utils.js";
@@ -462,6 +464,77 @@ describe("constraints", () => {
         `"450px 10px 40px"`
       );
     });
+  });
+
+  // Test for https://github.com/hipstersmoothie/window-splitter/issues/79
+  // The bug: applyDelta in togglingCollapse state calls updateLayout without 
+  // ensuring items are in pixel format first. If items somehow end up in 
+  // percentage format during the animation, it fails.
+  test("applyDelta should handle percentage format items during animation", async () => {
+    const actor = createActor({ groupId: "group" });
+
+    sendAll(actor, [
+      { type: "registerPanel", data: initializePanel({ id: "panel-1" }) },
+      {
+        type: "registerPanelHandle",
+        data: initializePanelHandleData({ id: "resizer-1", size: "10px" }),
+      },
+      {
+        type: "registerPanel",
+        data: initializePanel({
+          id: "panel-2",
+          collapsible: true,
+          min: "100px",
+          default: "200px",
+          collapseAnimation: {
+            easing: "ease-in-out",
+            duration: 5000, // Long animation so we can intercept
+          },
+        }),
+      },
+    ]);
+
+    initializeSizes(actor, { width: 500, height: 200 });
+
+    // Start the collapse animation - this transitions to togglingCollapse
+    actor.send({
+      type: "collapsePanel",
+      panelId: "panel-2",
+    });
+
+    // Wait a tick for the animation to start
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    // Verify we're in togglingCollapse state
+    expect(actor.state.current).toBe("togglingCollapse");
+
+    // Now simulate a scenario where items got back into percentage format
+    // (e.g., from autosave restoration or some edge case)
+    const groupSize = 500;
+    const staticWidth = 10;
+    const availableSpace = groupSize - staticWidth;
+    
+    for (const item of actor.value.items) {
+      if (isPanelData(item) && !item.collapsed) {
+        const pixelValue = item.currentValue.value.toNumber();
+        item.currentValue = {
+          type: "percent",
+          value: new Big(pixelValue).div(availableSpace),
+        };
+      }
+    }
+
+    // Send an applyDelta event - this is what the animation actor sends
+    // Before the fix, this should throw because updateLayout is called
+    // with percentage items
+    actor.send({
+      type: "applyDelta",
+      handleId: "resizer-1",
+      panelId: "panel-2",
+      delta: 10,
+    });
+
+    await waitForIdle(actor);
   });
 
   test("supports 1 panel being collapsed with another panel expanding to fill", () => {

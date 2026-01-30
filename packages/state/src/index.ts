@@ -1185,7 +1185,11 @@ function updateLayout(
 ): Partial<GroupMachineContextValue> {
   const handleIndex = getPanelHandleIndex(context, dragEvent.handleId);
   const handle = context.items[handleIndex] as PanelHandleData;
-  const newItems = [...context.items];
+  // Check if items need to be prepared (have non-pixel values)
+  const needsPrepare = context.items.some(
+    (item) => isPanelData(item) && item.currentValue.type !== "pixel"
+  );
+  const newItems = needsPrepare ? prepareItems(context) : [...context.items];
 
   let moveAmount =
     context.orientation === "horizontal"
