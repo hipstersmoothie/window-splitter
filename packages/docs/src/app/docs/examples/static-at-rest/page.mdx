@@ -39,11 +39,11 @@ import { PanelGroup, Panel, PanelResizer } from "@window-splitter/react";
 function StaticAtRestExample() {
   return (
     <PanelGroup>
-      <Panel min="80px" max="200px" isStaticAtRest />
-      <PanelResizer />
-      <Panel min="130px" />
-      <PanelResizer />
-      <Panel min="130px" />
+      <Panel id="panel-1" min="80px" max="200px" isStaticAtRest />
+      <PanelResizer id="resizer-1" />
+      <Panel id="panel-2" min="130px" />
+      <PanelResizer id="resizer-2" />
+      <Panel id="panel-3" min="130px" />
     </PanelGroup>
   );
 }

@@ -30,22 +30,20 @@ import { PanelGroup, Panel, PanelResizer } from "@window-splitter/react";
 function Example() {
   return (
     <PanelGroup>
-      <Panel min="130px" max="400px" />
-      <PanelResizer />
-      <Panel min="130px" />
+      <Panel id="panel-1" min="130px" max="400px" />
+      <PanelResizer id="resizer-1" />
+      <Panel id="panel-2" min="130px" />
     </PanelGroup>
   );
 }
 ```
 
-## Server Side Rendering + Strict Mode
+## ID Requirement
 
-While not required for the simple case, for anything more complex you will
-need to add an `id` prop to your panels and handles.
-This is so that the component can tell all of the components apart during layout and rendering.\_createMdxContent
-
-Features that require `id`:
+The `id` prop is **required** for both `Panel` and `PanelResizer` components.
+This is so that the component can tell all of the components apart during layout and rendering, especially for:
 
 - Conditional Panels
 - Server Side Rendering
 - React Strict Mode
+- Layout persistence

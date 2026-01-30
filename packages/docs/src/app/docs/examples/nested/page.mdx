@@ -22,23 +22,23 @@ function NestedExample() {
         height: 400,
       }}
     >
-      <Panel min="10%">left</Panel>
-      <PanelResizer />
-      <Panel min="10%">
+      <Panel id="panel-1" min="10%">left</Panel>
+      <PanelResizer id="resizer-1" />
+      <Panel id="panel-2" min="10%">
         <PanelGroup orientation="vertical">
-          <Panel min="10%">top</Panel>
-          <PanelResizer />
-          <Panel min="10%">
+          <Panel id="panel-2-1" min="10%">top</Panel>
+          <PanelResizer id="resizer-2-1" />
+          <Panel id="panel-2-2" min="10%">
             <PanelGroup orientation="horizontal">
-              <Panel min="20%">left</Panel>
-              <PanelResizer />
-              <Panel min="20%">right</Panel>
+              <Panel id="panel-2-2-1" min="20%">left</Panel>
+              <PanelResizer id="resizer-2-2-1" />
+              <Panel id="panel-2-2-2" min="20%">right</Panel>
             </PanelGroup>
           </Panel>
         </PanelGroup>
       </Panel>
-      <PanelResizer />
-      <Panel min="10%">right</Panel>
+      <PanelResizer id="resizer-2" />
+      <Panel id="panel-3" min="10%">right</Panel>
     </PanelGroup>
   );
 }

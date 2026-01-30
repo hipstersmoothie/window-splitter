@@ -17,9 +17,9 @@ export function ImperativeGroupExample() {
         style={{ height: 200 }}
         handle={panelGroupHandle}
       >
-        <Panel color="green" min="50px" max="300px" />
-        <PanelResizer />
-        <Panel color="red" min="50px" />
+        <Panel id="panel-1" color="green" min="50px" max="300px" />
+        <PanelResizer id="resizer-1" />
+        <Panel id="panel-2" color="red" min="50px" />
       </PanelGroup>
       <Button
         onPress={() => {

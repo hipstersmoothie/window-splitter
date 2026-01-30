@@ -14,6 +14,7 @@ export function ImperativeGroupExample() {
     <div className="flex flex-col gap-4">
       <PanelGroup orientation="horizontal" style={{ height: 200 }}>
         <Panel
+          id="panel-1"
           handle={panelHandle}
           color="green"
           min="200px"
@@ -21,8 +22,8 @@ export function ImperativeGroupExample() {
           collapsible
           collapsedSize="100px"
         />
-        <PanelResizer />
-        <Panel color="red" min="50px" />
+        <PanelResizer id="resizer-1" />
+        <Panel id="panel-2" color="red" min="50px" />
       </PanelGroup>
       <Button
         onPress={() => {

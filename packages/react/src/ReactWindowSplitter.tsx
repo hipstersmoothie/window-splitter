@@ -520,7 +520,9 @@ const PanelGroupImplementation = React.forwardRef<
 
 export interface PanelProps
   extends SharedPanelProps<boolean>,
-    Omit<React.HTMLAttributes<HTMLDivElement>, "onResize"> {
+    Omit<React.HTMLAttributes<HTMLDivElement>, "onResize" | "id"> {
+  /** Unique identifier for the panel (required) */
+  id: string;
   /** Imperative handle to control the panel */
   handle?: React.Ref<PanelHandle>;
 }
@@ -734,8 +736,11 @@ export interface PanelResizerProps
   extends SharedPanelResizerProps,
     Omit<
       React.HTMLAttributes<HTMLDivElement>,
-      "onDragStart" | "onDrag" | "onDragEnd"
-    > {}
+      "onDragStart" | "onDrag" | "onDragEnd" | "id"
+    > {
+  /** Unique identifier for the panel resizer (required) */
+  id: string;
+}
 
 /** A resize handle to place between panels. */
 export const PanelResizer = React.forwardRef<HTMLDivElement, PanelResizerProps>(

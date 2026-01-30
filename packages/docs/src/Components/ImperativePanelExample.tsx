@@ -16,6 +16,7 @@ export function ImperativePanelExample() {
     <div className="flex flex-col gap-4">
       <ColorfulPanelGroup orientation="horizontal" style={{ height: 200 }}>
         <ColorfulPanel
+          id="panel-1"
           handle={panelHandle}
           color="green"
           min="200px"
@@ -23,8 +24,8 @@ export function ImperativePanelExample() {
           collapsible
           collapsedSize="100px"
         />
-        <ColorfulPanelResizer />
-        <ColorfulPanel color="red" min="50px" />
+        <ColorfulPanelResizer id="resizer-1" />
+        <ColorfulPanel id="panel-2" color="red" min="50px" />
       </ColorfulPanelGroup>
       <Button
         onPress={() => {

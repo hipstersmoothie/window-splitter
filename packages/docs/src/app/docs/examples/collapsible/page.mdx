@@ -33,9 +33,9 @@ import { PanelGroup, Panel, PanelResizer } from "@window-splitter/react";
 function CollapsibleExample() {
   return (
     <PanelGroup>
-      <Panel collapsible collapsedSize="100px" min="150px" max="400px" />
-      <PanelResizer />
-      <Panel min="130px" />
+      <Panel id="panel-1" collapsible collapsedSize="100px" min="150px" max="400px" />
+      <PanelResizer id="resizer-1" />
+      <Panel id="panel-2" min="130px" />
     </PanelGroup>
   );
 }
@@ -88,6 +88,7 @@ function CollapsibleExample() {
   return (
     <PanelGroup>
       <Panel
+        id="panel-1"
         min="150px"
         max="400px"
         collapsible
@@ -95,8 +96,8 @@ function CollapsibleExample() {
         collapsed={collapsed}
         onCollapseChange={onCollapseChange}
       />
-      <PanelResizer />
-      <Panel min="130px" />
+      <PanelResizer id="resizer-1" />
+      <Panel id="panel-2" min="130px" />
     </PanelGroup>
   );
 }
@@ -140,6 +141,7 @@ function CollapsibleExample() {
   return (
     <PanelGroup>
       <Panel
+        id="panel-1"
         min="150px"
         max="400px"
         collapsible
@@ -149,8 +151,8 @@ function CollapsibleExample() {
           duration: 1000,
         }}
       />
-      <PanelResizer />
-      <Panel min="130px" />
+      <PanelResizer id="resizer-1" />
+      <Panel id="panel-2" min="130px" />
     </PanelGroup>
   );
 }
@@ -192,6 +194,7 @@ function CollapsibleExample() {
   return (
     <PanelGroup>
       <Panel
+        id="panel-1"
         min="150px"
         max="400px"
         collapsible
@@ -201,8 +204,8 @@ function CollapsibleExample() {
           duration: springFn.calculatedDuration ?? 1000,
         }}
       />
-      <PanelResizer />
-      <Panel min="130px" />
+      <PanelResizer id="resizer-1" />
+      <Panel id="panel-2" min="130px" />
     </PanelGroup>
   );
 }

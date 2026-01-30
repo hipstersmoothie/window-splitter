@@ -45,9 +45,9 @@ import { PanelGroup, Panel, PanelResizer } from "@window-splitter/react";
 function VerticalExample() {
   return (
     <PanelGroup orientation="vertical">
-      <Panel min="50px" max="300px" />
-      <PanelResizer />
-      <Panel min="50px" />
+      <Panel id="panel-1" min="50px" max="300px" />
+      <PanelResizer id="resizer-1" />
+      <Panel id="panel-2" min="50px" />
     </PanelGroup>
   );
 }
