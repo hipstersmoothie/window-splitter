@@ -2216,7 +2216,7 @@ export function groupMachine(
           context.items = withLastKnownSize;
         } else if (
           totalSize > getGroupSize(context) &&
-          state.current !== "dragging"
+          state.current === "idle"
         ) {
           context.items = handleOverflow({
             ...context,
