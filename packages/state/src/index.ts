@@ -1638,7 +1638,7 @@ function handleOverflow(context: GroupMachineContextValue) {
   const totalSize = pixelItems.reduce((acc, i) => acc.add(i), new Big(0));
   const overflow = totalSize.abs().sub(groupSize);
 
-  if (overflow.eq(0) || groupSize.eq(0)) {
+  if (overflow.abs().lt(1) || groupSize.eq(0)) {
     return context;
   }
 
