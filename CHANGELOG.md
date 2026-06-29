@@ -1,3 +1,19 @@
+# v1.1.4 (Mon Jun 29 2026)
+
+#### 🐛 Bug Fix
+
+- `@window-splitter/state`
+  - fix(state): avoid overflow collapse during animation [#83](https://github.com/hipstersmoothie/window-splitter/pull/83) (andrey_okonetchnikov@crgl-thirdparty.com [@okonet](https://github.com/okonet))
+  - fix: tolerate sub-pixel overflow [#84](https://github.com/hipstersmoothie/window-splitter/pull/84) ([@PawelMalakVolue](https://github.com/PawelMalakVolue))
+
+#### Authors: 3
+
+- [@PawelMalakVolue](https://github.com/PawelMalakVolue)
+- Andrey Okonetchnikov ([@okonet](https://github.com/okonet))
+- ANDREY OKONETCHNIKOV (CRGL-THIRDPARTY.COM) (andrey_okonetchnikov@crgl-thirdparty.com)
+
+---
+
 # v1.1.3 (Fri Jan 30 2026)
 
 #### 🐛 Bug Fix
