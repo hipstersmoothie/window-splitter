@@ -1827,7 +1827,15 @@ let groupId = 0;
 
 export function groupMachine(
   input: Partial<GroupMachineContextValue>,
-  onUpdate?: (context: GroupMachineContextValue) => void
+  onUpdate?: (context: GroupMachineContextValue) => void,
+  /**
+   * A lazy getter for the group's DOM element. When provided and it returns
+   * an element, `applyDelta` frames during collapse/expand animations write
+   * the grid template directly to the DOM and skip `onUpdate` — avoiding a
+   * full reactive re-render per animation frame. Other events still call
+   * `onUpdate` as usual.
+   */
+  getGroupElement?: () => HTMLElement | null
 ) {
   const abortController = new AbortController();
   const state = {
@@ -2042,6 +2050,8 @@ export function groupMachine(
   }
 
   function send(event: GroupMachineEvent) {
+    let skipOnUpdate = false;
+
     switch (event.type) {
       case "lockGroup":
         locked = true;
@@ -2183,6 +2193,15 @@ export function groupMachine(
         actions.onAutosave();
         break;
       case "setActualItemsSize": {
+        // During direct-DOM animations the machine writes grid-template to the
+        // DOM each frame, which causes panel sizes to change, which fires the
+        // ResizeObserver in measureGroupChildren, which sends this event.
+        // Ignore it so we don't trigger an onUpdate and re-render mid-animation.
+        if (state.current === "togglingCollapse" && getGroupElement) {
+          skipOnUpdate = true;
+          break;
+        }
+
         const withLastKnownSize = context.items.map((i) => {
           if (!isPanelData(i)) return i;
           const lastKnownSize = event.childrenSizes[i.id] || i.lastKnownSize;
@@ -2365,11 +2384,28 @@ export function groupMachine(
             })
           );
           actions.onResize();
+
+          if (getGroupElement) {
+            const el = getGroupElement();
+
+            if (el) {
+              const template = buildTemplate(context);
+
+              if (context.orientation === "horizontal") {
+                el.style.gridTemplateColumns = template;
+              } else {
+                el.style.gridTemplateRows = template;
+              }
+              skipOnUpdate = true;
+            }
+          }
           break;
       }
     }
 
-    onUpdate?.(context);
+    if (!skipOnUpdate) {
+      onUpdate?.(context);
+    }
   }
 
   return [context, send, state] as const;
