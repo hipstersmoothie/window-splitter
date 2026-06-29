@@ -537,6 +537,80 @@ describe("constraints", () => {
     await waitForIdle(actor);
   });
 
+
+  test("overflow measurements should not collapse panels during animation", async () => {
+    const actor = createActor({ groupId: "group" });
+
+    sendAll(actor, [
+      {
+        type: "registerPanel",
+        data: initializePanel({
+          id: "panel-1",
+          collapsible: true,
+          collapsedSize: "60px",
+          default: "140px",
+        }),
+      },
+      {
+        type: "registerPanelHandle",
+        data: initializePanelHandleData({ id: "resizer-1", size: "10px" }),
+      },
+      {
+        type: "registerPanel",
+        data: initializePanel({
+          id: "panel-2",
+          collapsible: true,
+          default: "140px",
+          collapseAnimation: {
+            easing: "ease-in-out",
+            duration: 500,
+          },
+        }),
+      },
+    ]);
+
+    actor.send({
+      type: "setSize",
+      size: { width: 300, height: 200 },
+    });
+    actor.send({
+      type: "setActualItemsSize",
+      childrenSizes: {
+        "panel-1": { width: 140, height: 200 },
+        "panel-2": { width: 140, height: 200 },
+      },
+    });
+
+    const panelBefore = actor.value.items.find(
+      (item) => isPanelData(item) && item.id === "panel-1"
+    );
+    expect(panelBefore?.collapsed).toBe(false);
+
+    actor.send({
+      type: "collapsePanel",
+      panelId: "panel-2",
+    });
+
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    expect(actor.state.current).toBe("togglingCollapse");
+
+    actor.send({
+      type: "setActualItemsSize",
+      childrenSizes: {
+        "panel-1": { width: 200, height: 200 },
+        "panel-2": { width: 200, height: 200 },
+      },
+    });
+
+    const panelAfter = actor.value.items.find(
+      (item) => isPanelData(item) && item.id === "panel-1"
+    );
+    expect(panelAfter?.collapsed).toBe(false);
+
+    await waitForIdle(actor);
+  });
+
   test("supports 1 panel being collapsed with another panel expanding to fill", () => {
     const actor = createActor({
       groupId: "group",
