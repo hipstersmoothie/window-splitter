@@ -680,13 +680,18 @@ const PanelVisible = React.forwardRef<
       }
 
       try {
-        const p = getPanelWithId(context, panelId);
+        // Throws if the panel isn't registered yet
+        getPanelWithId(context, panelId);
 
-        if (collapsed === true && !p.collapsed) {
-          send({ type: "collapsePanel", panelId, controlled: true });
-        } else if (collapsed === false && p.collapsed) {
-          send({ type: "expandPanel", panelId, controlled: true });
-        }
+        // Always send the change and let the machine decide if it applies.
+        // The panel's `collapsed` flag isn't reliable during an animation:
+        // expanding clears it on the first frame and collapsing only sets it
+        // once the animation ends.
+        send({
+          type: collapsed ? "collapsePanel" : "expandPanel",
+          panelId,
+          controlled: true,
+        });
       } catch {
         // with conditional panels the panel might not be registered yet
       }

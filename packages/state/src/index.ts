@@ -1842,6 +1842,15 @@ export function groupMachine(
     current: "idle" as State,
   };
   let locked = false;
+  /**
+   * Collapse/expand requests that arrive while a collapse animation is running.
+   * Only the latest request per panel is kept, and it is applied once the
+   * running animation ends.
+   */
+  const pendingCollapseToggles = new Map<
+    string,
+    CollapsePanelEvent | ExpandPanelEvent
+  >();
 
   const context: GroupMachineContextValue = {
     size: input.size || { width: 0, height: 0 },
@@ -1953,15 +1962,22 @@ export function groupMachine(
     onAnimationEnd: (output: AnimationActorOutput | undefined) => {
       invariant(output, "Expected output from animation actor");
 
-      const panel = getPanelWithId(context, output.panelId);
-      panel.collapsed = output.action === "collapse";
+      const panel = context.items.find(
+        (item): item is PanelData =>
+          isPanelData(item) && item.id === output.panelId,
+      );
 
-      if (panel.collapsed) {
-        panel.currentValue = panel.collapsedSize;
-      }
+      // The panel might have been removed while it was animating
+      if (panel) {
+        panel.collapsed = output.action === "collapse";
 
-      if (!panel.collapseIsControlled) {
-        panel.onCollapseChange?.current?.(panel.collapsed);
+        if (panel.collapsed) {
+          panel.currentValue = panel.collapsedSize;
+        }
+
+        if (!panel.collapseIsControlled) {
+          panel.onCollapseChange?.current?.(panel.collapsed);
+        }
       }
 
       actions.commit();
@@ -1980,6 +1996,11 @@ export function groupMachine(
       isEvent(event, ["collapsePanel", "expandPanel"]);
       const panel = getPanelWithId(context, event.panelId);
       return panel.collapseIsControlled === true;
+    },
+    isAlreadyInRequestedState: (event: GroupMachineEvent) => {
+      isEvent(event, ["collapsePanel", "expandPanel"]);
+      const panel = getPanelWithId(context, event.panelId);
+      return Boolean(panel.collapsed) === (event.type === "collapsePanel");
     },
     cannotExpandPanel: (event: GroupMachineEvent) => {
       isEvent(event, ["expandPanel"]);
@@ -2068,6 +2089,93 @@ export function groupMachine(
     if (!skipOnUpdate) {
       onUpdate?.(context);
     }
+
+    return skipOnUpdate;
+  }
+
+  /** Settle the promise of a collapse/expand request that has nothing to animate */
+  function settleCollapseToggle(event: CollapsePanelEvent | ExpandPanelEvent) {
+    if (event.resolve) {
+      requestAnimationFrame(event.resolve);
+    }
+  }
+
+  /**
+   * The running animation can't be retargeted, so keep the latest request for
+   * the panel and apply it when the animation ends. A request that gets
+   * replaced settles together with the request that replaced it.
+   */
+  function deferCollapseToggle(event: CollapsePanelEvent | ExpandPanelEvent) {
+    const pending = pendingCollapseToggles.get(event.panelId);
+
+    // For a controlled panel the `collapsed` prop is the source of truth. An
+    // uncontrolled request (e.g. the resizer's Enter key, which reads the
+    // panel's `collapsed` flag while it is still stale) only asks the owner to
+    // change the prop, so it must not replace the prop's pending request.
+    if (
+      pending?.controlled &&
+      !event.controlled &&
+      guards.shouldCollapseToggle(event)
+    ) {
+      settleCollapseToggle(event);
+      return;
+    }
+
+    const superseded = pending?.resolve;
+
+    if (superseded) {
+      const resolve = event.resolve;
+
+      event = {
+        ...event,
+        resolve: () => {
+          superseded();
+          resolve?.();
+        },
+      };
+    }
+
+    pendingCollapseToggles.set(event.panelId, event);
+  }
+
+  /** Apply the requests that arrived during the animation that just ended */
+  function flushPendingCollapseToggles() {
+    const events = [...pendingCollapseToggles.values()];
+    pendingCollapseToggles.clear();
+
+    for (const event of events) {
+      // The group might have been locked, or the panel removed, while the
+      // request was waiting
+      if (!locked && context.items.some((item) => item.id === event.panelId)) {
+        send(event);
+      } else {
+        settleCollapseToggle(event);
+      }
+    }
+  }
+
+  /** Returns true if the caller should skip `onUpdate` */
+  function animateCollapseToggle(
+    event: CollapsePanelEvent | ExpandPanelEvent,
+  ): boolean {
+    const skipOnUpdate = transition("togglingCollapse");
+
+    abortController.abort();
+    animationActor(context, event, send, abortController).then((output) => {
+      try {
+        actions.onAnimationEnd(output);
+      } finally {
+        // Always return to idle and apply the waiting requests, so a failure
+        // here can't leave the group stuck in `togglingCollapse`
+        transition("idle");
+
+        if (event.resolve) {
+          requestAnimationFrame(event.resolve);
+        }
+
+        flushPendingCollapseToggles();
+      }
+    });
 
     return skipOnUpdate;
   }
@@ -2333,47 +2441,21 @@ export function groupMachine(
           break;
         }
         case "collapsePanel":
-          if (guards.shouldNotifyCollapseToggle(event)) {
-            actions.notifyCollapseToggle(event);
-          } else {
-            const panel = getPanelWithId(context, event.panelId);
-
-            if (!panel.collapsed) {
-              if (transition("togglingCollapse")) skipOnUpdate = true;
-              abortController.abort();
-              animationActor(context, event, send, abortController).then(
-                (output) => {
-                  actions.onAnimationEnd(output);
-                  transition("idle");
-                  if (event.resolve) {
-                    requestAnimationFrame(event.resolve);
-                  }
-                },
-              );
-            }
-          }
-          break;
         case "expandPanel":
-          if (guards.cannotExpandPanel(event)) {
-            break;
+          if (guards.isAlreadyInRequestedState(event)) {
+            settleCollapseToggle(event);
+            // Nothing changed, so there is nothing to render
+            skipOnUpdate = true;
+          } else if (
+            event.type === "expandPanel" &&
+            guards.cannotExpandPanel(event)
+          ) {
+            settleCollapseToggle(event);
           } else if (guards.shouldNotifyCollapseToggle(event)) {
             actions.notifyCollapseToggle(event);
-          } else {
-            const panel = getPanelWithId(context, event.panelId);
-
-            if (panel.collapsed) {
-              if (transition("togglingCollapse")) skipOnUpdate = true;
-              abortController.abort();
-              animationActor(context, event, send, abortController).then(
-                (output) => {
-                  actions.onAnimationEnd(output);
-                  transition("idle");
-                  if (event.resolve) {
-                    requestAnimationFrame(event.resolve);
-                  }
-                },
-              );
-            }
+            settleCollapseToggle(event);
+          } else if (animateCollapseToggle(event)) {
+            skipOnUpdate = true;
           }
 
           break;
@@ -2392,13 +2474,24 @@ export function groupMachine(
           break;
         case "expandPanel":
         case "collapsePanel":
-          if (guards.shouldCollapseToggle(event)) {
+          if (
+            guards.shouldCollapseToggle(event) &&
+            !guards.isAlreadyInRequestedState(event)
+          ) {
             actions.runCollapseToggle(event);
           }
+
+          settleCollapseToggle(event);
           break;
       }
     } else if (state.current === "togglingCollapse") {
       switch (event.type) {
+        case "collapsePanel":
+        case "expandPanel":
+          deferCollapseToggle(event);
+          // Nothing changed yet, so there is nothing to render
+          skipOnUpdate = true;
+          break;
         case "applyDelta":
           assign(
             context,

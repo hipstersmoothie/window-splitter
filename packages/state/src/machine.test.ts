@@ -10,6 +10,7 @@ import {
   getPanelGroupPixelSizes,
   getPanelPercentageSize,
   getPanelPixelSize,
+  getPanelWithId,
   GroupMachineContextValue,
   GroupMachineEvent,
   initializePanel,
@@ -2175,6 +2176,345 @@ describe("collapsible panel", () => {
         dragHandle(actor, { id: "resizer-1", delta: -400 });
         expect(buildTemplate(actor.value)).toBe("330px 10px 60px");
       });
+    });
+  });
+
+  describe("collapse requests during an animation", () => {
+    const EXPANDED = "245px 10px 245px";
+    const COLLAPSED = "470px 10px 20px";
+
+    function createControlledActor(collapsed: boolean) {
+      const actor = createActor({ groupId: "group" });
+
+      sendAll(actor, [
+        { type: "registerPanel", data: initializePanel({ id: "panel-1" }) },
+        {
+          type: "registerPanelHandle",
+          data: initializePanelHandleData({ id: "resizer-1", size: "10px" }),
+        },
+        {
+          type: "registerPanel",
+          data: initializePanel({
+            id: "panel-2",
+            collapsible: true,
+            min: "100px",
+            collapsed,
+            collapsedSize: "20px",
+            collapseAnimation: { duration: 300, easing: "linear" },
+          }),
+        },
+      ]);
+
+      initializeSizes(actor, { width: 500, height: 200 });
+
+      return actor;
+    }
+
+    function nextFrame() {
+      return new Promise<void>((resolve) =>
+        requestAnimationFrame(() => resolve()),
+      );
+    }
+
+    /** Resolves to whether `promise` settled within `ms` */
+    function settlesWithin(promise: Promise<void>, ms = 2000) {
+      return Promise.race([
+        promise.then(() => true),
+        new Promise<boolean>((resolve) => setTimeout(() => resolve(false), ms)),
+      ]);
+    }
+
+    function request(
+      actor: Actor,
+      type: "collapsePanel" | "expandPanel",
+    ): Promise<void> {
+      return new Promise<void>((resolve) => {
+        actor.send({ type, panelId: "panel-2", controlled: true, resolve });
+      });
+    }
+
+    function expectTemplate(actor: Actor, template: string) {
+      capturePixelValues(actor, () => {
+        expect(buildTemplate(actor.value)).toBe(template);
+      });
+    }
+
+    async function startAnimation(
+      actor: Actor,
+      type: "collapsePanel" | "expandPanel",
+      panelId = "panel-2",
+    ) {
+      actor.send({ type, panelId, controlled: true });
+      await nextFrame();
+      await nextFrame();
+      expect(actor.state.current).toBe("togglingCollapse");
+    }
+
+    async function setup(collapsed: boolean) {
+      const actor = createControlledActor(collapsed);
+
+      // Settle into a measured, at-rest layout first
+      if (collapsed) {
+        actor.send({
+          type: "expandPanel",
+          panelId: "panel-2",
+          controlled: true,
+        });
+        await waitForIdle(actor);
+        actor.send({
+          type: "collapsePanel",
+          panelId: "panel-2",
+          controlled: true,
+        });
+        await waitForIdle(actor);
+        expectTemplate(actor, COLLAPSED);
+      } else {
+        expectTemplate(actor, EXPANDED);
+      }
+
+      return actor;
+    }
+
+    test("applies an expand requested while collapsing", async () => {
+      const actor = await setup(false);
+
+      await startAnimation(actor, "collapsePanel");
+      actor.send({ type: "expandPanel", panelId: "panel-2", controlled: true });
+      await waitForIdle(actor);
+
+      expect(getPanelWithId(actor.value, "panel-2").collapsed).toBe(false);
+      expectTemplate(actor, EXPANDED);
+    });
+
+    test("applies a collapse requested while expanding", async () => {
+      const actor = await setup(true);
+
+      await startAnimation(actor, "expandPanel");
+      actor.send({
+        type: "collapsePanel",
+        panelId: "panel-2",
+        controlled: true,
+      });
+      await waitForIdle(actor);
+
+      expect(getPanelWithId(actor.value, "panel-2").collapsed).toBe(true);
+      expectTemplate(actor, COLLAPSED);
+    });
+
+    test("only the latest request made during an animation is applied", async () => {
+      const actor = await setup(false);
+      const onCollapseChange = vi.fn();
+      getPanelWithId(actor.value, "panel-2").onCollapseChange = {
+        current: onCollapseChange,
+      };
+
+      const send = (type: "collapsePanel" | "expandPanel") =>
+        actor.send({ type, panelId: "panel-2", controlled: true });
+
+      // collapse, then expand -> collapse -> expand while it runs
+      await startAnimation(actor, "collapsePanel");
+      send("expandPanel");
+      send("collapsePanel");
+      send("expandPanel");
+      await waitForIdle(actor);
+
+      expect(getPanelWithId(actor.value, "panel-2").collapsed).toBe(false);
+      expectTemplate(actor, EXPANDED);
+
+      // expand, then collapse -> expand while it runs: the latest request
+      // matches where the running animation ends
+      await startAnimation(actor, "collapsePanel");
+      await waitForIdle(actor);
+      await startAnimation(actor, "expandPanel");
+      send("collapsePanel");
+      send("expandPanel");
+      await waitForIdle(actor);
+
+      expect(getPanelWithId(actor.value, "panel-2").collapsed).toBe(false);
+      expectTemplate(actor, EXPANDED);
+
+      // Controlled requests never ask the owner to change the prop
+      expect(onCollapseChange).not.toHaveBeenCalled();
+    });
+
+    test("settles the promise of a request superseded by a later one", async () => {
+      const actor = await setup(false);
+
+      const running = request(actor, "collapsePanel");
+      await nextFrame();
+      await nextFrame();
+      expect(actor.state.current).toBe("togglingCollapse");
+
+      const superseded = request(actor, "expandPanel");
+      const latest = request(actor, "collapsePanel");
+
+      expect(await settlesWithin(running)).toBe(true);
+      expect(await settlesWithin(superseded)).toBe(true);
+      expect(await settlesWithin(latest)).toBe(true);
+      expect(actor.state.current).toBe("idle");
+      expectTemplate(actor, COLLAPSED);
+    });
+
+    test("settles a request for the state the panel is already in", async () => {
+      const expanded = await setup(false);
+      expect(await settlesWithin(request(expanded, "expandPanel"))).toBe(true);
+      expect(expanded.state.current).toBe("idle");
+      expectTemplate(expanded, EXPANDED);
+
+      const collapsed = await setup(true);
+      expect(await settlesWithin(request(collapsed, "collapsePanel"))).toBe(
+        true,
+      );
+      expect(collapsed.state.current).toBe("idle");
+      expectTemplate(collapsed, COLLAPSED);
+    });
+
+    test("a request for the current state does nothing while dragging", async () => {
+      const actor = await setup(false);
+
+      actor.send({ type: "dragHandleStart", handleId: "resizer-1" });
+      dragHandle(actor, { id: "resizer-1", delta: 10 });
+      const template = buildTemplate(actor.value);
+
+      const expand = request(actor, "expandPanel");
+      expect(buildTemplate(actor.value)).toBe(template);
+      expect(getPanelWithId(actor.value, "panel-2").collapsed).toBe(false);
+      expect(await settlesWithin(expand)).toBe(true);
+
+      actor.send({ type: "dragHandleEnd", handleId: "resizer-1" });
+      expectTemplate(actor, "255px 10px 235px");
+    });
+
+    test("an uncontrolled request doesn't replace a pending controlled one", async () => {
+      const actor = await setup(false);
+      const onCollapseChange = vi.fn();
+      getPanelWithId(actor.value, "panel-2").onCollapseChange = {
+        current: onCollapseChange,
+      };
+
+      // The prop asks to collapse and then to expand again
+      await startAnimation(actor, "collapsePanel");
+      actor.send({ type: "expandPanel", panelId: "panel-2", controlled: true });
+
+      // A resizer keypress reads the stale `collapsed` flag and asks to collapse
+      const uncontrolled = new Promise<void>((resolve) => {
+        actor.send({ type: "collapsePanel", panelId: "panel-2", resolve });
+      });
+      expect(await settlesWithin(uncontrolled)).toBe(true);
+      await waitForIdle(actor);
+
+      expect(getPanelWithId(actor.value, "panel-2").collapsed).toBe(false);
+      expectTemplate(actor, EXPANDED);
+      expect(onCollapseChange).not.toHaveBeenCalled();
+    });
+
+    test("applies a request made while an uncontrolled panel animates", async () => {
+      const actor = createActor({ groupId: "group" });
+
+      sendAll(actor, [
+        { type: "registerPanel", data: initializePanel({ id: "panel-1" }) },
+        {
+          type: "registerPanelHandle",
+          data: initializePanelHandleData({ id: "resizer-1", size: "10px" }),
+        },
+        {
+          type: "registerPanel",
+          data: initializePanel({
+            id: "panel-2",
+            collapsible: true,
+            min: "100px",
+            collapsedSize: "20px",
+            collapseAnimation: { duration: 300, easing: "linear" },
+          }),
+        },
+      ]);
+      initializeSizes(actor, { width: 500, height: 200 });
+      expectTemplate(actor, EXPANDED);
+
+      actor.send({ type: "collapsePanel", panelId: "panel-2" });
+      await nextFrame();
+      await nextFrame();
+      expect(actor.state.current).toBe("togglingCollapse");
+
+      actor.send({ type: "expandPanel", panelId: "panel-2" });
+      await waitForIdle(actor);
+
+      expect(getPanelWithId(actor.value, "panel-2").collapsed).toBe(false);
+      expectTemplate(actor, EXPANDED);
+    });
+
+    function createThreePanelActor() {
+      const actor = createActor({ groupId: "group" });
+      const collapsible = (id: string) =>
+        initializePanel({
+          id,
+          collapsible: true,
+          min: "100px",
+          collapsed: false,
+          collapsedSize: "20px",
+          collapseAnimation: { duration: 300, easing: "linear" },
+        });
+
+      sendAll(actor, [
+        { type: "registerPanel", data: initializePanel({ id: "panel-1" }) },
+        {
+          type: "registerPanelHandle",
+          data: initializePanelHandleData({ id: "resizer-1", size: "10px" }),
+        },
+        { type: "registerPanel", data: collapsible("panel-2") },
+        {
+          type: "registerPanelHandle",
+          data: initializePanelHandleData({ id: "resizer-2", size: "10px" }),
+        },
+        { type: "registerPanel", data: collapsible("panel-3") },
+      ]);
+
+      initializeSizes(actor, { width: 500, height: 200 });
+
+      return actor;
+    }
+
+    test("applies requests for different panels one after another", async () => {
+      const actor = createThreePanelActor();
+
+      await startAnimation(actor, "collapsePanel");
+      const other = new Promise<void>((resolve) => {
+        actor.send({
+          type: "collapsePanel",
+          panelId: "panel-3",
+          controlled: true,
+          resolve,
+        });
+      });
+
+      expect(await settlesWithin(other)).toBe(true);
+      await waitForIdle(actor);
+
+      expect(getPanelWithId(actor.value, "panel-2").collapsed).toBe(true);
+      expect(getPanelWithId(actor.value, "panel-3").collapsed).toBe(true);
+    });
+
+    test("settles a pending request for a panel removed meanwhile", async () => {
+      const actor = createThreePanelActor();
+
+      // panel-3 animates against resizer-2, so panel-1 and resizer-1 can go
+      await startAnimation(actor, "collapsePanel", "panel-3");
+      const removed = new Promise<void>((resolve) => {
+        actor.send({
+          type: "collapsePanel",
+          panelId: "panel-1",
+          controlled: true,
+          resolve,
+        });
+      });
+      sendAll(actor, [
+        { type: "unregisterPanel", id: "panel-1" },
+        { type: "unregisterPanelHandle", id: "resizer-1" },
+      ]);
+
+      expect(await settlesWithin(removed)).toBe(true);
+      await waitForIdle(actor);
+      expect(getPanelWithId(actor.value, "panel-3").collapsed).toBe(true);
     });
   });
 });
