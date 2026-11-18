@@ -170,6 +170,7 @@ describe("Autosave", () => {
       </div>,
     );
 
+    await waitForMeasurement(handle.current);
     await dragHandle({ delta: -200 });
     await expectTemplate(handle.current, "100px 10px 388px");
     expect(spy).toHaveBeenCalledWith(true);
@@ -182,6 +183,7 @@ describe("Autosave", () => {
       </div>,
     );
 
+    await waitForMeasurement(handle.current);
     await expectTemplate(handle.current, "100px 10px 388px");
     await dragHandle({ delta: 200 });
     expect(spy).toHaveBeenCalledWith(false);
@@ -520,5 +522,137 @@ describe("direct-DOM animation path", () => {
     expect(handle.current.getState()).toBe("idle");
 
     expect(renderCount).toBe(rendersBeforeAnimation);
+  });
+});
+
+describe("controlled collapse during an animation", () => {
+  function ControlledCollapse({
+    collapsed,
+    handle,
+    panelHandle,
+  }: {
+    collapsed?: boolean;
+    handle: { current: PanelGroupHandle };
+    panelHandle: { current: PanelHandle };
+  }) {
+    return (
+      <div style={{ width: 500 }}>
+        <PanelGroup
+          handle={handle}
+          orientation="horizontal"
+          style={{ height: 200 }}
+        >
+          <Panel id="panel1">1</Panel>
+          <PanelResizer id="resizer1" size="10px" />
+          <Panel
+            id="panel2"
+            handle={panelHandle}
+            min="100px"
+            collapsible
+            collapsed={collapsed}
+            collapsedSize="60px"
+            collapseAnimation={{ easing: "linear", duration: 300 }}
+          >
+            2
+          </Panel>
+        </PanelGroup>
+      </div>
+    );
+  }
+
+  function renderControlled(collapsed: boolean | undefined) {
+    const handle = { current: null } as unknown as {
+      current: PanelGroupHandle;
+    };
+    const panelHandle = { current: null } as unknown as {
+      current: PanelHandle;
+    };
+    const { rerender } = render(
+      <ControlledCollapse
+        collapsed={collapsed}
+        handle={handle}
+        panelHandle={panelHandle}
+      />,
+    );
+
+    return {
+      handle,
+      panelHandle,
+      setCollapsed: (value: boolean | undefined) =>
+        rerender(
+          <ControlledCollapse
+            collapsed={value}
+            handle={handle}
+            panelHandle={panelHandle}
+          />,
+        ),
+    };
+  }
+
+  function nextFrame() {
+    return new Promise<void>((resolve) =>
+      requestAnimationFrame(() => resolve()),
+    );
+  }
+
+  /** Waits a couple of frames so the 300ms animation is running, not done */
+  async function expectAnimating(handle: PanelGroupHandle) {
+    await nextFrame();
+    await nextFrame();
+    // The group handle reports every non-idle state, including a running
+    // collapse animation, as "dragging"
+    expect(handle.getState()).toBe("dragging");
+  }
+
+  test("collapses when collapsed again while still expanding", async () => {
+    const { handle, panelHandle, setCollapsed } = renderControlled(true);
+    await waitForMeasurement(handle.current);
+    await expectTemplate(handle.current, "430px 10px 60px");
+
+    setCollapsed(false);
+    await expectAnimating(handle.current);
+
+    setCollapsed(true);
+    await waitForCondition(
+      () =>
+        handle.current.getState() === "idle" &&
+        panelHandle.current.isCollapsed(),
+    );
+    await expectTemplate(handle.current, "430px 10px 60px");
+  });
+
+  test("expands when expanded again while still collapsing", async () => {
+    const { handle, panelHandle, setCollapsed } = renderControlled(false);
+    await waitForMeasurement(handle.current);
+    await expectTemplate(handle.current, "245px 10px 245px");
+
+    setCollapsed(true);
+    await expectAnimating(handle.current);
+
+    setCollapsed(false);
+    await waitForCondition(
+      () =>
+        handle.current.getState() === "idle" &&
+        !panelHandle.current.isCollapsed(),
+    );
+    await expectTemplate(handle.current, "245px 10px 245px");
+  });
+
+  test("handle promises called during an animation resolve", async () => {
+    const { handle, panelHandle } = renderControlled(undefined);
+    await waitForMeasurement(handle.current);
+    await expectTemplate(handle.current, "245px 10px 245px");
+
+    let collapsed = false;
+    let expanded = false;
+
+    panelHandle.current.collapse().then(() => (collapsed = true));
+    await expectAnimating(handle.current);
+    panelHandle.current.expand().then(() => (expanded = true));
+
+    await waitForCondition(() => collapsed && expanded);
+    expect(handle.current.getState()).toBe("idle");
+    expect(panelHandle.current.isCollapsed()).toBe(false);
+    await expectTemplate(handle.current, "245px 10px 245px");
   });
 });
