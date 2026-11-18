@@ -170,6 +170,7 @@ describe("Autosave", () => {
       </div>,
     );
 
+    await waitForMeasurement(handle.current);
     await dragHandle({ delta: -200 });
     await expectTemplate(handle.current, "100px 10px 388px");
     expect(spy).toHaveBeenCalledWith(true);
@@ -182,6 +183,7 @@ describe("Autosave", () => {
       </div>,
     );
 
+    await waitForMeasurement(handle.current);
     await expectTemplate(handle.current, "100px 10px 388px");
     await dragHandle({ delta: 200 });
     expect(spy).toHaveBeenCalledWith(false);
